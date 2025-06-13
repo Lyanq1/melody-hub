@@ -17,6 +17,3 @@ export async function getArtist() {
   const [rows] = await pool.query('SELECT * FROM Artist')
   return rows
 }
-
-const taiKhoan = await getArtist()
-console.log(taiKhoan)

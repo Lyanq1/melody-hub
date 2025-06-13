@@ -13,6 +13,7 @@ CREATE TABLE Artist (
 -- Bảng Account
 CREATE TABLE Account (
     AccountID INT PRIMARY KEY,
+    username VARCHAR(100),
     Password VARCHAR(100),
     UserType VARCHAR(50)
 );
@@ -106,8 +107,8 @@ INSERT INTO Artist VALUES
 
 -- ACCOUNT
 INSERT INTO Account VALUES
-(1, 'pass123', 'admin'),
-(2, 'cust001', 'customer');
+(1,'user1', '123', 'admin'),
+(2,'user2' '123', 'customer');
 
 -- CUSTOMER
 INSERT INTO Customer VALUES
