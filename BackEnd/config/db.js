@@ -1,7 +1,7 @@
 import mysql from 'mysql2'
 import { env } from './environment.js'
 
-export const pool = mysql
+const pool = mysql
   .createPool({
     host: env.MYSQL_HOST,
     user: env.MYSQL_USER,
@@ -9,3 +9,5 @@ export const pool = mysql
     database: env.MYSQL_DATABASE
   })
   .promise()
+
+export default pool
