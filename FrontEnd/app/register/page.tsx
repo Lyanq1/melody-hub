@@ -22,6 +22,35 @@ export default function RegisterPage() {
               required
             />
           </div>
+          <div>
+            <label className='text-sm mb-1 block'>Display Name</label>
+            <input
+              type='text'
+              placeholder='john123'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              required
+            />
+          </div>
+
+          <div>
+            <label className='text-sm mb-1 block'>Phone Number</label>
+            <input
+              type='tel'
+              placeholder='0909123123'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              required
+            />
+          </div>
+
+          <div>
+            <label className='text-sm mb-1 block'>Address</label>
+            <input
+              type='text'
+              placeholder='227 Đ. Nguyễn Văn Cừ, Phường 4, Quận 5, Hồ Chí Minh'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              required
+            />
+          </div>
 
           <div>
             <label className='text-sm mb-1 block'>Password</label>
@@ -41,6 +70,23 @@ export default function RegisterPage() {
               className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
               required
             />
+          </div>
+
+          <div>
+            <label className='text-sm mb-1 block'>Role</label>
+            <select
+              name='role'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              required
+              defaultValue=''
+            >
+              <option value='' disabled>
+                Select a role
+              </option>
+              <option value='customer'>Customer</option>
+              <option value='artist'>Artist</option>
+              <option value='admin'>Admin</option>
+            </select>
           </div>
 
           {/* Birthdate */}
