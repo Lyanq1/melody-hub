@@ -10,6 +10,7 @@ import { createAdmin } from '../models/admin.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import axios from 'axios'
+import sendVerificationEmail from '../utils/email.js'
 
 // Đăng ký
 export const register = async (req, res) => {
@@ -40,6 +41,8 @@ export const register = async (req, res) => {
     } else if (role === 'Admin') {
       await createAdmin(accountID, phone, address)
     }
+
+    await sendVerificationEmail(email, displayName) // Gửi email xác nhận
 
     res.status(201).json({ message: 'Registration successful', accountID })
   } catch (error) {
