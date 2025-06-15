@@ -22,6 +22,26 @@ export default function RegisterPage() {
               required
             />
           </div>
+
+          <div>
+            <label className='text-sm mb-1 block'>Password</label>
+            <input
+              type='password'
+              placeholder='••••••••'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              required
+            />
+          </div>
+
+          <div>
+            <label className='text-sm mb-1 block'>Email</label>
+            <input
+              type='email'
+              placeholder='john123@gmail.com'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              required
+            />
+          </div>
           <div>
             <label className='text-sm mb-1 block'>Display Name</label>
             <input
@@ -47,26 +67,6 @@ export default function RegisterPage() {
             <input
               type='text'
               placeholder='227 Đ. Nguyễn Văn Cừ, Phường 4, Quận 5, Hồ Chí Minh'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
-              required
-            />
-          </div>
-
-          <div>
-            <label className='text-sm mb-1 block'>Password</label>
-            <input
-              type='password'
-              placeholder='••••••••'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
-              required
-            />
-          </div>
-
-          <div>
-            <label className='text-sm mb-1 block'>Confirm password</label>
-            <input
-              type='password'
-              placeholder='••••••••'
               className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
               required
             />
