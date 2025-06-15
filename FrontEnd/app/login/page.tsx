@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
@@ -12,7 +13,7 @@ declare global {
 const LoginPage = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState('Customer')
+  const [role] = useState('Customer')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
