@@ -9,7 +9,12 @@ import adminRoutes from './routes/admin.routes.js'
 // Cấu hình CORS
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'https://localhost:3000', 'https://680f-14-169-250-93.ngrok-free.app'],
+    origin: [
+      'http://localhost:3000',
+      'https://localhost:3000',
+      'https://680f-14-169-250-93.ngrok-free.app',
+      'https://melodyhub1.vercel.app'
+    ],
     credentials: true // Cho phép gửi cookie nếu cần
   })
 )
