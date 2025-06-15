@@ -1,23 +1,27 @@
-import { createAccount, findAccountByUsername, findAccountByEmail } from '../models/account.model.js'
+import {
+  createAccount,
+  findAccountByUsername,
+  findAccountByEmail,
+  findOrCreateFacebookAccount
+} from '../models/account.model.js'
 import { createCustomer } from '../models/customer.model.js'
 import { createArtist } from '../models/artist.model.js'
 import { createAdmin } from '../models/admin.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import axios from 'axios'
 
 // Đăng ký
 export const register = async (req, res) => {
   console.log('register hit')
   const { username, password, email, displayName, phone, address, role } = req.body
 
-  // Kiểm tra vai trò hợp lệ
   const validRoles = ['Customer', 'Artist', 'Admin']
   if (!validRoles.includes(role)) {
     return res.status(400).json({ message: 'Invalid role' })
   }
 
   try {
-    // Kiểm tra username hoặc email đã tồn tại
     const existingUser = await findAccountByUsername(username)
     const existingEmail = await findAccountByEmail(email)
     if (existingUser) {
@@ -27,10 +31,8 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'Email already exists' })
     }
 
-    // Tạo tài khoản
     const accountID = await createAccount(username, password, email, displayName, null, role)
 
-    // Tạo thông tin theo vai trò
     if (role === 'Customer') {
       await createCustomer(accountID, phone, address)
     } else if (role === 'Artist') {
@@ -51,19 +53,16 @@ export const login = async (req, res) => {
   const { username, password } = req.body
 
   try {
-    // Tìm tài khoản
     const account = await findAccountByUsername(username)
     if (!account) {
       return res.status(400).json({ message: 'Invalid username or password' })
     }
 
-    // Kiểm tra mật khẩu
     const isMatch = await bcrypt.compare(password, account.Password)
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid username or password' })
     }
 
-    // Tạo JWT token
     const token = jwt.sign(
       { accountID: account.AccountID, username: account.Username, role: account.Role },
       process.env.JWT_SECRET || 'your_jwt_secret',
@@ -84,5 +83,56 @@ export const login = async (req, res) => {
     })
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error: error.message })
+  }
+}
+
+// Đăng nhập qua Facebook
+export const facebookLogin = async (req, res) => {
+  const { accessToken, role } = req.body
+
+  const validRoles = ['Customer', 'Artist', 'Admin']
+  if (!validRoles.includes(role)) {
+    return res.status(400).json({ message: 'Invalid role' })
+  }
+
+  try {
+    // Xác minh access token với Facebook
+    const response = await axios.get(
+      `https://graph.facebook.com/me?fields=id,email,name,picture&access_token=${accessToken}`
+    )
+    const { id: facebookId, email, name, picture } = response.data
+
+    if (!email || !name) {
+      return res.status(400).json({ message: 'Email and display name are required from Facebook' })
+    }
+
+    // Tìm hoặc tạo tài khoản Facebook
+    const accountID = await findOrCreateFacebookAccount(facebookId, email, name, picture?.data?.url, role)
+
+    // Lấy thông tin tài khoản để kiểm tra và trả về
+    const account = await findAccountByEmail(email)
+
+    // Tạo JWT token
+    const token = jwt.sign(
+      { accountID, username: `fb_${facebookId}`, role },
+      process.env.JWT_SECRET || 'your_jwt_secret',
+      { expiresIn: '1h' }
+    )
+
+    res.status(200).json({
+      message: 'Facebook login successful',
+      token,
+      user: {
+        accountID,
+        username: `fb_${facebookId}`,
+        email,
+        displayName: name,
+        avatarURL: picture?.data?.url,
+        role
+      }
+    })
+  } catch (error) {
+    console.error('Facebook login error:', error.response?.data || error.message)
+    res.status(500).json({ message: 'Error logging in with Facebook', error: error.message })
   }
 }
