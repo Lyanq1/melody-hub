@@ -1,42 +1,37 @@
 'use client'
 import { ProductCard } from '@/components/ui/product-card'
-
-const sampleProducts = [
-  {
-    id: '1',
-    name: 'Wireless Headphones',
-    price: 199.99,
-    description: 'High-quality wireless headphones with noise cancellation and premium sound quality.',
-    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80',
-    isNew: true,
-  },
-  {
-    id: '2',
-    name: 'Smart Watch',
-    price: 299.99,
-    description: 'Feature-rich smartwatch with health tracking and notifications.',
-    imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80',
-    isNew: false,
-  },
-  {
-    id: '3',
-    name: 'Laptop Stand',
-    price: 49.99,
-    description: 'Ergonomic aluminum laptop stand for better posture and cooling.',
-    imageUrl: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&q=80',
-    isNew: true,
-  },
-]
+import { useEffect, useState } from 'react'
 
 export default function Products() {
+  type Product = {
+    _id: string
+    ['product-name']: string
+    ['product-price']: string
+    ['product-image']: string
+    // Add more fields if needed
+  }
+  
+  const [products, setProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/products') 
+      .then(res => res.json())
+      .then(data => setProducts(data))
+  }, [])
+
   return (
     <div className="py-8">
       <h1 className="text-3xl font-bold mb-8">Our Products</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sampleProducts.map((product) => (
+      <div className="grid grid-cols-20 md:grid-cols-50 lg:grid-cols-4 gap-4">
+      {products.map((product) => (
           <ProductCard
-            key={product.id}
-            {...product}
+            key={product._id}
+            id={product._id}
+            name={product['product-name']}
+            price={product['product-price']}
+            imageUrl={product['product-image']}
+            description={''} // Nếu có trường mô tả thì truyền vào
+            isNew={false} // Nếu có trường phân biệt sản phẩm mới thì truyền vào
             onAddToCart={(id) => {
               console.log(`Added product ${id} to cart`)
             }}

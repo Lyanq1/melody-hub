@@ -3,7 +3,7 @@ export const Navbar = () => {
   return (
     <nav className='sticky top-0 z-50 bg-white shadow'>
       <div className='container flex justify-between items-center p-4'>
-        <Link href='/'>Logo app</Link>
+        <Link href='/'>Melody Hub</Link>
         <div className='flex gap-4'>
           <Link href='/'>Home</Link>
 

@@ -14,7 +14,7 @@ import {
 interface ProductCardProps {
   id: string
   name: string
-  price: number
+  price: string
   description: string
   imageUrl: string
   isNew?: boolean
@@ -31,8 +31,9 @@ export function ProductCard({
   onAddToCart,
 }: ProductCardProps) {
   return (
-    <Card className="w-[300px] overflow-hidden">
-      <div className="relative h-[200px] w-full">
+    <Card className="w-[300px] overflow-hidden flex-1 flex flex-col ">
+
+      <div className="relative h-[200px] w-full ">
         <Image
           src={imageUrl}
           alt={name}
@@ -46,16 +47,21 @@ export function ProductCard({
           </span>
         )}
       </div>
+      <div className="flex-1 flex flex-col">
       <CardHeader>
         <CardTitle className="text-xl">{name}</CardTitle>
-        <CardDescription className="text-lg font-semibold text-primary">
-          ${price.toFixed(2)}
-        </CardDescription>
+        
       </CardHeader>
-      <CardContent>
+      {/* <CardContent>
         <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
-      </CardContent>
-      <CardFooter>
+      </CardContent> */}
+      </div>
+      <div className='flex flex-col items-center'>
+      <CardDescription className="text-lg font-semibold text-primary pt-0">
+          {price}
+        </CardDescription>
+        </div>
+      <CardFooter >
         <Button 
           className="w-full" 
           onClick={() => onAddToCart?.(id)}
@@ -63,6 +69,7 @@ export function ProductCard({
           Add to Cart
         </Button>
       </CardFooter>
+      
     </Card>
   )
 } 
