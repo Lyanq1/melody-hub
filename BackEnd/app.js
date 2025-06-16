@@ -1,11 +1,14 @@
 import express from 'express'
 import cors from 'cors'
-const app = express()
-
 import authRoutes from './routes/auth.routes.js'
 import artistRoutes from './routes/artist.routes.js'
 import customerRoutes from './routes/customer.routes.js'
 import adminRoutes from './routes/admin.routes.js'
+import discRoutes from './routes/disc.route.js';
+import './database.js'
+
+const app = express()
+
 // Cấu hình CORS
 app.use(
   cors({
@@ -26,5 +29,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/artist', artistRoutes)
 app.use('/api/customer', customerRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/products', discRoutes);
+
 
 export default app

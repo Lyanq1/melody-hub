@@ -1,5 +1,8 @@
 import mysql from 'mysql2'
 import dotenv from 'dotenv'
+
+import mongoose from 'mongoose';
+
 dotenv.config()
 
 export const pool = mysql
@@ -13,7 +16,10 @@ export const pool = mysql
 
 // test thử các console log bằng cách gõ node database.js
 
-export async function getArtist() {
-  const [rows] = await pool.query('SELECT * FROM Artist')
-  return rows
-}
+mongoose.connect(process.env.MONGODB_URI, {
+})
+.then(() => console.log('MongoDB Atlas connected!'))
+.catch((err) => console.error('MongoDB connection error:', err));
+
+
+export default mongoose

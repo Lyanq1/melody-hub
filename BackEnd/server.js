@@ -1,9 +1,10 @@
 import app from './app.js'
-import { env } from './config/environment.js'
-import { getArtists } from './models/artist.model.js'
 
+import { getArtists } from './models/artist.model.js'
 // const result = await getArtists()
-app.listen(env.APP_PORT, () => {
-  // console.log(result)
-  console.log(`Server running on http://${env.APP_HOST}:${env.APP_PORT}`)
+
+app.listen(process.env.APP_PORT, () => {
+
+  console.log(`Server running on http://${process.env.APP_HOST}:${process.env.APP_PORT}`)
 })
+
