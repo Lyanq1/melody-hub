@@ -9,9 +9,10 @@ export const Navbar = () => {
 
           <Link href='/products'>Products</Link>
         </div>
-        <div className='flex items-center space-x-4'>
+        <div className='flex items-center space-x-10'>
           <Link href='/cart'>Cart</Link>
           <Link href='/checkout'>Checkout</Link>
+          <Link href='/register'>Signup</Link>
         </div>
       </div>
     </nav>

@@ -1,140 +1,216 @@
+
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
+import axios from 'axios'
 
 export default function RegisterPage() {
+  // Định nghĩa interface cho formData
+  interface FormData {
+    username: string
+    password: string
+    email: string
+    displayName: string
+    phoneNumber: string
+    address: string
+    role: string
+  }
+
+  // State cho form inputs
+  const [formData, setFormData] = useState<FormData>({
+    username: '',
+    password: '',
+    email: '',
+    displayName: '',
+    phoneNumber: '',
+    address: '',
+    role: '',
+  })
+  const [error, setError] = useState<string>('')
+  const [success, setSuccess] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+
+  // Xử lý thay đổi input với kiểu ChangeEvent
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  // Xử lý submit form với kiểu FormEvent
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+    setLoading(true)
+
+    // Kiểm tra client-side cơ bản
+    if (formData.password.length < 8) {
+      setError('Mật khẩu phải có ít nhất 8 ký tự')
+      setLoading(false)
+      return
+    }
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      setError('Định dạng email không hợp lệ')
+      setLoading(false)
+      return
+    }
+    if (!formData.role) {
+      setError('Vui lòng chọn vai trò')
+      setLoading(false)
+      return
+    }
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/register', formData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      setSuccess('Đăng ký thành công! Vui lòng đăng nhập.')
+      setFormData({
+        username: '',
+        password: '',
+        email: '',
+        displayName: '',
+        phoneNumber: '',
+        address: '',
+        role: '',
+      })
+      // Chuyển hướng tới trang login sau 2 giây
+      // setTimeout(() => {
+      //   window.location.href = '/login'
+      // }, 2000)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div
       className='min-h-screen bg-cover bg-center flex items-center justify-center'
       style={{
-        backgroundImage: `url('/vercel.svg')` // your image here
+        backgroundImage: `url('/background.jpg')`, // Thay bằng hình nền phù hợp
       }}
     >
       <div className='bg-gray-900 bg-opacity-90 text-white rounded-lg p-8 w-full max-w-md shadow-lg'>
-        <h2 className='text-2xl font-bold mb-6 text-center'>Create your Free Account</h2>
-        <form className='space-y-4'>
+        <h2 className='text-2xl font-bold mb-6 text-center'>Tạo Tài Khoản Miễn Phí</h2>
+        {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
+        {success && <p className='text-green-500 text-sm mb-4 text-center'>{success}</p>}
+        <form className='space-y-4' onSubmit={handleSubmit}>
           <div>
-            <label className='text-sm mb-1 block'>Username</label>
+            <label htmlFor='username' className='text-sm mb-1 block'>Tên đăng nhập</label>
             <input
               type='text'
+              id='username'
+              name='username'
+              value={formData.username}
+              onChange={handleChange}
               placeholder='john123'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label className='text-sm mb-1 block'>Password</label>
+            <label htmlFor='password' className='text-sm mb-1 block'>Mật khẩu</label>
             <input
               type='password'
+              id='password'
+              name='password'
+              value={formData.password}
+              onChange={handleChange}
               placeholder='••••••••'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label className='text-sm mb-1 block'>Email</label>
+            <label htmlFor='email' className='text-sm mb-1 block'>Email</label>
             <input
               type='email'
+              id='email'
+              name='email'
+              value={formData.email}
+              onChange={handleChange}
               placeholder='john123@gmail.com'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
-              required
-            />
-          </div>
-          <div>
-            <label className='text-sm mb-1 block'>Display Name</label>
-            <input
-              type='text'
-              placeholder='john123'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label className='text-sm mb-1 block'>Phone Number</label>
+            <label htmlFor='displayName' className='text-sm mb-1 block'>Tên hiển thị</label>
+            <input
+              type='text'
+              id='displayName'
+              name='displayName'
+              value={formData.displayName}
+              onChange={handleChange}
+              placeholder='John Doe'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor='phoneNumber' className='text-sm mb-1 block'>Số điện thoại</label>
             <input
               type='tel'
+              id='phoneNumber'
+              name='phoneNumber'
+              value={formData.phoneNumber}
+              onChange={handleChange}
               placeholder='0909123123'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label className='text-sm mb-1 block'>Address</label>
+            <label htmlFor='address' className='text-sm mb-1 block'>Địa chỉ</label>
             <input
               type='text'
+              id='address'
+              name='address'
+              value={formData.address}
+              onChange={handleChange}
               placeholder='227 Đ. Nguyễn Văn Cừ, Phường 4, Quận 5, Hồ Chí Minh'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label className='text-sm mb-1 block'>Role</label>
+            <label htmlFor='role' className='text-sm mb-1 block'>Vai trò</label>
             <select
+              id='role'
               name='role'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none'
+              value={formData.role}
+              onChange={handleChange}
+              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
-              defaultValue=''
             >
-              <option value='' disabled>
-                Select a role
-              </option>
-              <option value='customer'>Customer</option>
-              <option value='artist'>Artist</option>
-              <option value='admin'>Admin</option>
+              <option value='' disabled>Chọn vai trò</option>
+              <option value='Customer'>Khách hàng</option>
+              <option value='Artist'>Nghệ sĩ</option>
+              <option value='Admin'>Quản trị viên</option>
             </select>
           </div>
 
-          {/* Birthdate */}
-          {/* <div>
-            <label className='text-sm mb-1 block'>Birth Date</label>
-            <div className='flex gap-2'>
-              <select className='w-full bg-gray-800 border border-gray-700 p-2 rounded'>
-                <option>Day</option>
-                {[...Array(31)].map((_, i) => (
-                  <option key={i}>{i + 1}</option>
-                ))}
-              </select>
-              <select className='w-full bg-gray-800 border border-gray-700 p-2 rounded'>
-                <option>Month</option>
-                {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m, i) => (
-                  <option key={i}>{m}</option>
-                ))}
-              </select>
-              <select className='w-full bg-gray-800 border border-gray-700 p-2 rounded'>
-                <option>Year</option>
-                {[...Array(100)].map((_, i) => (
-                  <option key={i}>{2025 - i}</option>
-                ))}
-              </select>
-            </div>
-          </div> */}
-
-          {/* Terms and coditions */}
-
-          {/* <div className='flex items-center gap-2'>
-            <input type='checkbox' id='terms' className='w-4 h-4' required />
-            <label htmlFor='terms' className='text-sm'>
-              I accept the{' '}
-              <a href='#' className='underline text-blue-400'>
-                Terms and Conditions
-              </a>
-            </label>
-          </div> */}
-
-          <button type='submit' className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded'>
-            Create an account
+          <button
+            type='submit'
+            className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded disabled:bg-gray-600'
+            disabled={loading}
+          >
+            {loading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
           </button>
 
           <p className='text-sm text-center mt-2'>
-            Already have an account?{' '}
-            <a href='/login' className='text-blue-400 underline'>
-              Login here
-            </a>
+            Đã có tài khoản?{' '}
+            <a href='/login' className='text-blue-400 underline'>Đăng nhập tại đây</a>
           </p>
         </form>
       </div>
