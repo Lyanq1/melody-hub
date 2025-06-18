@@ -42,7 +42,7 @@ export const register = async (req, res) => {
       await createAdmin(accountID, phone, address)
     }
 
-    await sendVerificationEmail(email, displayName) // Gửi email xác nhận
+    // await sendVerificationEmail(email, displayName) // Gửi email xác nhận
 
     res.status(201).json({ message: 'Registration successful', accountID })
   } catch (error) {
