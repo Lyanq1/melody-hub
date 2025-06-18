@@ -1,9 +1,9 @@
 import Link from 'next/link'
 export const Navbar = () => {
   return (
-    <nav className='sticky top-0 z-50 bg-white shadow'>
-      <div className='container flex justify-between items-center p-4'>
-        <Link href='/'>Melody Hub</Link>
+    <nav style={{ backgroundColor: '#323031' }} className='sticky top-0 z-50 text-white shadow-md'>
+      <div style={{ fontFamily: 'Poster' }} className='container flex justify-between items-center p-4'>
+        <Link href='/'>ECHO RECORDS</Link>
         <div className='flex gap-4'>
           <Link href='/'>Home</Link>
 

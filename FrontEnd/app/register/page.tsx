@@ -96,139 +96,140 @@ export default function RegisterPage() {
         backgroundImage: `url('/background.jpg')` // Thay bằng hình nền phù hợp
       }}
     >
-      <div className='bg-gray-900 bg-opacity-90 text-white rounded-lg p-8 w-full max-w-md shadow-lg'>
-        <h2 className='text-2xl font-bold mb-6 text-center'>Tạo Tài Khoản Miễn Phí</h2>
+      <div className='card mt-12'>
+        <span style={{ fontFamily: 'Poster' }} className="card__title">Create new account</span>
         {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
         {success && <p className='text-green-500 text-sm mb-4 text-center'>{success}</p>}
-        <form className='space-y-4' onSubmit={handleSubmit}>
+        <form style={{ fontFamily: 'Poster' }} className='card__form' onSubmit={handleSubmit}>
           <div>
-            <label htmlFor='username' className='text-sm mb-1 block'>
+            <label htmlFor='username' className='card__content'>
               Tên đăng nhập
             </label>
             <input
+              style={{ fontFamily: 'GlamourCoquette' }}
               type='text'
               id='username'
               name='username'
               value={formData.username}
               onChange={handleChange}
               placeholder='john123'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label htmlFor='password' className='text-sm mb-1 block'>
+            <label htmlFor='password' className='card__content'>
               Mật khẩu
             </label>
             <input
+              style={{ fontFamily: 'GlamourCoquette' }}
               type='password'
               id='password'
               name='password'
               value={formData.password}
               onChange={handleChange}
               placeholder='••••••••'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label htmlFor='email' className='text-sm mb-1 block'>
+            <label htmlFor='email' className='card__content'>
               Email
             </label>
             <input
+              style={{ fontFamily: 'GlamourCoquette' }}
               type='email'
               id='email'
               name='email'
               value={formData.email}
               onChange={handleChange}
               placeholder='john123@gmail.com'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label htmlFor='displayName' className='text-sm mb-1 block'>
+            <label htmlFor='displayName' className='card__content'>
               Tên hiển thị
             </label>
             <input
+              style={{ fontFamily: 'GlamourCoquette' }}
               type='text'
               id='displayName'
               name='displayName'
               value={formData.displayName}
               onChange={handleChange}
               placeholder='John Doe'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label htmlFor='phoneNumber' className='text-sm mb-1 block'>
+            <label htmlFor='phoneNumber' className='card__content'>
               Số điện thoại
             </label>
             <input
+              style={{ fontFamily: 'GlamourCoquette' }}
               type='tel'
               id='phoneNumber'
               name='phoneNumber'
               value={formData.phoneNumber}
               onChange={handleChange}
               placeholder='0909123123'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label htmlFor='address' className='text-sm mb-1 block'>
+            <label htmlFor='address' className='card__content'>
               Địa chỉ
             </label>
             <input
+              style={{ fontFamily: 'GlamourCoquette' }}
               type='text'
               id='address'
               name='address'
               value={formData.address}
               onChange={handleChange}
               placeholder='227 Đ. Nguyễn Văn Cừ, Phường 4, Quận 5, Hồ Chí Minh'
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             />
           </div>
 
           <div>
-            <label htmlFor='role' className='text-sm mb-1 block'>
+            <label htmlFor='role' className='card__content'>
               Vai trò
             </label>
             <select
+              style={{ fontFamily: 'GlamourCoquette' }}
               id='role'
               name='role'
               value={formData.role}
               onChange={handleChange}
-              className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
+              className='card__select'
               required
             >
-              <option value='' disabled>
+              <option style={{ fontFamily: 'GlamourCoquette' }} value='' disabled>
                 Chọn vai trò
               </option>
-              <option value='Customer'>Khách hàng</option>
-              <option value='Artist'>Nghệ sĩ</option>
-              <option value='Admin'>Quản trị viên</option>
+              <option style={{ fontFamily: 'GlamourCoquette' }} value='Customer'>Khách hàng</option>
+              <option style={{ fontFamily: 'GlamourCoquette' }} value='Artist'>Nghệ sĩ</option>
+              <option style={{ fontFamily: 'GlamourCoquette' }} value='Admin'>Quản trị viên</option>
             </select>
           </div>
 
           <button
             type='submit'
-            className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded disabled:bg-gray-600'
+            className='card__button'
             disabled={loading}
           >
-            {loading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
+            {loading ? 'Creating account...' : 'Create'}
           </button>
 
-          <p className='text-sm text-center mt-2'>
+          <p className='card__content'>
             Đã có tài khoản?{' '}
-            <a href='/login' className='text-blue-400 underline'>
+            <a href='/login' className='card__content text-blue-500 hover:underline'>
               Đăng nhập tại đây
             </a>
           </p>
