@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 'use client'
 
 import React, { useState } from 'react'
-// import axios from 'axios'
+import axios from 'axios'
 
 export default function RegisterPage() {
   // Định nghĩa interface cho formData
@@ -62,11 +63,11 @@ export default function RegisterPage() {
     }
 
     try {
-      // const response = await axios.post('http://localhost:5000/api/auth/register', formData, {
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   }
-      // })
+      const response = await axios.post('https://melody-hub-vhml.onrender.com/api/auth/register', formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
       setSuccess('Đăng ký thành công! Vui lòng đăng nhập.')
       setFormData({
         username: '',

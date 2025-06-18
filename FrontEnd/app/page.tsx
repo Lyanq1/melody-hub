@@ -12,7 +12,7 @@ export default function Home() {
     setIsAuthenticated(!!token)
 
     // Fetch 4 featured products
-    fetch('http://localhost:5000/api/products')
+    fetch('https://melody-hub-vhml.onrender.com/api/products')
       .then((res) => res.json())
       .then((data) => setFeaturedProducts(data.slice(0, 4)))
   }, [])

@@ -10,20 +10,20 @@ export default function Products() {
     ['product-image']: string
     // Add more fields if needed
   }
-  
+
   const [products, setProducts] = useState<Product[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products') 
-      .then(res => res.json())
-      .then(data => setProducts(data))
+    fetch('https://melody-hub-vhml.onrender.com/api/products')
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
   }, [])
 
   return (
-    <div className="py-8">
-      <h1 className="text-3xl font-bold mb-8">Our Products</h1>
-      <div className="grid grid-cols-20 md:grid-cols-50 lg:grid-cols-4 gap-4">
-      {products.map((product) => (
+    <div className='py-8'>
+      <h1 className='text-3xl font-bold mb-8'>Our Products</h1>
+      <div className='grid grid-cols-20 md:grid-cols-50 lg:grid-cols-4 gap-4'>
+        {products.map((product) => (
           <ProductCard
             key={product._id}
             id={product._id}

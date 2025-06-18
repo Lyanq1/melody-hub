@@ -50,7 +50,7 @@ const LoginPage = () => {
     setError('')
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { username, password })
+      const response = await axios.post('https://melody-hub-vhml.onrender.com/api/auth/login', { username, password })
       const { token, user } = response.data
       localStorage.setItem('token', token)
       alert(`Login successful! Welcome, ${user.displayName}`)
@@ -95,7 +95,7 @@ const LoginPage = () => {
               })
 
             axios
-              .post('http://localhost:5000/api/auth/facebook', { accessToken, role })
+              .post('https://melody-hub-vhml.onrender.com/api/auth/facebook', { accessToken, role })
               .then((res) => {
                 const { token, user } = res.data
                 localStorage.setItem('token', token)
