@@ -77,9 +77,9 @@ export default function RegisterPage() {
         role: '',
       })
       // Chuyển hướng tới trang login sau 2 giây
-      // setTimeout(() => {
-      //   window.location.href = '/login'
-      // }, 2000)
+      setTimeout(() => {
+        window.location.href = '/login'
+      }, 2000)
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.')
     } finally {
