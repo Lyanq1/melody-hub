@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 'use client'
 
 import React, { useState } from 'react'
-import axios from 'axios'
+// import axios from 'axios'
 
 export default function RegisterPage() {
   // Định nghĩa interface cho formData
@@ -24,7 +25,7 @@ export default function RegisterPage() {
     displayName: '',
     phoneNumber: '',
     address: '',
-    role: '',
+    role: ''
   })
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
@@ -61,11 +62,11 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', formData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      // const response = await axios.post('http://localhost:5000/api/auth/register', formData, {
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   }
+      // })
       setSuccess('Đăng ký thành công! Vui lòng đăng nhập.')
       setFormData({
         username: '',
@@ -74,7 +75,7 @@ export default function RegisterPage() {
         displayName: '',
         phoneNumber: '',
         address: '',
-        role: '',
+        role: ''
       })
       // Chuyển hướng tới trang login sau 2 giây
       setTimeout(() => {
@@ -91,7 +92,7 @@ export default function RegisterPage() {
     <div
       className='min-h-screen bg-cover bg-center flex items-center justify-center'
       style={{
-        backgroundImage: `url('/background.jpg')`, // Thay bằng hình nền phù hợp
+        backgroundImage: `url('/background.jpg')` // Thay bằng hình nền phù hợp
       }}
     >
       <div className='bg-gray-900 bg-opacity-90 text-white rounded-lg p-8 w-full max-w-md shadow-lg'>
@@ -100,7 +101,9 @@ export default function RegisterPage() {
         {success && <p className='text-green-500 text-sm mb-4 text-center'>{success}</p>}
         <form className='space-y-4' onSubmit={handleSubmit}>
           <div>
-            <label htmlFor='username' className='text-sm mb-1 block'>Tên đăng nhập</label>
+            <label htmlFor='username' className='text-sm mb-1 block'>
+              Tên đăng nhập
+            </label>
             <input
               type='text'
               id='username'
@@ -114,7 +117,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor='password' className='text-sm mb-1 block'>Mật khẩu</label>
+            <label htmlFor='password' className='text-sm mb-1 block'>
+              Mật khẩu
+            </label>
             <input
               type='password'
               id='password'
@@ -128,7 +133,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor='email' className='text-sm mb-1 block'>Email</label>
+            <label htmlFor='email' className='text-sm mb-1 block'>
+              Email
+            </label>
             <input
               type='email'
               id='email'
@@ -142,7 +149,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor='displayName' className='text-sm mb-1 block'>Tên hiển thị</label>
+            <label htmlFor='displayName' className='text-sm mb-1 block'>
+              Tên hiển thị
+            </label>
             <input
               type='text'
               id='displayName'
@@ -156,7 +165,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor='phoneNumber' className='text-sm mb-1 block'>Số điện thoại</label>
+            <label htmlFor='phoneNumber' className='text-sm mb-1 block'>
+              Số điện thoại
+            </label>
             <input
               type='tel'
               id='phoneNumber'
@@ -170,7 +181,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor='address' className='text-sm mb-1 block'>Địa chỉ</label>
+            <label htmlFor='address' className='text-sm mb-1 block'>
+              Địa chỉ
+            </label>
             <input
               type='text'
               id='address'
@@ -184,7 +197,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor='role' className='text-sm mb-1 block'>Vai trò</label>
+            <label htmlFor='role' className='text-sm mb-1 block'>
+              Vai trò
+            </label>
             <select
               id='role'
               name='role'
@@ -193,7 +208,9 @@ export default function RegisterPage() {
               className='w-full p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600'
               required
             >
-              <option value='' disabled>Chọn vai trò</option>
+              <option value='' disabled>
+                Chọn vai trò
+              </option>
               <option value='Customer'>Khách hàng</option>
               <option value='Artist'>Nghệ sĩ</option>
               <option value='Admin'>Quản trị viên</option>
@@ -210,7 +227,9 @@ export default function RegisterPage() {
 
           <p className='text-sm text-center mt-2'>
             Đã có tài khoản?{' '}
-            <a href='/login' className='text-blue-400 underline'>Đăng nhập tại đây</a>
+            <a href='/login' className='text-blue-400 underline'>
+              Đăng nhập tại đây
+            </a>
           </p>
         </form>
       </div>
