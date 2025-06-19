@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react'
 import axios from 'axios'
+import './register.css'
 
 export default function RegisterPage() {
   // Định nghĩa interface cho formData
@@ -97,7 +98,9 @@ export default function RegisterPage() {
       }}
     >
       <div className='card mt-12'>
-        <span style={{ fontFamily: 'Poster' }} className="card__title">Create new account</span>
+        <span style={{ fontFamily: 'Poster' }} className='card__title'>
+          Create new account
+        </span>
         {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
         {success && <p className='text-green-500 text-sm mb-4 text-center'>{success}</p>}
         <form style={{ fontFamily: 'Poster' }} className='card__form' onSubmit={handleSubmit}>
@@ -213,17 +216,19 @@ export default function RegisterPage() {
               <option style={{ fontFamily: 'GlamourCoquette' }} value='' disabled>
                 Chọn vai trò
               </option>
-              <option style={{ fontFamily: 'GlamourCoquette' }} value='Customer'>Khách hàng</option>
-              <option style={{ fontFamily: 'GlamourCoquette' }} value='Artist'>Nghệ sĩ</option>
-              <option style={{ fontFamily: 'GlamourCoquette' }} value='Admin'>Quản trị viên</option>
+              <option style={{ fontFamily: 'GlamourCoquette' }} value='Customer'>
+                Khách hàng
+              </option>
+              <option style={{ fontFamily: 'GlamourCoquette' }} value='Artist'>
+                Nghệ sĩ
+              </option>
+              <option style={{ fontFamily: 'GlamourCoquette' }} value='Admin'>
+                Quản trị viên
+              </option>
             </select>
           </div>
 
-          <button
-            type='submit'
-            className='card__button'
-            disabled={loading}
-          >
+          <button type='submit' className='card__button' disabled={loading}>
             {loading ? 'Creating account...' : 'Create'}
           </button>
 
