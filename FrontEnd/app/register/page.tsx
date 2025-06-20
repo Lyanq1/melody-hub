@@ -98,12 +98,12 @@ export default function RegisterPage() {
       }}
     >
       <div className='card mt-12'>
-        <span style={{ fontFamily: 'Poster' }} className='card__title'>
-          Create new account
+        <span style={{ fontFamily: 'Tangkiwood' }} className='card__title'>
+          create new account
         </span>
         {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
         {success && <p className='text-green-500 text-sm mb-4 text-center'>{success}</p>}
-        <form style={{ fontFamily: 'Poster' }} className='card__form' onSubmit={handleSubmit}>
+        <form style={{ fontFamily: 'Tangkiwood' }} className='card__form' onSubmit={handleSubmit}>
           <div>
             <label htmlFor='username' className='card__content'>
               Tên đăng nhập

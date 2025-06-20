@@ -21,8 +21,10 @@ export default function Products() {
 
   return (
     <div className='py-8'>
-      <h1 style={{ fontFamily: 'Poster' }} className='text-3xl font-bold mb-8'>Our Products</h1>
-      <div style={{ fontFamily: 'GalleryModern' }} className='grid grid-cols-20 md:grid-cols-50 lg:grid-cols-4 gap-4 text-center'>
+      <h1 style={{ fontFamily: 'Tangkiwood', fontSize: '40px', color: '#323031' }} className='text-3xl font-bold mb-8'>
+        <span style={{ marginRight: '10px', color: '#DB3A34' }}>■</span>our products
+      </h1>
+      <div style={{ fontFamily: 'MicaValo' }} className='grid grid-cols-20 md:grid-cols-50 lg:grid-cols-4 gap-4 text-center'>
         {products.map((product) => (
           <ProductCard
             key={product._id}
