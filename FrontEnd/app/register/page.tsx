@@ -92,152 +92,109 @@ export default function RegisterPage() {
 
   return (
     <div
-      className='min-h-screen bg-cover bg-center flex items-center justify-center'
+      className='min-h-[calc(100vh-64px)] bg-cover bg-center flex items-center justify-center'
       style={{
-        backgroundImage: `url('/background.jpg')` // Thay bằng hình nền phù hợp
+        backgroundImage: `url('')` // Thay bằng hình nền phù hợp
       }}
     >
-      <div className='card mt-12'>
-        <span style={{ fontFamily: 'Tangkiwood' }} className='card__title'>
-          create new account
-        </span>
+      <div className='wrapper'>
+        <h1 style={{ fontFamily: 'Tangkiwood' }} >REGISTER</h1>
         {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
         {success && <p className='text-green-500 text-sm mb-4 text-center'>{success}</p>}
-        <form style={{ fontFamily: 'Tangkiwood' }} className='card__form' onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor='username' className='card__content'>
-              Tên đăng nhập
-            </label>
+        <form onSubmit={handleSubmit}>
+          <div className="input-box">
             <input
-              style={{ fontFamily: 'GlamourCoquette' }}
+              style={{ fontFamily: 'MicaValo' }}
               type='text'
               id='username'
               name='username'
               value={formData.username}
               onChange={handleChange}
-              placeholder='john123'
+              placeholder='username'
               required
             />
           </div>
 
-          <div>
-            <label htmlFor='password' className='card__content'>
-              Mật khẩu
-            </label>
+          <div className="input-box">
             <input
-              style={{ fontFamily: 'GlamourCoquette' }}
-              type='password'
-              id='password'
-              name='password'
-              value={formData.password}
-              onChange={handleChange}
-              placeholder='••••••••'
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor='email' className='card__content'>
-              Email
-            </label>
-            <input
-              style={{ fontFamily: 'GlamourCoquette' }}
+              style={{ fontFamily: 'MicaValo' }}
               type='email'
               id='email'
               name='email'
               value={formData.email}
               onChange={handleChange}
-              placeholder='john123@gmail.com'
+              placeholder='email'
               required
             />
+            <i className="bx bxs-user"></i>
           </div>
 
-          <div>
-            <label htmlFor='displayName' className='card__content'>
-              Tên hiển thị
-            </label>
+          <div className="input-box">
             <input
-              style={{ fontFamily: 'GlamourCoquette' }}
+              style={{ fontFamily: 'MicaValo' }}
+              type='password'
+              id='password'
+              name='password'
+              value={formData.password}
+              onChange={handleChange}
+              placeholder='password'
+              required
+            />
+            <i className="bx bxs-lock-alt"></i>
+          </div>
+
+          
+
+          <div  className="input-box">
+            <input
+              style={{ fontFamily: 'MicaValo' }}
               type='text'
               id='displayName'
               name='displayName'
               value={formData.displayName}
               onChange={handleChange}
-              placeholder='John Doe'
+              placeholder='name'
               required
             />
           </div>
 
-          <div>
-            <label htmlFor='phoneNumber' className='card__content'>
-              Số điện thoại
-            </label>
-            <input
-              style={{ fontFamily: 'GlamourCoquette' }}
-              type='tel'
-              id='phoneNumber'
-              name='phoneNumber'
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              placeholder='0909123123'
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor='address' className='card__content'>
-              Địa chỉ
-            </label>
-            <input
-              style={{ fontFamily: 'GlamourCoquette' }}
-              type='text'
-              id='address'
-              name='address'
-              value={formData.address}
-              onChange={handleChange}
-              placeholder='227 Đ. Nguyễn Văn Cừ, Phường 4, Quận 5, Hồ Chí Minh'
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor='role' className='card__content'>
-              Vai trò
-            </label>
+          <div className="input-box">
             <select
-              style={{ fontFamily: 'GlamourCoquette' }}
+              style={{ fontFamily: 'MicaValo' }}
               id='role'
               name='role'
               value={formData.role}
               onChange={handleChange}
-              className='card__select'
               required
             >
-              <option style={{ fontFamily: 'GlamourCoquette' }} value='' disabled>
-                Chọn vai trò
+              <option style={{ fontFamily: 'MicaValo' }} value='' disabled>
+                role
               </option>
-              <option style={{ fontFamily: 'GlamourCoquette' }} value='Customer'>
-                Khách hàng
+              <option style={{ fontFamily: 'MicaValo' }} value='Customer'>
+                customer
               </option>
-              <option style={{ fontFamily: 'GlamourCoquette' }} value='Artist'>
-                Nghệ sĩ
+              <option style={{ fontFamily: 'MicaValo' }} value='Artist'>
+                artist
               </option>
-              <option style={{ fontFamily: 'GlamourCoquette' }} value='Admin'>
-                Quản trị viên
+              <option style={{ fontFamily: 'MicaValo' }} value='Admin'>
+                admin
               </option>
             </select>
+            <i className="bx bxs-chevron-down"></i>
           </div>
 
-          <button type='submit' className='card__button' disabled={loading}>
-            {loading ? 'Creating account...' : 'Create'}
+          <div style={{ fontFamily: 'MicaValo' }} className="remember-forgot">
+            <label><input type="checkbox" />Remember me </label>
+            <a href="#">Forgot password?</a>
+          </div>
+
+          <button style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }} type='submit' className='btn' disabled={loading}>
+            {loading ? 'Creating account...' : 'REGISTER'}
           </button>
 
-          <p className='card__content'>
-            Đã có tài khoản?{' '}
-            <a href='/login' className='card__content text-blue-500 hover:underline'>
-              Đăng nhập tại đây
-            </a>
-          </p>
+          <div style={{ fontFamily: 'MicaValo' }} className="register-link">
+            <p>Already have an account? <a href="/login"> Login </a></p>
+          </div>
         </form>
       </div>
     </div>

@@ -40,7 +40,7 @@
   left: 0;
   height: 100%;
   width: 0;
-  background-color: rgba(108, 99, 255, 0.1);
+  background-color: rgba(169, 164, 252, 0.1);
   transition: width 0.3s;
 }
 

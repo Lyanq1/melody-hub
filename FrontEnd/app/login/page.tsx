@@ -2,7 +2,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-
+import './login.css'
 declare global {
   interface Window {
     FB: any
@@ -121,61 +121,57 @@ const LoginPage = () => {
   }
 
   return (
-    <div className='login-container' style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <h2>Login to MelodyHub</h2>
-      <form onSubmit={handleLogin} style={{ marginBottom: '20px' }}>
-        <div>
-          <label>Username:</label>
-          <input
-            type='text'
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', margin: '5px 0' }}
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type='password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', margin: '5px 0' }}
-          />
-        </div>
+    <div
+      className='min-h-[calc(100vh-64px)] bg-cover bg-center flex items-center justify-center'
+      style={{
+        backgroundImage: `url('')` // Thay bằng hình nền phù hợp
+      }}
+    >
+      <div className='wrapper'>
+        <h1 style={{ fontFamily: 'Tangkiwood' }} >ACCOUNT LOGIN</h1>
+        <form onSubmit={handleLogin}>
+          <div className="input-box">
+            <input
+              style={{ fontFamily: 'MicaValo' }}
+              type='text'
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder='username'
+              required
+            />
+          </div>
+          <div className="input-box">
+            <input
+              style={{ fontFamily: 'MicaValo' }}
+              placeholder='password'
+              type='password'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type='submit'
+            style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }}
+            disabled={isLoading}
+            className='btn'
+          >
+            {isLoading ? 'Logging in...' : 'LOGIN'}
+          </button>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+        </form>
 
         <button
-          type='submit'
+          onClick={handleFacebookLogin}
           disabled={isLoading}
-          style={{
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer'
-          }}
+          style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }}
+          className='btn'
         >
-          {isLoading ? 'Logging in...' : 'Login'}
+          {isLoading ? 'Logging in with Facebook...' : 'FACEBOOK'}
         </button>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-      </form>
-      <button
-        onClick={handleFacebookLogin}
-        disabled={isLoading}
-        style={{
-          width: '100%',
-          padding: '10px',
-          backgroundColor: '#3b5998',
-          color: 'white',
-          border: 'none',
-          cursor: 'pointer'
-        }}
-      >
-        {isLoading ? 'Logging in with Facebook...' : 'Login with Facebook'}
-      </button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      </div>
     </div>
   )
 }
