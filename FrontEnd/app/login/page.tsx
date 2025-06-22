@@ -161,7 +161,7 @@ const LoginPage = () => {
           </button>
           {error && <p style={{ color: 'red' }}>{error}</p>}
         </form>
-
+        
         <button
           onClick={handleFacebookLogin}
           disabled={isLoading}
