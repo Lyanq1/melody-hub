@@ -14,8 +14,6 @@ export default function RegisterPage() {
     password: string
     email: string
     displayName: string
-    phoneNumber: string
-    address: string
     role: string
   }
 
@@ -25,8 +23,6 @@ export default function RegisterPage() {
     password: '',
     email: '',
     displayName: '',
-    phoneNumber: '',
-    address: '',
     role: ''
   })
   const [error, setError] = useState<string>('')
@@ -75,8 +71,6 @@ export default function RegisterPage() {
         password: '',
         email: '',
         displayName: '',
-        phoneNumber: '',
-        address: '',
         role: ''
       })
       // Chuyển hướng tới trang login sau 2 giây
