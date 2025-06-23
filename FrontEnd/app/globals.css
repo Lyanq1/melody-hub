@@ -150,15 +150,15 @@
 }
 
 @font-face {
-  font-family: 'Bileha';
-  src: url('/fonts/Bileha.otf') format('truetype');
+  font-family: 'Cerova';
+  src: url('/fonts/TF-Cerova-Regular-iolrsj.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'NeuePlak';
-  src: url('/fonts/Monotype-NeuePlakWideBold.ttf') format('truetype');
+  font-family: 'Gretha';
+  src: url('/fonts/TF-Gretha.semibold-mcqulu.otf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }

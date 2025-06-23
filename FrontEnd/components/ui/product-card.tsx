@@ -32,7 +32,7 @@ export function ProductCard({
 }: ProductCardProps) {
   return (
     <Card className='w-[300px] overflow-hidden flex-1 flex flex-col '>
-      <div className='relative h-[200px] w-full '>
+      <div className='relative h-[300px] w-full '>
         <Image src={imageUrl} alt={name} fill className='object-cover' sizes='(max-width: 300px) 100vw, 300px' />
         {isNew && (
           <span className='absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded-md text-sm font-medium'>
@@ -42,11 +42,12 @@ export function ProductCard({
       </div>
       <div className='flex-1 flex flex-col'>
         <CardHeader>
-          <CardTitle className='text-xl'>{name}</CardTitle>
+          <CardTitle className='text-lg'>{name}</CardTitle>
         </CardHeader>
         {/* <CardContent>
         <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
       </CardContent> */}
+        
       </div>
       <div className='flex flex-col items-center'>
         <CardDescription className='text-lg font-semibold text-primary pt-0'>{price}</CardDescription>

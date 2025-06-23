@@ -5,22 +5,22 @@ import Link from 'next/link'
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-[var(--background)] text-[var(--foreground)] py-8 border-t border-[var(--border)]">
+    <footer className="bg-[#FFC857] text-[#DB3A34] py-8 border-t border-[var(--border)]">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-start text-left gap-8 text-sm md:text-base">
           {/* Logo và mô tả - Sử dụng font MicaValo cho logo */}
           <div>
-            <Link href="/" style={{ fontFamily: 'MicaValo' }} className="flex items-center space-x-2">
-              <span className="text-xl">ECHO RECORDS</span>
+            <Link href="/" className="flex items-center space-x-2">
+              <h1 style={{ fontFamily: 'Cerova', fontSize: '50px' }} className="text-xl">ECHO <br /> RECORDS</h1>
             </Link>
             <p className="mt-4 text-sm font-['Lora'] text-[var(--muted-foreground)]">
-              Nền tảng kết nối nghệ sĩ và khách hàng, mang nghệ thuật đến gần hơn với mọi người.
+              Nền tảng kết nối nghệ sĩ và khách hàng, <br /> mang nghệ thuật đến gần hơn với mọi người.
             </p>
           </div>
 
           {/* Liên kết nhanh */}
           <div>
-            <h3 className="text-lg font-['NeuePlak'] mb-4">Liên kết nhanh</h3>
+            <h1 style={{ fontSize: '40px' }} className="text-lg font-['Cerova'] mb-4">THÔNG TIN</h1>
             <ul className="space-y-2 text-sm font-['Lora']">
               <li><Link href="/about" className="hover:text-[var(--primary)]">Giới thiệu</Link></li>
               <li><Link href="/services" className="hover:text-[var(--primary)]">Dịch vụ</Link></li>
@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
 
           {/* Liên hệ */}
           <div>
-            <h3 className="text-lg font-['NeuePlak'] mb-4">Hỗ trợ</h3>
+            <h1 style={{ fontSize: '40px' }} className="text-lg font-['Cerova'] mb-4">TRỢ GIÚP</h1>
             <ul className="space-y-2 text-sm font-['Lora']">
               <li><Link href="/thanhtoan" className="hover:text-[var(--primary)]">Thanh toán</Link></li>
               <li><Link href="/giaohang" className="hover:text-[var(--primary)]">Giao hàng</Link></li>
@@ -42,7 +42,7 @@ const Footer: React.FC = () => {
 
           {/* Social Media */}
           <div>
-            <h3 className="text-lg font-['NeuePlak'] mb-4">Theo dõi chúng tôi</h3>
+            <h1 style={{ fontSize: '40px' }} className="text-lg font-['Cerova'] mb-4">FOLLOW US</h1>
             <div className="flex space-x-4">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-[var(--muted-foreground)] hover:text-[var(--primary)]">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
