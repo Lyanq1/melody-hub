@@ -128,9 +128,9 @@ const LoginPage = () => {
       }}
     >
       <div className='wrapper'>
-        <h1 style={{ fontFamily: 'Tangkiwood' }} >ACCOUNT LOGIN</h1>
+        <h1 style={{ fontFamily: 'Tangkiwood' }}>ACCOUNT LOGIN</h1>
         <form onSubmit={handleLogin}>
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='text'
@@ -140,7 +140,7 @@ const LoginPage = () => {
               required
             />
           </div>
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               placeholder='password'
@@ -161,7 +161,7 @@ const LoginPage = () => {
           </button>
           {error && <p style={{ color: 'red' }}>{error}</p>}
         </form>
-        
+
         <button
           onClick={handleFacebookLogin}
           disabled={isLoading}

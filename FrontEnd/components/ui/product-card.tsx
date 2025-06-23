@@ -21,6 +21,14 @@ interface ProductCardProps {
   onAddToCart?: (id: string) => void
 }
 
+const addToLocalStorage = (id: string, name: string, price: string, imageUrl: string) => {
+  const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+  if (!cart.some((item: { id: string }) => item.id === id)) {
+    cart.push({ id, name, price, imageUrl, quantity: 1 })
+    localStorage.setItem('cart', JSON.stringify(cart))
+  }
+}
+
 export function ProductCard({
   id,
   name,
@@ -53,7 +61,13 @@ export function ProductCard({
         <CardDescription className='text-lg font-semibold text-primary pt-0'>{price}</CardDescription>
       </div>
       <CardFooter>
-        <Button className='w-full' onClick={() => onAddToCart?.(id)}>
+        <Button
+          className='w-full'
+          onClick={() => {
+            onAddToCart?.(id)
+            addToLocalStorage(id, name, price, imageUrl)
+          }}
+        >
           Add to Cart
         </Button>
       </CardFooter>

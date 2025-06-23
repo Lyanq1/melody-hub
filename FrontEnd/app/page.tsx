@@ -11,10 +11,10 @@ export default function Home() {
     const token = localStorage.getItem('token')
     setIsAuthenticated(!!token)
 
-    // Fetch 4 featured products
+    // Fetch 12 featured products
     fetch('https://melody-hub-vhml.onrender.com/api/products')
       .then((res) => res.json())
-      .then((data) => setFeaturedProducts(data.slice(0, 4)))
+      .then((data) => setFeaturedProducts(data.slice(0, 12)))
   }, [])
 
   if (!isAuthenticated) {
