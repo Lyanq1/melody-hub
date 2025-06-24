@@ -180,32 +180,19 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className='input-box'>
-            <select
-              style={{ fontFamily: 'MicaValo' }}
-              id='role'
-              name='role'
-              value={formData.role}
-              onChange={handleChange}
-              required
-            >
-              <option style={{ fontFamily: 'MicaValo' }} value='' disabled>
+          <div className='input-box' style={{ fontFamily: 'MicaValo' }}>
+            <select id='role' name='role' value={formData.role} onChange={handleChange} required>
+              <option value='' disabled>
                 role
               </option>
-              <option style={{ fontFamily: 'MicaValo' }} value='Customer'>
-                customer
-              </option>
-              <option style={{ fontFamily: 'MicaValo' }} value='Artist'>
-                artist
-              </option>
-              <option style={{ fontFamily: 'MicaValo' }} value='Admin'>
-                admin
-              </option>
+              <option value='Customer'>customer</option>
+              <option value='Artist'>artist</option>
+              <option value='Admin'>admin</option>
             </select>
             <i className='bx bxs-chevron-down'></i>
           </div>
 
-          <div style={{ fontFamily: 'MicaValo' }} className='remember-forgot'>
+          <div className='remember-forgot' style={{ fontFamily: 'MicaValo' }}>
             <label>
               <input type='checkbox' />
               Remember me{' '}
@@ -213,18 +200,15 @@ export default function RegisterPage() {
             <a href='#'>Forgot password?</a>
           </div>
 
-          <button
-            style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }}
-            type='submit'
-            className='btn'
-            disabled={loading}
-          >
-            {loading ? 'Creating account...' : 'REGISTER'}
-          </button>
+          <div className='submit-btn' style={{ fontFamily: 'Tankiwood' }}>
+            <button className='btn text-white' type='submit' disabled={loading}>
+              <span className='text-white'>{loading ? 'Creating account...' : 'REGISTER'}</span>
+            </button>
+          </div>
 
           <div style={{ fontFamily: 'MicaValo' }} className='register-link'>
             <p>
-              Already have an account? <a href='/login'> Login </a>
+              Already have an account? <a href='/login'> Login here </a>
             </p>
           </div>
         </form>

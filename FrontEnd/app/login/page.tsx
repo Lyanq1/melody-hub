@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import React, { useState, useEffect } from 'react'
@@ -129,6 +130,7 @@ const LoginPage = () => {
     >
       <div className='wrapper'>
         <h1 style={{ fontFamily: 'Tangkiwood' }}>ACCOUNT LOGIN</h1>
+        {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
         <form onSubmit={handleLogin}>
           <div className='input-box'>
             <input
@@ -151,26 +153,26 @@ const LoginPage = () => {
             />
           </div>
 
-          <button
-            type='submit'
-            style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }}
-            disabled={isLoading}
-            className='btn'
-          >
-            {isLoading ? 'Logging in...' : 'LOGIN'}
+          <button type='submit' style={{ fontFamily: 'Tankiwood' }} disabled={isLoading} className='btn mt-5'>
+            <span className='text-white'>{isLoading ? 'Logging in...' : 'LOGIN'}</span>
           </button>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
         </form>
-
+        <p className='text-sm text-center mt-4'>or</p>
+        {/* <p className='text-2xl text-center mt-4'>Login with Facebook</p> */}
         <button
+          style={{ fontFamily: 'Tankiwood' }}
           onClick={handleFacebookLogin}
           disabled={isLoading}
-          style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }}
-          className='btn'
+          className='btn text-white mt-5'
         >
-          {isLoading ? 'Logging in with Facebook...' : 'FACEBOOK'}
+          <span className='text-white'>{isLoading ? 'Logging in...' : 'FACEBOOK LOGIN'}</span>
         </button>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+
+        <div style={{ fontFamily: 'MicaValo' }} className='register-link'>
+          <p>
+            Don't have an account? <a href='/register'> Register here </a>
+          </p>
+        </div>
       </div>
     </div>
   )
