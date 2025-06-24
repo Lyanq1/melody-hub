@@ -99,13 +99,13 @@ export default function Products() {
         {' '}
         {/* Thêm container và mx-auto để căn giữa nội dung */}
         <h1
-          style={{ fontFamily: 'Tangkiwood', fontSize: '40px', color: '#323031' }}
+          style={{ fontFamily: 'MicaValo', fontSize: '40px', color: '#323031' }}
           className='text-3xl font-bold mb-8 text-left'
         >
           our products
         </h1>
         <div
-          style={{ fontFamily: 'MicaValo' }}
+          style={{ fontFamily: 'Gretha' }}
           className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-center'
         >
           {currentItems.map((product) => (

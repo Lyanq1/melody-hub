@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-[#FFC857] text-[#DB3A34] py-8 border-t border-[var(--border)]">
+    <footer className="bg-[#323031] text-[#FFFFFF] py-8 border-t border-[var(--border)]">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-start text-left gap-8 text-sm md:text-base">
           {/* Logo và mô tả - Sử dụng font MicaValo cho logo */}
@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
             <Link href="/" className="flex items-center space-x-2">
               <h1 style={{ fontFamily: 'Cerova', fontSize: '50px' }} className="text-xl">ECHO <br /> RECORDS</h1>
             </Link>
-            <p className="mt-4 text-sm font-['Lora'] text-[var(--muted-foreground)]">
+            <p className="mt-4 text-sm font-['MicaValo'] text-[var(--muted-foreground)]">
               Nền tảng kết nối nghệ sĩ và khách hàng, <br /> mang nghệ thuật đến gần hơn với mọi người.
             </p>
           </div>
@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
           {/* Liên kết nhanh */}
           <div>
             <h1 style={{ fontSize: '40px' }} className="text-lg font-['Cerova'] mb-4">THÔNG TIN</h1>
-            <ul className="space-y-2 text-sm font-['Lora']">
+            <ul className="space-y-2 text-sm font-['MicaValo']">
               <li><Link href="/about" className="hover:text-[var(--primary)]">Giới thiệu</Link></li>
               <li><Link href="/services" className="hover:text-[var(--primary)]">Dịch vụ</Link></li>
               <li><Link href="/contact" className="hover:text-[var(--primary)]">Liên hệ</Link></li>
@@ -32,7 +32,7 @@ const Footer: React.FC = () => {
           {/* Liên hệ */}
           <div>
             <h1 style={{ fontSize: '40px' }} className="text-lg font-['Cerova'] mb-4">TRỢ GIÚP</h1>
-            <ul className="space-y-2 text-sm font-['Lora']">
+            <ul className="space-y-2 text-sm font-['MicaValo']">
               <li><Link href="/thanhtoan" className="hover:text-[var(--primary)]">Thanh toán</Link></li>
               <li><Link href="/giaohang" className="hover:text-[var(--primary)]">Giao hàng</Link></li>
               <li><Link href="/baomat" className="hover:text-[var(--primary)]">Chính sách bảo mật</Link></li>
@@ -64,8 +64,8 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Copyright */}
-        <div className="mt-8 text-center text-sm font-['Lora'] text-[var(--muted-foreground)]">
-          © {new Date().getFullYear()} Echo Record. All rights reserved.
+        <div className="mt-8 text-center text-sm font-['MicaValo'] text-[var(--muted-foreground)]">
+          © {new Date().getFullYear()} Echo Records. All rights reserved.
         </div>
       </div>
     </footer>
