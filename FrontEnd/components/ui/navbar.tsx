@@ -401,7 +401,7 @@ export const Navbar = () => {
               ) : (
                 <DropdownMenuItem asChild>
                   <Link
-                    href="/Profile"
+                    href="/profile"
                     className="flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
                   >
                     <span className="text-xl">👤</span> Tài khoản
