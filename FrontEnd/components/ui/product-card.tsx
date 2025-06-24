@@ -68,7 +68,7 @@ export function ProductCard({
             addToLocalStorage(id, name, price, imageUrl)
           }}
         >
-          Add to Cart
+          ADD TO CART
         </Button>
       </CardFooter>
     </Card>
