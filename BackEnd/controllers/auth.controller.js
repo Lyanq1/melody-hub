@@ -4,9 +4,6 @@ import {
   findAccountByEmail,
   findOrCreateFacebookAccount
 } from '../models/account.model.js'
-import { createCustomer } from '../models/customer.model.js'
-import { createArtist } from '../models/artist.model.js'
-import { createAdmin } from '../models/admin.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import axios from 'axios'
@@ -14,7 +11,7 @@ import sendVerificationEmail from '../utils/email.js'
 
 // Đăng ký
 export const register = async (req, res) => {
-  console.log('register hit')
+  console.log('Register endpoint hit with data:', JSON.stringify(req.body, null, 2))
   const { username, password, email, displayName, phone, address, role } = req.body
 
   const validRoles = ['Customer', 'Artist', 'Admin']
@@ -23,8 +20,14 @@ export const register = async (req, res) => {
   }
 
   try {
+    console.log('Checking for existing user with username:', username)
     const existingUser = await findAccountByUsername(username)
+    console.log('Existing user check result:', existingUser)
+    
+    console.log('Checking for existing email:', email)
     const existingEmail = await findAccountByEmail(email)
+    console.log('Existing email check result:', existingEmail)
+    
     if (existingUser) {
       return res.status(400).json({ message: 'Username already exists' })
     }
@@ -32,20 +35,20 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'Email already exists' })
     }
 
-    const accountID = await createAccount(username, password, email, displayName, null, role)
+    // Create account with MongoDB
+    console.log('Creating account with MongoDB...')
+    const accountID = await createAccount(username, password, email, displayName, null, role, phone, address)
+    console.log('Account created with ID:', accountID)
 
-    if (role === 'Customer') {
-      await createCustomer(accountID, phone, address)
-    } else if (role === 'Artist') {
-      await createArtist(accountID, phone, address)
-    } else if (role === 'Admin') {
-      await createAdmin(accountID, phone, address)
-    }
+    // With MongoDB, we don't need separate tables for different roles
+    // The role and additional fields are already stored in the Account document
 
     // await sendVerificationEmail(email, displayName) // Gửi email xác nhận
 
+    console.log('Registration successful, returning response')
     res.status(201).json({ message: 'Registration successful', accountID })
   } catch (error) {
+    console.error('Registration error:', error)
     res.status(500).json({ message: 'Error registering user', error: error.message })
   }
 }
@@ -61,13 +64,14 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid username or password' })
     }
 
-    const isMatch = await bcrypt.compare(password, account.Password)
+    // For MongoDB, we use the comparePassword method
+    const isMatch = await account.comparePassword(password)
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid username or password' })
     }
 
     const token = jwt.sign(
-      { accountID: account.AccountID, username: account.Username, role: account.Role },
+      { accountID: account._id, username: account.Username, role: account.Role },
       process.env.JWT_SECRET || 'your_jwt_secret',
       { expiresIn: '1h' }
     )
@@ -76,7 +80,7 @@ export const login = async (req, res) => {
       message: 'Login successful',
       token,
       user: {
-        accountID: account.AccountID,
+        accountID: account._id,
         username: account.Username,
         email: account.Email,
         displayName: account.DisplayName,

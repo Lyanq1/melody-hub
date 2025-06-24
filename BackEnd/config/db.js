@@ -1,13 +1,18 @@
-import mysql from 'mysql2'
+import mongoose from 'mongoose'
 import { env } from './environment.js'
 
-const pool = mysql
-  .createPool({
-    host: env.MYSQL_HOST,
-    user: env.MYSQL_USER,
-    password: env.MYSQL_PASSWORD,
-    database: env.MYSQL_DATABASE
-  })
-  .promise()
+// Connect to MongoDB
+const connectDB = async () => {
+  try {
+    await mongoose.connect(env.MONGODB_URI || process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error.message);
+    process.exit(1);
+  }
+};
 
-export default pool
+export default connectDB;

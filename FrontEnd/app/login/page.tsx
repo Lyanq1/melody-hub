@@ -1,7 +1,8 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "./login.css";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import './login.css'
 declare global {
   interface Window {
     FB: any;
@@ -132,8 +133,8 @@ const LoginPage = () => {
         backgroundImage: `url('')`, // Thay bằng hình nền phù hợp
       }}
     >
-      <div className="wrapper">
-        <h1 style={{ fontFamily: "Tangkiwood" }}>ACCOUNT LOGIN</h1>
+      <div className='wrapper'>
+        <h1 style={{ fontFamily: 'Tangkiwood' }}>ACCOUNT LOGIN</h1>
         <form onSubmit={handleLogin}>
           <div className="input-box">
             <input
@@ -157,25 +158,27 @@ const LoginPage = () => {
           </div>
 
           <button
-            type="submit"
-            style={{ fontFamily: "Tangkiwood", fontSize: "20px" }}
+            type='submit'
+            style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }}
             disabled={isLoading}
-            className="btn"
+            className='btn'
           >
-            {isLoading ? "Logging in..." : "LOGIN"}
+            {isLoading ? 'Logging in...' : 'LOGIN'}
           </button>
-          {error && <p style={{ color: "red" }}>{error}</p>}
+          {error && <p style={{ color: 'red' }}>{error}</p>}
         </form>
-
+        <p className='text-sm text-center mt-4'>or</p>
+        {/* <p className='text-2xl text-center mt-4'>Login with Facebook</p> */}
         <button
+          style={{ fontFamily: 'Tankiwood' }}
           onClick={handleFacebookLogin}
           disabled={isLoading}
-          style={{ fontFamily: "Tangkiwood", fontSize: "20px" }}
-          className="btn"
+          style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }}
+          className='btn'
         >
-          {isLoading ? "Logging in with Facebook..." : "FACEBOOK"}
+          {isLoading ? 'Logging in with Facebook...' : 'FACEBOOK'}
         </button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
     </div>
   );

@@ -15,6 +15,8 @@ export default function RegisterPage() {
     email: string
     displayName: string
     role: string
+    phone: string
+    address: string
   }
 
   // State cho form inputs
@@ -23,7 +25,9 @@ export default function RegisterPage() {
     password: '',
     email: '',
     displayName: '',
-    role: ''
+    role: '',
+    phone: '',
+    address: ''
   })
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
@@ -58,7 +62,7 @@ export default function RegisterPage() {
       setLoading(false)
       return
     }
-
+    // http://localhost:5000/api/auth/register
     try {
       const response = await axios.post('https://melody-hub-vhml.onrender.com/api/auth/register', formData, {
         headers: {
@@ -71,7 +75,9 @@ export default function RegisterPage() {
         password: '',
         email: '',
         displayName: '',
-        role: ''
+        role: '',
+        phone: '',
+        address: ''
       })
       // Chuyển hướng tới trang login sau 2 giây
       setTimeout(() => {
@@ -92,11 +98,11 @@ export default function RegisterPage() {
       }}
     >
       <div className='wrapper'>
-        <h1 style={{ fontFamily: 'Tangkiwood' }} >REGISTER</h1>
+        <h1 style={{ fontFamily: 'Tangkiwood' }}>REGISTER</h1>
         {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
         {success && <p className='text-green-500 text-sm mb-4 text-center'>{success}</p>}
         <form onSubmit={handleSubmit}>
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='text'
@@ -109,7 +115,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='email'
@@ -120,10 +126,10 @@ export default function RegisterPage() {
               placeholder='email'
               required
             />
-            <i className="bx bxs-user"></i>
+            <i className='bx bxs-user'></i>
           </div>
 
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='password'
@@ -134,12 +140,10 @@ export default function RegisterPage() {
               placeholder='password'
               required
             />
-            <i className="bx bxs-lock-alt"></i>
+            <i className='bx bxs-lock-alt'></i>
           </div>
 
-          
-
-          <div  className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='text'
@@ -152,42 +156,60 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="input-box">
-            <select
+          <div className='input-box'>
+            <input
               style={{ fontFamily: 'MicaValo' }}
-              id='role'
-              name='role'
-              value={formData.role}
+              type='text'
+              id='phone'
+              name='phone'
+              value={formData.phone}
               onChange={handleChange}
-              required
-            >
-              <option style={{ fontFamily: 'MicaValo' }} value='' disabled>
+              placeholder='phone'
+            />
+          </div>
+
+          <div className='input-box'>
+            <input
+              style={{ fontFamily: 'MicaValo' }}
+              type='text'
+              id='address'
+              name='address'
+              value={formData.address}
+              onChange={handleChange}
+              placeholder='address'
+            />
+          </div>
+
+          <div className='input-box' style={{ fontFamily: 'MicaValo' }}>
+            <select id='role' name='role' value={formData.role} onChange={handleChange} required>
+              <option value='' disabled>
                 role
               </option>
-              <option style={{ fontFamily: 'MicaValo' }} value='Customer'>
-                customer
-              </option>
-              <option style={{ fontFamily: 'MicaValo' }} value='Artist'>
-                artist
-              </option>
-              <option style={{ fontFamily: 'MicaValo' }} value='Admin'>
-                admin
-              </option>
+              <option value='Customer'>customer</option>
+              <option value='Artist'>artist</option>
+              <option value='Admin'>admin</option>
             </select>
-            <i className="bx bxs-chevron-down"></i>
+            <i className='bx bxs-chevron-down'></i>
           </div>
 
-          <div style={{ fontFamily: 'MicaValo' }} className="remember-forgot">
-            <label><input type="checkbox" />Remember me </label>
-            <a href="#">Forgot password?</a>
+          <div className='remember-forgot' style={{ fontFamily: 'MicaValo' }}>
+            <label>
+              <input type='checkbox' />
+              Remember me{' '}
+            </label>
+            <a href='#'>Forgot password?</a>
           </div>
 
-          <button style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }} type='submit' className='btn' disabled={loading}>
-            {loading ? 'Creating account...' : 'REGISTER'}
-          </button>
+          <div className='submit-btn' style={{ fontFamily: 'Tankiwood' }}>
+            <button className='btn text-white' type='submit' disabled={loading}>
+              <span className='text-white'>{loading ? 'Creating account...' : 'REGISTER'}</span>
+            </button>
+          </div>
 
-          <div style={{ fontFamily: 'MicaValo' }} className="register-link">
-            <p>Already have an account? <a href="/login"> Login </a></p>
+          <div style={{ fontFamily: 'MicaValo' }} className='register-link'>
+            <p>
+              Already have an account? <a href='/login'> Login here </a>
+            </p>
           </div>
         </form>
       </div>
