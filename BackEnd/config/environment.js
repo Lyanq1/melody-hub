@@ -6,5 +6,7 @@ export const env = {
   MYSQL_HOST: process.env.MYSQL_HOST,
   MYSQL_USER: process.env.MYSQL_USER,
   MYSQL_PASSWORD: process.env.MYSQL_PASSWORD,
-  MYSQL_DATABASE: process.env.MYSQL_DATABASE
+  MYSQL_DATABASE: process.env.MYSQL_DATABASE,
+  MONGODB_URI: process.env.MONGODB_URI,
+  JWT_SECRET: process.env.JWT_SECRET || 'your_jwt_secret'
 }

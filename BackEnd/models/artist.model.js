@@ -1,22 +1,45 @@
-import pool from '../config/db.js'
+import mongoose from 'mongoose';
+import Account from './account.model.js';
 
 export const createArtist = async (accountID, phone, address) => {
   try {
-    const [result] = await pool.query(
-      `INSERT INTO Artist (AccountID, Phone, Address)
-       VALUES (?, ?, ?)`,
-      [accountID, phone || null, address || null]
-    )
-    return result.insertId
+    // In MongoDB, we just update the existing Account document with additional artist fields
+    const updatedAccount = await Account.findByIdAndUpdate(
+      accountID,
+      { 
+        Phone: phone || null, 
+        Address: address || null 
+      },
+      { new: true }
+    );
+    
+    return accountID;
   } catch (error) {
-    throw new Error('Error creating admin: ' + error.message)
+    throw new Error('Error creating artist: ' + error.message);
   }
-}
+};
 
-export const getArtists = async () => {
+export const getArtists = async (page = 1, limit = 10) => {
   try {
-    const [result] = await pool.query(`SELECT * FROM Artist`)
+    const skip = (page - 1) * limit;
+    const artists = await Account.find({ Role: 'Artist' })
+      .skip(skip)
+      .limit(limit)
+      .select('-Password');
+    return artists;
   } catch (error) {
-    throw new Error('Error getArtists: ' + error.message)
+    throw new Error('Error getting artists: ' + error.message);
   }
-}
+};
+
+export const getArtistByAccountId = async (accountID) => {
+  try {
+    const artist = await Account.findOne({ 
+      _id: accountID,
+      Role: 'Artist'
+    });
+    return artist;
+  } catch (error) {
+    throw new Error('Error finding artist: ' + error.message);
+  }
+};

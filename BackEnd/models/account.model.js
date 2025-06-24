@@ -39,6 +39,14 @@ const accountSchema = new mongoose.Schema({
     enum: ['Customer', 'Artist', 'Admin'],
     default: 'Customer'
   },
+  Phone: {
+    type: String,
+    required: false
+  },
+  Address: {
+    type: String,
+    required: false
+  },
   CreatedAt: {
     type: Date,
     default: Date.now
@@ -53,8 +61,8 @@ const accountSchema = new mongoose.Schema({
 });
 
 // Create indexes for better performance
-accountSchema.index({ Username: 1 });
-accountSchema.index({ Email: 1 });
+// accountSchema.index({ Username: 1 });
+// accountSchema.index({ Email: 1 });
 
 // Pre-save middleware to hash password
 accountSchema.pre('save', async function(next) {
@@ -73,7 +81,7 @@ accountSchema.methods.comparePassword = async function(candidatePassword) {
 const Account = mongoose.model('Account', accountSchema);
 
 // Hàm tạo tài khoản mới
-export const createAccount = async (username, password, email, displayName, avatarURL, role = 'Customer') => {
+export const createAccount = async (username, password, email, displayName, avatarURL, role = 'Customer', phone = null, address = null) => {
   try {
     const account = new Account({
       Username: username,
@@ -81,7 +89,9 @@ export const createAccount = async (username, password, email, displayName, avat
       Email: email,
       DisplayName: displayName,
       AvatarURL: avatarURL,
-      Role: role
+      Role: role,
+      Phone: phone,
+      Address: address
     });
     
     const savedAccount = await account.save();

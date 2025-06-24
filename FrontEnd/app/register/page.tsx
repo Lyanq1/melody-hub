@@ -15,6 +15,8 @@ export default function RegisterPage() {
     email: string
     displayName: string
     role: string
+    phone: string
+    address: string
   }
 
   // State cho form inputs
@@ -23,7 +25,9 @@ export default function RegisterPage() {
     password: '',
     email: '',
     displayName: '',
-    role: ''
+    role: '',
+    phone: '',
+    address: ''
   })
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
@@ -60,7 +64,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await axios.post('https://melody-hub-vhml.onrender.com/api/auth/register', formData, {
+      const response = await axios.post('https://localhost:5000/api/auth/register', formData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -71,7 +75,9 @@ export default function RegisterPage() {
         password: '',
         email: '',
         displayName: '',
-        role: ''
+        role: '',
+        phone: '',
+        address: '',
       })
       // Chuyển hướng tới trang login sau 2 giây
       setTimeout(() => {
@@ -137,9 +143,7 @@ export default function RegisterPage() {
             <i className="bx bxs-lock-alt"></i>
           </div>
 
-          
-
-          <div  className="input-box">
+          <div className="input-box">
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='text'
@@ -149,6 +153,30 @@ export default function RegisterPage() {
               onChange={handleChange}
               placeholder='name'
               required
+            />
+          </div>
+
+          <div className="input-box">
+            <input
+              style={{ fontFamily: 'MicaValo' }}
+              type='text'
+              id='phone'
+              name='phone'
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder='phone'
+            />
+          </div>
+
+          <div className="input-box">
+            <input
+              style={{ fontFamily: 'MicaValo' }}
+              type='text'
+              id='address'
+              name='address'
+              value={formData.address}
+              onChange={handleChange}
+              placeholder='address'
             />
           </div>
 
