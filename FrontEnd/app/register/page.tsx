@@ -62,9 +62,9 @@ export default function RegisterPage() {
       setLoading(false)
       return
     }
-
+    // http://localhost:5000/api/auth/register
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', formData, {
+      const response = await axios.post('https://melody-hub-vhml.onrender.com/api/auth/register', formData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -77,7 +77,7 @@ export default function RegisterPage() {
         displayName: '',
         role: '',
         phone: '',
-        address: '',
+        address: ''
       })
       // Chuyển hướng tới trang login sau 2 giây
       setTimeout(() => {
@@ -98,11 +98,11 @@ export default function RegisterPage() {
       }}
     >
       <div className='wrapper'>
-        <h1 style={{ fontFamily: 'Tangkiwood' }} >REGISTER</h1>
+        <h1 style={{ fontFamily: 'Tangkiwood' }}>REGISTER</h1>
         {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
         {success && <p className='text-green-500 text-sm mb-4 text-center'>{success}</p>}
         <form onSubmit={handleSubmit}>
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='text'
@@ -115,7 +115,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='email'
@@ -126,10 +126,10 @@ export default function RegisterPage() {
               placeholder='email'
               required
             />
-            <i className="bx bxs-user"></i>
+            <i className='bx bxs-user'></i>
           </div>
 
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='password'
@@ -140,10 +140,10 @@ export default function RegisterPage() {
               placeholder='password'
               required
             />
-            <i className="bx bxs-lock-alt"></i>
+            <i className='bx bxs-lock-alt'></i>
           </div>
 
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='text'
@@ -156,7 +156,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='text'
@@ -168,7 +168,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="input-box">
+          <div className='input-box'>
             <input
               style={{ fontFamily: 'MicaValo' }}
               type='text'
@@ -180,7 +180,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="input-box">
+          <div className='input-box'>
             <select
               style={{ fontFamily: 'MicaValo' }}
               id='role'
@@ -202,20 +202,30 @@ export default function RegisterPage() {
                 admin
               </option>
             </select>
-            <i className="bx bxs-chevron-down"></i>
+            <i className='bx bxs-chevron-down'></i>
           </div>
 
-          <div style={{ fontFamily: 'MicaValo' }} className="remember-forgot">
-            <label><input type="checkbox" />Remember me </label>
-            <a href="#">Forgot password?</a>
+          <div style={{ fontFamily: 'MicaValo' }} className='remember-forgot'>
+            <label>
+              <input type='checkbox' />
+              Remember me{' '}
+            </label>
+            <a href='#'>Forgot password?</a>
           </div>
 
-          <button style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }} type='submit' className='btn' disabled={loading}>
+          <button
+            style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }}
+            type='submit'
+            className='btn'
+            disabled={loading}
+          >
             {loading ? 'Creating account...' : 'REGISTER'}
           </button>
 
-          <div style={{ fontFamily: 'MicaValo' }} className="register-link">
-            <p>Already have an account? <a href="/login"> Login </a></p>
+          <div style={{ fontFamily: 'MicaValo' }} className='register-link'>
+            <p>
+              Already have an account? <a href='/login'> Login </a>
+            </p>
           </div>
         </form>
       </div>
