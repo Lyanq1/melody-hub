@@ -173,7 +173,7 @@ const LoginPage = () => {
           style={{ fontFamily: 'Tankiwood' }}
           onClick={handleFacebookLogin}
           disabled={isLoading}
-          style={{ fontFamily: 'Tangkiwood', fontSize: '20px' }}
+      
           className='btn'
         >
           {isLoading ? 'Logging in with Facebook...' : 'FACEBOOK'}
