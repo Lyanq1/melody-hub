@@ -1,30 +1,63 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Tab } from "@headlessui/react";
+import { useEffect, useState } from "react"
+import { Tab } from "@headlessui/react"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { UserCircle } from "lucide-react"
 
 const ProfilePage = () => {
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState(0)
+  const [fullName, setFullName] = useState("")
+  const [address, setAddress] = useState("")
+  const [phone, setPhone] = useState("")
+  const [email, setEmail] = useState("")
+  const [displayedName, setDisplayedName] = useState("Chưa có tên");
+  // Lấy email từ localStorage
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("userEmail")
+    const storedName = localStorage.getItem("userDisplayName");
+    if (storedEmail) {
+      setEmail(storedEmail)
+    } else {
+      setEmail("example@email.com")
+    }
+    if (storedName) {
+    setDisplayedName(storedName); 
+    setFullName(storedName);    
+    }
+  }, [])
 
-  const tabs = [
-    "Thông tin tài khoản",
-    "Đơn hàng đã mua"
-  ];
+  const handleSave = () => {
+    // TODO: Có thể gửi lên server tại đây
+    setDisplayedName(fullName);
+    localStorage.setItem("userDisplayName", fullName);
+    alert("Thông tin đã được lưu!")
+
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Trang cá nhân</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center text-blue-600">
+        Trang Cá Nhân
+      </h1>
 
-      {/* Tabs Navigation */}
       <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
-        <div className="flex space-x-4 border-b border-gray-300 mb-6">
-          {tabs.map((tab, index) => (
+        <div className="flex justify-center mb-8 gap-4 border-b border-gray-200">
+          {["Thông tin tài khoản", "Đơn hàng đã mua"].map((tab, index) => (
             <Tab
-              key={tab}
+              key={index}
               className={({ selected }) =>
-                `px-4 py-2 font-medium focus:outline-none ${
+                `px-4 py-2 font-semibold text-sm sm:text-base focus:outline-none transition-all ${
                   selected
-                    ? "border-b-2 border-blue-500 text-blue-500"
+                    ? "border-b-2 border-blue-600 text-blue-600"
                     : "text-gray-500 hover:text-gray-700"
                 }`
               }
@@ -34,99 +67,98 @@ const ProfilePage = () => {
           ))}
         </div>
 
-        {/* Tabs Content */}
         <Tab.Panels>
-          {/* Tab 1: Thông tin tài khoản */}
           <Tab.Panel>
-            <div className="bg-white shadow-md rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Thông tin tài khoản</h2>
-              <div className="space-y-4">
-                {/* Hình ảnh đại diện */}
-                <div className="flex items-center space-x-4">
-                  <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-                    <span className="text-gray-500">Avatar</span>
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-xl sm:text-2xl text-blue-600 text-center">
+                  Thông tin tài khoản
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Avatar */}
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-md">
+                    <UserCircle className="w-12 h-12" />
                   </div>
                   <div>
-                    <p className="font-medium">Nguyen Van A</p>
-                    <p className="text-gray-600">nguyenvana@example.com</p>
+                    <p className="text-lg font-semibold">
+                      {displayedName}
+                    </p>
+                    <p className="text-muted-foreground">{email}</p>
                   </div>
                 </div>
 
-                {/* Thông tin khác */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Editable fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Họ và tên
-                    </label>
-                    <input
+                    <Label>Họ và tên</Label>
+                    <Input
                       type="text"
-                      className="mt-1 p-2 w-full border rounded-md"
-                      value="Nguyen Van A"
-                      disabled
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Nhập họ và tên"
+                      className="mt-2"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Email
-                    </label>
-                    <input
+                    <Label>Email</Label>
+                    <Input
+                      value={email}
                       type="email"
-                      className="mt-1 p-2 w-full border rounded-md"
-                      value="nguyenvana@example.com"
                       disabled
-                    />
-                  </div>
-                </div>
-
-                {/* Địa chỉ giao hàng và Số điện thoại */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Địa chỉ giao hàng
-                    </label>
-                    <input
-                      type="text"
-                      className="mt-1 p-2 w-full border rounded-md"
-                      placeholder="Nhập địa chỉ giao hàng"
+                      className="mt-2"
+                      
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Số điện thoại
-                    </label>
-                    <input
-                      type="tel"
-                      className="mt-1 p-2 w-full border rounded-md"
+                    <Label>Địa chỉ giao hàng</Label>
+                    <Input
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Nhập địa chỉ"
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label>Số điện thoại</Label>
+                    <Input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
                       placeholder="Nhập số điện thoại"
+                      className="mt-2"
                     />
                   </div>
                 </div>
 
-                {/* Nút Đăng xuất */}
-                <div className="text-right mt-6">
-                  <button
-                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                    onClick={() => alert("Đăng xuất thành công!")}
-                  >
+                <div className="flex justify-end gap-4 pt-4">
+                  <Button variant="outline" onClick={() => alert("Đăng xuất thành công!")}>
                     Đăng xuất
-                  </button>
+                  </Button>
+                  <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+                    Lưu thay đổi
+                  </Button>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </Tab.Panel>
 
-          {/* Tab 2: Đơn hàng đã mua */}
           <Tab.Panel>
-            <div className="bg-white shadow-md rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Đơn hàng đã mua</h2>
-              <p>Chưa có dữ liệu đơn hàng.</p>
-            </div>
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-xl sm:text-2xl text-blue-600 text-center">
+                  Đơn hàng đã mua
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Chưa có dữ liệu đơn hàng.</p>
+              </CardContent>
+            </Card>
           </Tab.Panel>
-
         </Tab.Panels>
       </Tab.Group>
     </div>
-  );
-};
+  )
+}
 
-export default ProfilePage;
+export default ProfilePage

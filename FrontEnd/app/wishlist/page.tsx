@@ -1,49 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+
+interface WishlistItem {
+  id: string;
+  name: string;
+  price: string;
+  imageUrl: string;
+}
 
 const WishlistPage = () => {
-  // Giả lập danh sách sản phẩm trong wishlist (có thể thay bằng API sau)
-  const [wishlist, setWishlist] = useState([
-    { id: 1, name: "Vinyl Record - Classic Hits", price: "$20.00" },
-    { id: 2, name: "Echo Headphones", price: "$50.00" },
-  ]);
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
 
-  // Hàm xóa sản phẩm khỏi wishlist
-  const removeFromWishlist = (id: number) => {
-    setWishlist(wishlist.filter((item) => item.id !== id));
+  useEffect(() => {
+    const stored = localStorage.getItem("wishlist");
+    if (stored) {
+      setWishlist(JSON.parse(stored));
+    }
+  }, []);
+
+  const removeFromWishlist = (id: string) => {
+    const updated = wishlist.filter((item) => item.id !== id);
+    setWishlist(updated);
+    localStorage.setItem("wishlist", JSON.stringify(updated));
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">
-        My Wishlist
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">MY WISHLIST</h1>
 
       {wishlist.length === 0 ? (
-        <div className="bg-white shadow-md rounded-lg p-6 text-center">
-          <p className="text-gray-500">Wishlist của bạn hiện trống.</p>
-        </div>
+        <Card>
+          <CardContent className="text-center py-6 text-gray-500">
+            Wishlist của bạn hiện trống.
+          </CardContent>
+        </Card>
       ) : (
-        <div className="bg-white shadow-md rounded-lg p-6">
-          {wishlist.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between border-b py-4 last:border-b-0"
-            >
-              <div>
-                <h3 className="text-lg font-medium">{item.name}</h3>
-                <p className="text-gray-600">{item.price}</p>
-              </div>
-              <button
-                onClick={() => removeFromWishlist(item.id)}
-                className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
-              >
-                Xóa
-              </button>
-            </div>
-          ))}
-        </div>
+        <Card>
+              <CardHeader>
+                <CardTitle>PRODUCT NAME</CardTitle>
+              </CardHeader>
+              <Separator className="my-4" /> {/* Thêm Separator ở trên cùng */}
+              <CardContent className="space-y-4">
+                {wishlist.map((item, index) => (
+                  <div key={item.id}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-base font-medium">{item.name}</p>
+                        <p className="text-sm text-muted-foreground">{item.price}</p>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeFromWishlist(item.id)}
+                      >
+                        Xóa
+                      </Button>
+                    </div>
+                    {index < wishlist.length - 1 && <Separator className="my-4" />} {/* Giữ nguyên Separator giữa các sản phẩm */}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+
       )}
     </div>
   );
