@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 'use client'
-
 import React, { useState } from 'react'
 import axios from 'axios'
 import './register.css'
