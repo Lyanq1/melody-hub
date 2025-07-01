@@ -21,6 +21,10 @@ const addToLocalStorage = (id: string, name: string, price: string, imageUrl: st
     cart.push({ id, name, price, imageUrl, quantity: 1 })
     localStorage.setItem('cart', JSON.stringify(cart))
   }
+
+  // Gửi sự kiện ra toàn window để Navbar biết
+  window.dispatchEvent(new Event('cart-updated'))
+
   toast.success('Product added to cart', {
     description: `"${name}" has been added successfully.`,
     duration: 2500

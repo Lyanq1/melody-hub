@@ -30,6 +30,9 @@ export default function Cart() {
   const updateCart = (newCart: CartItem[]) => {
     setCart(newCart)
     localStorage.setItem('cart', JSON.stringify(newCart))
+
+    //Phát sự kiện để Navbar tự cập nhật
+    window.dispatchEvent(new Event('cart-updated'))
   }
 
   const handleDelete = (id: string) => {
