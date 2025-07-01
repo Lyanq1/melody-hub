@@ -62,6 +62,7 @@ const WishlistPage = () => {
 
                 <div className='flex items-center gap-4'>
                   <Button
+                    className='w-full sm:w-auto cursor-pointers hover:bg-primary hover:text-white'
                     variant='outline'
                     size='sm'
                     onClick={() => {
