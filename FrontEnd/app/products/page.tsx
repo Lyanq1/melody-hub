@@ -115,7 +115,6 @@ export default function Products() {
               name={product['product-name']}
               price={product['product-price']}
               imageUrl={product['product-image']}
-              description={''} // Nếu có trường mô tả thì truyền vào
               isNew={false} // Nếu có trường phân biệt sản phẩm mới thì truyền vào
               onAddToCart={(id) => {
                 console.log(`Added product ${id} to cart`)
