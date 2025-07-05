@@ -1,9 +1,13 @@
 import mongoose from 'mongoose';
 import { ObjectId } from 'mongodb'
 const discSchema = new mongoose.Schema({
-  'product-image': String,
-  'product-name': String,
-  'product-price': String,
+  'image': String,
+  'name': String,
+  'price': String,
+  'artist': String,
+  'categoryId': ObjectId,
+  'releaseDate': Date,
+  'stock': Number
 }, {
   collection: 'disc' // Đảm bảo dùng collection 'disc'
 });
