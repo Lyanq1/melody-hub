@@ -8,7 +8,7 @@ import Image from 'next/image'
 type CartItem = {
   id: string
   name: string
-  price: string
+  price: string | number
   quantity: number
   imageUrl: string
 }
@@ -49,8 +49,13 @@ export default function Cart() {
   const calculateTotal = () => {
     return cart
       .reduce((total, item) => {
-        // Remove any non-digit characters (like currency symbols, commas, dots)
-        const price = parseInt(item.price.replace(/[^\d]/g, ''), 10) || 0
+        // Handle both string and number price types
+        let price = 0
+        if (typeof item.price === 'string') {
+          price = parseInt(item.price.replace(/[^\d]/g, ''), 10) || 0
+        } else if (typeof item.price === 'number') {
+          price = item.price
+        }
         return total + price * item.quantity
       }, 0)
       .toLocaleString('vi-VN')
