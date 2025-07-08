@@ -68,6 +68,7 @@ export default function RegisterPage() {
         }
       })
       setSuccess('Đăng ký thành công! Vui lòng đăng nhập.')
+      localStorage.setItem("userEmail", formData.email);
       setFormData({
         username: '',
         password: '',
