@@ -13,13 +13,14 @@ import {
   PaginationNext,
   PaginationPrevious
 } from '@/components/ui/pagination' // Điều chỉnh đường dẫn import nếu cần thiết
+import axios from 'axios'
 
 export default function Products() {
   type Product = {
     _id: string
-    ['product-name']: string
-    ['product-price']: string
-    ['product-image']: string
+    name: string
+    price: string
+    image: string
     // Add more fields if needed
   }
 
@@ -28,10 +29,16 @@ export default function Products() {
   const itemsPerPage = 16
 
   useEffect(() => {
-    fetch('https://melody-hub-vhml.onrender.com/api/products')
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-  }, [])
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('https://melody-hub-vhml.onrender.com/api/products');
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   // Tính tổng số trang
   const totalPages = Math.ceil(products.length / itemsPerPage)
@@ -112,9 +119,9 @@ export default function Products() {
             <ProductCard
               key={product._id}
               id={product._id}
-              name={product['product-name']}
-              price={product['product-price']}
-              imageUrl={product['product-image']}
+              name={product.name}
+              price={product.price}
+              imageUrl={product.image}
               isNew={false} // Nếu có trường phân biệt sản phẩm mới thì truyền vào
               onAddToCart={(id) => {
                 console.log(`Added product ${id} to cart`)
