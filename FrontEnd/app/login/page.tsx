@@ -153,19 +153,18 @@ const LoginPage = () => {
             />
           </div>
 
-          <button type='submit' style={{ fontFamily: 'Tankiwood' }} disabled={isLoading} className='btn mt-5'>
-            <span className='text-white'>{isLoading ? 'Logging in...' : 'LOGIN'}</span>
+          <button type='submit' disabled={isLoading} className='btn font-[Tangkiwood] mt-5'>
+            <span>{isLoading ? 'Logging in...' : 'LOGIN'}</span>
           </button>
         </form>
         <p className='text-sm text-center mt-4'>or</p>
         {/* <p className='text-2xl text-center mt-4'>Login with Facebook</p> */}
         <button
-          style={{ fontFamily: 'Tankiwood' }}
           onClick={handleFacebookLogin}
           disabled={isLoading}
-          className='btn text-white mt-5'
+          className='btn font-[Tangkiwood] text-white mt-5'
         >
-          <span className='text-white'>{isLoading ? 'Logging in...' : 'FACEBOOK LOGIN'}</span>
+          <span>{isLoading ? 'Logging in...' : 'FACEBOOK LOGIN'}</span>
         </button>
 
         <div style={{ fontFamily: 'MicaValo' }} className='register-link'>

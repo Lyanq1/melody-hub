@@ -162,7 +162,7 @@ export const Navbar = () => {
           <Link href='/products'>products</Link>
         </div>
         <div className='ui-input-container'>
-          <input placeholder='Search...' className='ui-input' type='text' />
+          <input placeholder='search...' className='ui-input' type='text' />
           <div className='ui-input-underline'></div>
           <div className='ui-input-highlight'></div>
           <div className='ui-input-icon'>

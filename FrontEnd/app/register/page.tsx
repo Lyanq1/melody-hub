@@ -198,9 +198,9 @@ export default function RegisterPage() {
             <a href='#'>Forgot password?</a>
           </div>
 
-          <div className='submit-btn' style={{ fontFamily: 'Tankiwood' }}>
-            <button className='btn text-white' type='submit' disabled={loading}>
-              <span className='text-white'>{loading ? 'Creating account...' : 'REGISTER'}</span>
+          <div className='btn font-[Tangkiwood]'>
+            <button className='btn' type='submit' disabled={loading}>
+              <span className='btn font-[Tangkiwood]'>{loading ? 'Creating account...' : 'REGISTER'}</span>
             </button>
           </div>
 
