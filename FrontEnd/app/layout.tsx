@@ -31,7 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-full flex-col`}
       >
         <Navbar />
-        <main className="container mx-auto flex-grow">{children}</main>
+        <main className="flex-grow">{children}</main>
         <Footer />
         <Toaster position="top-center" richColors closeButton />
       </body>

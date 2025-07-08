@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { Button } from './button'
+import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
@@ -9,7 +9,6 @@ interface ProductCardProps {
   id: string
   name: string
   price: string
-
   imageUrl: string
   isNew?: boolean
   onAddToCart?: (id: string) => void
@@ -52,8 +51,8 @@ const addToWishlist = (id: string, name: string, price: string, imageUrl: string
 
 export function ProductCard({ id, name, price, imageUrl, isNew = false, onAddToCart }: ProductCardProps) {
   return (
-    <Card className='w-[300px] overflow-hidden flex-1 flex flex-col h-full group'>
-      <div className='relative h-[300px] w-full'>
+    <Card className='w-full overflow-hidden flex flex-col h-full group'>
+      <div className='relative h-[250px] w-full'>
         <Image src={imageUrl} alt={name} fill className='object-cover' sizes='(max-width: 300px) 100vw, 300px' />
         {isNew && (
           <span className='absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded-md text-sm font-medium'>
@@ -95,4 +94,4 @@ export function ProductCard({ id, name, price, imageUrl, isNew = false, onAddToC
       </CardFooter>
     </Card>
   )
-}
+} 

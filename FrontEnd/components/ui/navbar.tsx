@@ -106,150 +106,212 @@
 // //   )
 // // }
 
-"use client";
+'use client'
 
-import Link from "next/link";
-import "./components.css";
-import { useState, useEffect } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Image from "next/image";
+import Link from 'next/link'
+import './components.css'
+import { useState, useEffect } from 'react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import Image from 'next/image'
 
 export const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
+
+  useEffect(() => {
+    const getCartCount = () => {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+      const total = cart.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0)
+      setCartCount(total)
+    }
+
+    getCartCount()
+
+    // Lắng nghe sự kiện custom khi có thay đổi từ ProductCard
+    window.addEventListener('cart-updated', getCartCount)
+
+    return () => window.removeEventListener('cart-updated', getCartCount)
+  }, [])
 
   useEffect(() => {
     // Kiểm tra và log trạng thái từ localStorage
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    console.log("Initial isLoggedIn from localStorage:", loggedIn);
-    setIsLoggedIn(loggedIn);
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true'
+    console.log('Initial isLoggedIn from localStorage:', loggedIn)
+    setIsLoggedIn(loggedIn)
 
     // Lắng nghe sự kiện thay đổi từ localStorage
     const handleStorageChange = () => {
-      const updatedLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-      console.log("Storage changed, updated isLoggedIn:", updatedLoggedIn);
+      const updatedLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
+      console.log('Storage changed, updated isLoggedIn:', updatedLoggedIn)
       if (updatedLoggedIn !== isLoggedIn) {
-        setIsLoggedIn(updatedLoggedIn);
+        setIsLoggedIn(updatedLoggedIn)
       }
-    };
-    window.addEventListener("storage", handleStorageChange);
+    }
+    window.addEventListener('storage', handleStorageChange)
 
     // Dọn dẹp event listener
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, [isLoggedIn]);
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [isLoggedIn])
 
   return (
-    <nav
-      style={{ backgroundColor: "#323031", fontSize: "20px" }}
-      className="sticky top-0 z-50 text-white shadow-md"
-    >
-      <div
-        style={{ fontFamily: "MicaValo" }}
-        className="container mx-auto flex items-center justify-between p-4"
-      >
-        <Link href="/">ECHO RECORDS</Link>
-        <div className="flex gap-10 text-center">
-          <Link href="/">home</Link>
-          <Link href="/products">products</Link>
+    <nav style={{ backgroundColor: '#323031', fontSize: '20px' }} className='sticky top-0 z-50 text-white shadow-md'>
+      <div style={{ fontFamily: 'MicaValo' }} className='container mx-auto flex items-center justify-between p-4'>
+        <Link href='/'>ECHO RECORDS</Link>
+        <div className='flex gap-10 text-center'>
+          <Link href='/'>home</Link>
+          <Link href='/products'>products</Link>
         </div>
-        <div className="ui-input-container">
-          <input placeholder="Search..." className="ui-input" type="text" />
-          <div className="ui-input-underline"></div>
-          <div className="ui-input-highlight"></div>
-          <div className="ui-input-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
+        <div className='ui-input-container'>
+          <input placeholder='search...' className='ui-input' type='text' />
+          <div className='ui-input-underline'></div>
+          <div className='ui-input-highlight'></div>
+          <div className='ui-input-icon'>
+            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
               <path
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2"
-                stroke="currentColor"
-                d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
+                strokeLinejoin='round'
+                strokeLinecap='round'
+                strokeWidth='2'
+                stroke='currentColor'
+                d='M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z'
               ></path>
             </svg>
           </div>
         </div>
-        <div className="flex gap-10 text-center">
-          <Link href="/cart" className="flex items-center gap-2">
-            <Image
-              src="/assets/cart.png"
-              alt="Cart"
-              width={24}
-              height={24}
-              className="cursor-pointer"
-            />
+        <div className='flex gap-5 text-center'>
+          <Link href='/cart' className='relative flex items-center gap-2'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shopping-cart-icon lucide-shopping-cart cursor-pointer">
+              <circle cx="8" cy="21" r="1"/>
+              <circle cx="19" cy="21" r="1"/>
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+            </svg>
+            {cartCount >= 1 && (
+              <span className='absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
+                {cartCount}
+              </span>
+            )}
           </Link>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 focus:outline-none">
-                <Image
-                  src="/assets/user.png"
-                  alt="Account"
-                  width={24}
-                  height={24}
-                  className="cursor-pointer"
-                />
+              <button className='flex items-center gap-2 focus:outline-none'>
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user-round-icon lucide-user-round cursor-pointer">
+                  <circle cx="12" cy="8" r="5"/>
+                  <path d="M20 21a8 8 0 0 0-16 0"/>
+                </svg>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-56"
-              align="end"
+              className='w-56'
+              align='end'
               style={{
-                backgroundColor: "#323031",
-                color: "white",
-                border: "1px solid #444",
-                fontFamily: "MicaValo",
+                backgroundColor: '#323031',
+                color: 'white',
+                border: '1px solid #444',
+                fontFamily: 'MicaValo'
               }}
             >
               <DropdownMenuItem asChild>
                 <Link
-                  href="/wishlist"
-                  className="flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  href='/wishlist'
+                  className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
                 >
-                  <span className="text-xl">💖</span> wishlist
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-heart-icon lucide-heart transition-colors duration-200 group-hover:stroke-black"
+                  >
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                  </svg>
+                  WISHLIST
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
-                  href="/order-tracking"
-                  className="flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  href='/order-tracking'
+                  className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
                 >
-                  <span className="text-xl">🧺</span> Theo dõi đơn hàng
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-shopping-basket-icon lucide-shopping-basket transition-colors duration-200 group-hover:stroke-black"
+                  >
+                    <path d="m15 11-1 9"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="M4.5 15.5h15"/><path d="m5 11 4-7"/><path d="m9 11 1 9"/>
+                  </svg>
+                  THEO DÕI ĐƠN HÀNG
                 </Link>
               </DropdownMenuItem>
               {!isLoggedIn ? (
                 <>
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/register"
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                      href='/register'
+                      className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
                     >
-                      <span className="text-xl">🔑</span> đăng ký
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#ffffff"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="lucide lucide-circle-user-round-icon lucide-circle-user-round transition-colors duration-200 group-hover:stroke-black"
+                      >
+                        <path d="M18 20a6 6 0 0 0-12 0"/>
+                        <circle cx="12" cy="10" r="4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                      </svg>
+                      REGISTER
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/login"
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                      href='/login'
+                      className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
                     >
-                      <span className="text-xl">✌️</span> đăng nhập
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#ffffff"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="lucide lucide-key-icon lucide-key transition-colors duration-200 group-hover:stroke-black"
+                      >
+                        <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/>
+                        <path d="m21 2-9.6 9.6"/>
+                        <circle cx="7.5" cy="15.5" r="5.5"/>
+                      </svg>
+                      LOGIN
                     </Link>
                   </DropdownMenuItem>
                 </>
               ) : (
                 <DropdownMenuItem asChild>
                   <Link
-                    href="/profile"
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                    href='/profile'
+                    className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
                   >
-                    <span className="text-xl">👤</span> Tài khoản
+                    <span className='text-xl'>👤</span> Tài khoản
                   </Link>
                 </DropdownMenuItem>
               )}
@@ -258,5 +320,5 @@ export const Navbar = () => {
         </div>
       </div>
     </nav>
-  );
-};
+  )
+}

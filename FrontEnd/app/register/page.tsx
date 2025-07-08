@@ -91,7 +91,7 @@ export default function RegisterPage() {
 
   return (
     <div
-      className='min-h-[calc(100vh-64px)] bg-cover bg-center flex items-center justify-center'
+      className='min-h-screen w-full bg-cover bg-center flex items-center justify-center'
       style={{
         backgroundImage: `url('')` // Thay bằng hình nền phù hợp
       }}
@@ -199,9 +199,9 @@ export default function RegisterPage() {
             <a href='#'>Forgot password?</a>
           </div>
 
-          <div className='submit-btn' style={{ fontFamily: 'Tankiwood' }}>
-            <button className='btn text-white' type='submit' disabled={loading}>
-              <span className='text-white'>{loading ? 'Creating account...' : 'REGISTER'}</span>
+          <div className='btn font-[Tangkiwood]'>
+            <button className='btn' type='submit' disabled={loading}>
+              <span className='btn font-[Tangkiwood]'>{loading ? 'Creating account...' : 'REGISTER'}</span>
             </button>
           </div>
 
