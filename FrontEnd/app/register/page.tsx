@@ -90,7 +90,7 @@ export default function RegisterPage() {
 
   return (
     <div
-      className='min-h-[calc(100vh-64px)] bg-cover bg-center flex items-center justify-center'
+      className='min-h-screen w-full bg-cover bg-center flex items-center justify-center'
       style={{
         backgroundImage: `url('')` // Thay bằng hình nền phù hợp
       }}
