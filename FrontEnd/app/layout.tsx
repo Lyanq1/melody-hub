@@ -27,9 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>{/* Không thêm Facebook SDK ở đây */}</head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-full flex-col`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}>
         <Navbar />
         <main className="flex-grow">{children}</main>
         <Footer />

@@ -45,7 +45,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #FFFFFF;
+  --background: #FAF5F4;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -113,13 +113,20 @@
 }
 
 @layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
+
 
 @font-face {
   font-family: 'LoraItalic';
@@ -150,15 +157,15 @@
 }
 
 @font-face {
-  font-family: 'Cerova';
-  src: url('/fonts/TF-Cerova-Regular-iolrsj.ttf') format('truetype');
+  font-family: 'Bileha';
+  src: url('/fonts/Bileha.otf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Gretha';
-  src: url('/fonts/TF-Gretha.semibold-mcqulu.otf') format('truetype');
+  font-family: 'NeuePlak';
+  src: url('/fonts/Monotype-NeuePlakWideBold.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -170,9 +177,3 @@
   font-style: normal;
 }
 
-@font-face {
-  font-family: 'Ceflinty';
-  src: url('/fonts/TF-Ceflinty-9gyh28.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
