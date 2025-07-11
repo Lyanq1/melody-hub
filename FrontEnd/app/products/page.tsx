@@ -105,16 +105,8 @@ export default function Products() {
       <div className='container mx-auto py-8'>
         {' '}
         {/* Thêm container và mx-auto để căn giữa nội dung */}
-        <h1
-          style={{ fontFamily: 'MicaValo', fontSize: '40px' }}
-          className='text-3xl font-bold mb-8 text-left'
-        >
-          OUR PRODUCTS
-        </h1>
-        <div
-          style={{ fontFamily: 'Ceflinty' }}
-          className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-center'
-        >
+        <h1 className='text-[40px] font-bold mb-8 text-left font-[MicaValo]'>OUR PRODUCTS</h1>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-center'>
           {currentItems.map((product) => (
             <ProductCard
               key={product._id}

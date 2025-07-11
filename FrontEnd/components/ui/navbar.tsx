@@ -158,8 +158,8 @@ export const Navbar = () => {
       <div style={{ fontFamily: 'MicaValo' }} className='container mx-auto flex items-center justify-between p-4'>
         <Link href='/'>ECHO RECORDS</Link>
         <div className='flex gap-10 text-center'>
-          <Link href='/'>home</Link>
-          <Link href='/products'>products</Link>
+          <Link href='/'>Home</Link>
+          <Link href='/products'>Products</Link>
         </div>
         <div className='ui-input-container'>
           <input placeholder='search...' className='ui-input' type='text' />
@@ -229,7 +229,7 @@ export const Navbar = () => {
                   >
                     <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
                   </svg>
-                  WISHLIST
+                  Wishlist
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
@@ -251,7 +251,7 @@ export const Navbar = () => {
                   >
                     <path d="m15 11-1 9"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="M4.5 15.5h15"/><path d="m5 11 4-7"/><path d="m9 11 1 9"/>
                   </svg>
-                  THEO DÕI ĐƠN HÀNG
+                  Theo dõi đơn hàng
                 </Link>
               </DropdownMenuItem>
               {!isLoggedIn ? (
@@ -277,7 +277,7 @@ export const Navbar = () => {
                         <circle cx="12" cy="10" r="4"/>
                         <circle cx="12" cy="12" r="10"/>
                       </svg>
-                      REGISTER
+                      Register
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -301,7 +301,7 @@ export const Navbar = () => {
                         <path d="m21 2-9.6 9.6"/>
                         <circle cx="7.5" cy="15.5" r="5.5"/>
                       </svg>
-                      LOGIN
+                      Login
                     </Link>
                   </DropdownMenuItem>
                 </>

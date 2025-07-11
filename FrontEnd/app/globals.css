@@ -177,3 +177,16 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Cerova';
+  src: url('/fonts/TF-Cerova-Regular-iolrsj.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Ceflinty';
+  src: url('/fonts/TF-Ceflinty-9gyh28.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
