@@ -16,7 +16,7 @@ const catalogItems: CatalogItem[] = [
   { id: '4', name: 'EDM', link: '/products?category=edm' },
   { id: '5', name: 'Hip-Hop', link: '/products?category=hip-hop' },
   { id: '6', name: 'Classical', link: '/products?category=classical' },
-  { id: '7', name: 'Jazz', link: '/products?category=jazz' }
+  { id: '7', name: 'Jazzed', link: '/products?category=jazz' }
   // Thêm các danh mục khác nếu cần
 ]
 
