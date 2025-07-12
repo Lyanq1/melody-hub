@@ -52,7 +52,7 @@ const addToWishlist = (id: string, name: string, price: string, imageUrl: string
 
 export function ProductCard({ id, name, price, imageUrl, isNew = false, onAddToCart }: ProductCardProps) {
   return (
-    <Card className='w-[300px] overflow-hidden flex-1 flex flex-col h-full group'>
+    <Card className='w-[300px] overflow-hidden flex-1 flex flex-col h-full group font-[Ceflinty]'>
       <div className='relative h-[300px] w-full'>
         <Image src={imageUrl} alt={name} fill className='object-cover' sizes='(max-width: 300px) 100vw, 300px' />
         {isNew && (

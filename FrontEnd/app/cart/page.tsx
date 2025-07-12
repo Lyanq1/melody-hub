@@ -80,7 +80,7 @@ export default function Cart() {
   }
 
   return (
-    <div className='container mx-auto px-4 py-8 max-w-7xl'>
+    <div className='container mx-auto px-4 py-8 max-w-7xl font-[Ceflinty]'>
       <h1 className='text-3xl font-bold mb-8'>Giỏ hàng của bạn</h1>
 
       <div className='grid gap-6'>
