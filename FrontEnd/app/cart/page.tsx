@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Trash2, Plus, Minus } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 type CartItem = {
   id: string
@@ -15,6 +16,7 @@ type CartItem = {
 
 export default function Cart() {
   const [cart, setCart] = useState<CartItem[]>([])
+  const router = useRouter()
 
   useEffect(() => {
     const stored = localStorage.getItem('cart')
@@ -46,6 +48,7 @@ export default function Cart() {
     )
     updateCart(newCart)
   }
+  
   const calculateTotal = () => {
     return cart
       .reduce((total, item) => {
@@ -59,6 +62,10 @@ export default function Cart() {
         return total + price * item.quantity
       }, 0)
       .toLocaleString('vi-VN')
+  }
+
+  const handleCheckout = () => {
+    router.push('/checkout')
   }
 
   if (cart.length === 0) {
@@ -129,7 +136,7 @@ export default function Cart() {
           <span className='text-lg font-semibold'>Tổng cộng:</span>
           <span className='text-xl font-bold'>{calculateTotal()}₫</span>
         </div>
-        <Button className='w-full bg-primary hover:bg-primary/90' size='lg'>
+        <Button className='w-full bg-primary hover:bg-primary/90' size='lg' onClick={handleCheckout}>
           Thanh toán
         </Button>
       </div>

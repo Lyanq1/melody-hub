@@ -3,7 +3,7 @@
 import 'keen-slider/keen-slider.min.css'
 import { useKeenSlider } from 'keen-slider/react'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 const images = [
   'https://theme.hstatic.net/1000304920/1001307865/14/slide_logo_4.jpg?v=455',
@@ -35,6 +35,9 @@ function Arrow(props: { disabled: boolean; left?: boolean; onClick: (e: any) => 
 export default function Carousel() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [loaded, setLoaded] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     initial: 0,
     slideChanged(slider) {
@@ -49,8 +52,39 @@ export default function Carousel() {
     drag: true
   })
 
+  // Auto-switch slides every 5 seconds
+  useEffect(() => {
+    if (loaded && instanceRef.current && !isPaused) {
+      intervalRef.current = setInterval(() => {
+        instanceRef.current?.next()
+      }, 2000)
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [loaded, instanceRef, isPaused])
+
+  // Pause auto-switching when mouse is over the carousel
+  const handleMouseEnter = () => {
+    setIsPaused(true)
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    setIsPaused(false)
+  }
+
   return (
-    <div className='w-full max-w-5xl mx-auto mt-6 rounded-lg overflow-hidden shadow-lg relative'>
+    <div 
+      className='w-full max-w-5xl mx-auto mt-6 rounded-lg overflow-hidden shadow-lg relative'
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className='navigation-wrapper'>
         <div ref={sliderRef} className='keen-slider'>
           {images.map((src, idx) => (
@@ -65,13 +99,16 @@ export default function Carousel() {
               <Arrow
                 left
                 onClick={(e) => e.stopPropagation() || instanceRef.current?.prev()}
-                disabled={currentSlide === 0}
+                disabled={currentSlide === 0 && !instanceRef.current.options.loop}
               />
             </div>
             <div className='absolute top-1/2 right-2 z-10 -translate-y-1/2'>
               <Arrow
                 onClick={(e) => e.stopPropagation() || instanceRef.current?.next()}
-                disabled={currentSlide === instanceRef.current.track.details.slides.length - 1}
+                disabled={
+                  currentSlide === instanceRef.current.track.details.slides.length - 1 && 
+                  !instanceRef.current.options.loop
+                }
               />
             </div>
           </>
