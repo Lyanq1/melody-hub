@@ -4,6 +4,7 @@ import { createPayment, momoCallback, verifyPayment } from '../controllers/momo.
 const router = express.Router();
 
 router.post('/momo-payment', createPayment);
+router.post('/momo/callback', momoCallback);
 router.get('/momo/callback', momoCallback);
 router.post('/momo/verify', verifyPayment);
 

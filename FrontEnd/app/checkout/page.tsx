@@ -24,6 +24,7 @@ export default function Checkout() {
     phone: '',
     address: ''
   });
+  const [formValid, setFormValid] = useState(false);
 
   // Fetch cart items from localStorage
   useEffect(() => {
@@ -61,6 +62,12 @@ export default function Checkout() {
     fetchCart();
   }, [router]);
 
+  // Validate form when customer info changes
+  useEffect(() => {
+    const { name, email, phone, address } = customerInfo;
+    setFormValid(name.trim() !== '' && email.trim() !== '' && phone.trim() !== '' && address.trim() !== '');
+  }, [customerInfo]);
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCustomerInfo(prev => ({
@@ -70,12 +77,26 @@ export default function Checkout() {
   };
 
   const handlePaymentInitiated = () => {
-    // You could save the order to your database here
+    // Save customer info to localStorage for order processing
+    localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
     console.log('Payment initiated for amount:', totalAmount);
   };
 
   const handlePaymentError = (errorMessage: string) => {
     setError(errorMessage);
+  };
+
+  const handleCashOnDelivery = () => {
+    if (!formValid) {
+      setError('Please fill in all customer information fields');
+      return;
+    }
+    
+    // Save order information
+    localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
+    
+    // Redirect to success page with COD flag
+    router.push('/checkout/success?resultCode=0&orderId=COD-' + Date.now() + '&message=Cash on Delivery');
   };
 
   if (loading) {
@@ -195,9 +216,14 @@ export default function Checkout() {
                     onPaymentInitiated={handlePaymentInitiated}
                     onPaymentError={handlePaymentError}
                     className="w-full"
+                    disabled={!formValid}
                   />
                   
-                  <button className="w-full px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                  <button 
+                    className="w-full px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                    onClick={handleCashOnDelivery}
+                    disabled={!formValid}
+                  >
                     Cash on Delivery
                   </button>
                 </div>

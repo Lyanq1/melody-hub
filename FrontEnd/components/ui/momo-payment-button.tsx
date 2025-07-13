@@ -4,15 +4,17 @@ import { useState } from 'react'
 import { createMoMoPayment } from '@/lib/services/payment'
 
 interface MoMoPaymentButtonProps {
-  amount: string
-  className?: string
-  onPaymentInitiated?: () => void
-  onPaymentError?: (error: string) => void
+  amount: string;
+  className?: string;
+  disabled?: boolean;
+  onPaymentInitiated?: () => void;
+  onPaymentError?: (error: string) => void;
 }
 
 export default function MoMoPaymentButton({
   amount,
   className = '',
+  disabled = false,
   onPaymentInitiated,
   onPaymentError
 }: MoMoPaymentButtonProps) {
@@ -30,16 +32,24 @@ export default function MoMoPaymentButton({
       }
 
       // Call the payment service
-      const response = await createMoMoPayment(formattedAmount)
-
-      if (response.success && response.payUrl) {
+      const response = await createMoMoPayment(formattedAmount);
+      
+      // Handle the new response format
+      if (response.success) {
         // Notify parent component
         if (onPaymentInitiated) {
           onPaymentInitiated()
         }
-
-        // Redirect to MoMo payment page
-        window.location.href = response.payUrl
+        
+        // Check if payUrl is directly in response or in data property
+        const payUrl = response.payUrl || (response.data && response.data.payUrl);
+        
+        if (payUrl) {
+          // Redirect to MoMo payment page
+          window.location.href = payUrl;
+        } else {
+          throw new Error('No payment URL received from server');
+        }
       } else {
         // Handle error
         if (onPaymentError) {
@@ -59,8 +69,8 @@ export default function MoMoPaymentButton({
   return (
     <button
       onClick={handlePayment}
-      disabled={isLoading}
-      className={`flex items-center justify-center px-6 py-3 bg-[#d82d8b] text-white rounded-lg hover:bg-[#b71c7b] transition-colors ${className}`}
+      disabled={isLoading || disabled}
+      className={`flex items-center justify-center px-6 py-3 ${disabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#d82d8b] hover:bg-[#b71c7b]'} text-white rounded-lg transition-colors ${className}`}
     >
       {isLoading ? (
         <div className='w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2'></div>

@@ -8,6 +8,7 @@ export interface PaymentResponse {
   message?: string;
   error?: string;
   verified?: boolean;
+  data?: any;
 }
 
 /**
@@ -29,6 +30,16 @@ export const createMoMoPayment = async (amount: string): Promise<PaymentResponse
     
     if (!response.ok) {
       throw new Error(data.message || 'Failed to create payment');
+    }
+    
+    // Handle the new response format from the backend
+    if (data.data && data.data.payUrl) {
+      return {
+        success: true,
+        payUrl: data.data.payUrl,
+        message: data.message,
+        data: data.data
+      };
     }
     
     return data;
