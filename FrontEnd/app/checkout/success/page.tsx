@@ -13,9 +13,11 @@ export default function CheckoutSuccess() {
   const [error, setError] = useState('');
   
   // Get payment status from URL parameters
-  const orderId = searchParams.get('orderId');
-  const resultCode = searchParams.get('resultCode');
-  const message = searchParams.get('message');
+  // MoMo might return different parameter names depending on the version
+  const orderId = searchParams.get('orderId') || searchParams.get('orderid');
+  const resultCode = searchParams.get('resultCode') || searchParams.get('resultcode');
+  const message = searchParams.get('message') || searchParams.get('errorMessage');
+  const extraData = searchParams.get('extraData');
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -46,6 +48,13 @@ export default function CheckoutSuccess() {
 
     verifyPayment();
   }, [orderId, resultCode]);
+
+  // Clear cart after successful payment
+  useEffect(() => {
+    if (resultCode === '0' && verified) {
+      localStorage.removeItem('cart');
+    }
+  }, [resultCode, verified]);
 
   if (verifying) {
     return (

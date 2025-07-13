@@ -1,72 +1,105 @@
 import axios from 'axios';
 import crypto from 'crypto';
+import https from 'https';
 
 export const createPayment = async (req, res) => {
     try {
-        // MoMo API configuration
-        var partnerCode = "MOMO";
-        var accessKey = "F8BBA842ECF85";
-        var secretkey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-        var requestId = partnerCode + new Date().getTime();
-        var orderId = requestId;
-        var orderInfo = "Payment for MelodyHub";
-        var redirectUrl = "http://localhost:3000/checkout/success"; // Frontend success page
-        var ipnUrl = "http://localhost:5000/api/payment/momo/callback"; // Backend callback URL
-        
+        var accessKey = 'F8BBA842ECF85';
+        var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+        var orderInfo = 'pay with MoMo';
+        var partnerCode = 'MOMO';
+        var redirectUrl = 'http://localhost:3000/checkout/success';
+        var ipnUrl = 'http://localhost:5000/api/payment/momo/callback';
+        var requestType = "payWithMethod";
         // Get amount from request body or use default
-        var amount = req.body.amount || "50000";
-        var requestType = "captureWallet";
-        var extraData = ""; // pass empty value if your merchant does not have stores
-
-        // Create signature
-        var rawSignature = "accessKey=" + accessKey + 
-                          "&amount=" + amount + 
-                          "&extraData=" + extraData + 
-                          "&ipnUrl=" + ipnUrl + 
-                          "&orderId=" + orderId + 
-                          "&orderInfo=" + orderInfo + 
-                          "&partnerCode=" + partnerCode + 
-                          "&redirectUrl=" + redirectUrl + 
-                          "&requestId=" + requestId + 
-                          "&requestType=" + requestType;
+        var amount = req.body.amount || '50000';
+        var orderId = partnerCode + new Date().getTime();
+        var requestId = orderId;
+        var extraData ='';
+        var paymentCode = 'T8Qii53fAXyUftPV3m9ysyRhEanUs9KlOPfHgpMR0ON50U10Bh+vZdpJU7VY4z+Z2y77fJHkoDc69scwwzLuW5MzeUKTwPo3ZMaB29imm6YulqnWfTkgzqRaion+EuD7FN9wZ4aXE1+mRt0gHsU193y+yxtRgpmY7SDMU9hCKoQtYyHsfFR5FUAOAKMdw2fzQqpToei3rnaYvZuYaxolprm9+/+WIETnPUDlxCYOiw7vPeaaYQQH0BF0TxyU3zu36ODx980rJvPAgtJzH1gUrlxcSS1HQeQ9ZaVM1eOK/jl8KJm6ijOwErHGbgf/hVymUQG65rHU2MWz9U8QUjvDWA==';
+        var orderGroupId ='';
+        var autoCapture =true;
+        var lang = 'vi';
         
-        // Generate HMAC SHA256 signature
-        var signature = crypto.createHmac('sha256', secretkey)
+        //before sign HMAC SHA256 with format
+        //accessKey=$accessKey&amount=$amount&extraData=$extraData&ipnUrl=$ipnUrl&orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$redirectUrl&requestId=$requestId&requestType=$requestType
+        var rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl + "&requestId=" + requestId + "&requestType=" + requestType;
+        //puts raw signature
+        console.log("--------------------RAW SIGNATURE----------------")
+        console.log(rawSignature)
+        //signature
+        var signature = crypto.createHmac('sha256', secretKey)
             .update(rawSignature)
             .digest('hex');
+        console.log("--------------------SIGNATURE----------------")
+        console.log(signature)
         
-        // Create request body for MoMo API
-        const requestBody = {
-            partnerCode: partnerCode,
-            accessKey: accessKey,
-            requestId: requestId,
-            amount: amount,
-            orderId: orderId,
-            orderInfo: orderInfo,
-            redirectUrl: redirectUrl,
-            ipnUrl: ipnUrl,
-            extraData: extraData,
+        //json object send to MoMo endpoint
+        const requestBody = JSON.stringify({
+            partnerCode : partnerCode,
+            partnerName : "Test",
+            storeId : "MomoTestStore",
+            requestId : requestId,
+            amount : amount,
+            orderId : orderId,
+            orderInfo : orderInfo,
+            redirectUrl : redirectUrl,
+            ipnUrl : ipnUrl,
+            lang : lang,
             requestType: requestType,
-            signature: signature,
-            lang: 'en'
-        };
-
-        // Send request to MoMo API
-        const response = await axios.post(
-            'https://test-payment.momo.vn/v2/gateway/api/create', 
-            requestBody, 
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            }
-        );
-
-        // Return payment URL to client
-        return res.status(200).json({ 
-            success: true, 
-            payUrl: response.data.payUrl 
+            autoCapture: autoCapture,
+            extraData : extraData,
+            orderGroupId: orderGroupId,
+            signature : signature
         });
+        //Create the HTTPS objects
+
+        const options = {
+            hostname: 'test-payment.momo.vn',
+            port: 443,
+            path: '/v2/gateway/api/create',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(requestBody)
+            }
+        }
+        //Send the request and get the response
+        const req1 = https.request(options, res1 => {
+            console.log(`Status: ${res1.statusCode}`);
+            console.log(`Headers: ${JSON.stringify(res1.headers)}`);
+            res1.setEncoding('utf8');
+            // res1.on('data', (body) => {
+            //     console.log('Body: ');
+            //     console.log(body);
+            //     console.log('resultCode: ');
+            //     console.log(JSON.parse(body).resultCode);
+            // });
+            res1.on('data',(body) => {
+                const response = JSON.parse(body);
+                res.status(201).json({
+                    data: response,
+                    message: "payment successfully", 
+                    success: true
+                });
+            })
+            res1.on('end', () => {
+                console.log('No more data in response.');
+            });
+        })
+        
+        req1.on('error', (e) => {
+            console.log(`problem with request: ${e.message}`);
+            return res.status(500).json({ 
+                success: false, 
+                message: "Payment processing failed", 
+                error: e.message 
+            });
+        });
+        // write data to request body
+        console.log("Sending....")
+        req1.write(requestBody);
+        req1.end();
 
     } catch (error) {
         console.error("MoMo payment error:", error);
