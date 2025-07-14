@@ -9,9 +9,9 @@ import { LayoutDashboard, Disc, ShoppingCart, Users, Bell } from 'lucide-react'
 const salesData = [
   { month: 'Jan', sales: 1200 },
   { month: 'Feb', sales: 2100 },
-  { month: 'ar', sales: 800 },
+  { month: 'Mar', sales: 800 },
   { month: 'Apr', sales: 1600 },
-  { month: 'ay', sales: 1700 },
+  { month: 'May', sales: 1700 },
   { month: 'Jun', sales: 1200 },
   { month: 'Jul', sales: 2100 },
   { month: 'Aug', sales: 800 },
@@ -34,9 +34,9 @@ const notifications = [
 
 export default function Dashboard() {
   return (
-    <div className='font-[MicaValo] min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 p-6 space-y-8'>
+    <div className='font-[JaJP] min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 p-6 space-y-8'>
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
-        <h1 className='text-4xl font-bold text-gray-900'>ADIN DASHBOARD</h1>
+        <h1 className='text-4xl font-bold text-gray-900'>ADMIN DASHBOARD</h1>
         <div className='flex items-center gap-4'>
           <Button variant='outline' className='flex items-center gap-2 border-gray-300'>
             <Bell className='w-5 h-5 text-yellow-500' />
@@ -126,7 +126,7 @@ export default function Dashboard() {
           <table className='min-w-full text-left'>
             <thead>
               <tr>
-                <th className='py-2 px-4 border-b'>ã đơn</th>
+                <th className='py-2 px-4 border-b'>Mã đơn</th>
                 <th className='py-2 px-4 border-b'>Khách hàng</th>
                 <th className='py-2 px-4 border-b'>Tổng tiền</th>
                 <th className='py-2 px-4 border-b'>Trạng thái</th>

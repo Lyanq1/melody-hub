@@ -151,28 +151,7 @@
 
 @font-face {
   font-family: 'MicaValo';
-  src: url('/fonts/TF-Mica-Valo-1cvu3u.otf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Bileha';
-  src: url('/fonts/Bileha.otf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'NeuePlak';
-  src: url('/fonts/Monotype-NeuePlakWideBold.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Helvetica';
-  src: url('/fonts/helvetica-compressed.otf') format('truetype');
+  src: url('/fonts/TF-Mica-Valo-1cvu3u.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
