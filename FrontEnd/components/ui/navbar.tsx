@@ -112,7 +112,7 @@ import Link from 'next/link'
 import './components.css'
 import { useState, useEffect } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-
+import SearchBar from '../SearchBar'
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [cartCount, setCartCount] = useState(0)
@@ -160,22 +160,8 @@ export const Navbar = () => {
           <Link href='/'>Home</Link>
           <Link href='/products'>Products</Link>
         </div>
-        <div className='ui-input-container'>
-          <input placeholder='search...' className='ui-input' type='text' />
-          <div className='ui-input-underline'></div>
-          <div className='ui-input-highlight'></div>
-          <div className='ui-input-icon'>
-            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
-              <path
-                strokeLinejoin='round'
-                strokeLinecap='round'
-                strokeWidth='2'
-                stroke='currentColor'
-                d='M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z'
-              ></path>
-            </svg>
-          </div>
-        </div>
+        <SearchBar />
+
         <div className='flex gap-5 text-center'>
           <Link href='/cart' className='relative flex items-center gap-2'>
             <svg

@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import './login.css'
+import { toast } from 'sonner'
 declare global {
   interface Window {
     FB: any
@@ -54,7 +55,8 @@ const LoginPage = () => {
       const response = await axios.post('https://melody-hub-vhml.onrender.com/api/auth/login', { username, password })
       const { token, user } = response.data
       localStorage.setItem('token', token)
-      alert(`Login successful! Welcome, ${user.displayName}`)
+      // alert(`Login successful! Welcome, ${user.displayName}`)
+      toast.success(`Login successful! Welcome, ${user.displayName}`)
       window.location.href = '/'
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -159,11 +161,7 @@ const LoginPage = () => {
         </form>
         <p className='text-sm text-center mt-4'>or</p>
         {/* <p className='text-2xl text-center mt-4'>Login with Facebook</p> */}
-        <button
-          onClick={handleFacebookLogin}
-          disabled={isLoading}
-          className='btn font-[Tangkiwood] text-white mt-5'
-        >
+        <button onClick={handleFacebookLogin} disabled={isLoading} className='btn font-[Tangkiwood] text-white mt-5'>
           <span>{isLoading ? 'Logging in...' : 'FACEBOOK LOGIN'}</span>
         </button>
 
