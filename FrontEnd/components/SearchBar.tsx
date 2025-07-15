@@ -27,7 +27,7 @@ export default function SearchBar() {
         const filtered = res.data.filter((product: Product) =>
           product.name?.toLowerCase().includes(query.toLowerCase())
         )
-        setSuggestions(filtered.slice(0, 5))
+        setSuggestions(filtered.slice(0, 10))
       } catch (err) {
         console.error('Error fetching suggestions:', err)
       }
