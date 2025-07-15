@@ -28,17 +28,19 @@ export default function Products() {
   const [currentPage, setCurrentPage] = useState<number>(1)
   const itemsPerPage = 16
 
+  // elastic search dựa vào tên sản phẩm lấy từ thanh tìm ki
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('https://melody-hub-vhml.onrender.com/api/products');
-        setProducts(response.data);
+        const response = await axios.get('https://melody-hub-vhml.onrender.com/api/products')
+        setProducts(response.data)
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('Error fetching products:', error)
       }
-    };
-    fetchProducts();
-  }, []);
+    }
+    fetchProducts()
+  }, [])
 
   // Tính tổng số trang
   const totalPages = Math.ceil(products.length / itemsPerPage)
@@ -166,4 +168,3 @@ export default function Products() {
     </div>
   )
 }
-
