@@ -70,11 +70,11 @@ const WishlistPage = () => {
                       if (!cart.some((cartItem: { id: string }) => cartItem.id === item.id)) {
                         cart.push({ ...item, quantity: 1 })
                         localStorage.setItem('cart', JSON.stringify(cart))
-                        toast.success('Product added to wishlist', {
+                        toast.success('Product added to cart', {
                           duration: 2500
                         })
                       } else {
-                        toast.info('Product already in wishlist', {
+                        toast.info('Product already in cart', {
                           duration: 2000
                         })
                       }

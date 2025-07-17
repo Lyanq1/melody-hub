@@ -48,7 +48,7 @@ export default function Cart() {
     )
     updateCart(newCart)
   }
-  
+
   const calculateTotal = () => {
     return cart
       .reduce((total, item) => {
@@ -72,9 +72,14 @@ export default function Cart() {
     return (
       <div className='min-h-[60vh] flex flex-col items-center justify-center p-4'>
         <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Bạn hiện chưa có sản phẩm nào trong giỏ hàng!</h2>
-        <Button asChild className='bg-primary hover:bg-primary/90'>
-          <a href='/products'>Tiếp tục mua sắm</a>
-        </Button>
+        <div className='flex gap-4 flex-wrap justify-center'>
+          <Button asChild className='bg-primary hover:bg-primary/90'>
+            <a href='/products'>Tiếp tục mua sắm</a>
+          </Button>
+          <Button asChild className='bg-primary hover:bg-primary/90'>
+            <a href='/wishlist'>Wishlist của tôi</a>
+          </Button>
+        </div>
       </div>
     )
   }
