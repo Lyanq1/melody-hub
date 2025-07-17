@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
+import Image from 'next/image'
+
 type Product = {
   _id: string
   name: string
@@ -13,7 +15,23 @@ type Product = {
 export default function SearchBar() {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<Product[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+
+  // Click outside to hide suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   useEffect(() => {
     if (!query.trim()) {
@@ -27,7 +45,8 @@ export default function SearchBar() {
         const filtered = res.data.filter((product: Product) =>
           product.name?.toLowerCase().includes(query.toLowerCase())
         )
-        setSuggestions(filtered.slice(0, 10))
+        setSuggestions(filtered.slice(0, 20))
+        setShowSuggestions(true)
       } catch (err) {
         console.error('Error fetching suggestions:', err)
       }
@@ -41,28 +60,34 @@ export default function SearchBar() {
     if (query.trim()) {
       router.push(`/products?search=${encodeURIComponent(query)}`)
       setSuggestions([])
+      setShowSuggestions(false)
     }
   }
 
   const handleSuggestionClick = (name: string) => {
     router.push(`/products?search=${encodeURIComponent(name)}`)
-    setQuery('')
+    setQuery(name)
     setSuggestions([])
+    setShowSuggestions(false)
   }
 
   return (
-    <div className='relative max-w-xl min-w-lg'>
+    <div ref={wrapperRef} className='relative max-w-xl min-w-lg'>
       <form onSubmit={handleSearch}>
         <input
+          ref={inputRef}
           type='text'
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => {
+            if (suggestions.length > 0) setShowSuggestions(true)
+          }}
           placeholder='Tìm sản phẩm...'
           className='w-full px-4 py-2 text-white bg-[#323031] border border-gray-600 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200'
         />
       </form>
 
-      {suggestions.length > 0 && (
+      {showSuggestions && suggestions.length > 0 && (
         <ul className='absolute z-50 w-full mt-1 bg-[#1f1e1d] border border-gray-600 rounded-md shadow-lg max-h-72 overflow-y-auto'>
           {suggestions.map((item) => (
             <li
@@ -70,7 +95,7 @@ export default function SearchBar() {
               onClick={() => handleSuggestionClick(item.name)}
               className='flex items-center gap-3 px-4 py-2 text-sm text-white hover:bg-[#3d3b3a] cursor-pointer transition duration-150'
             >
-              <img src={item.image} alt={item.name} className='w-12 h-12 rounded-lg' />
+              <Image src={item.image} alt={item.name} width={48} height={48} className='rounded-lg' />
               <div>
                 <p className='font-medium'>{item.name}</p>
                 <p className='text-xs text-gray-400'>{item.price}₫</p>

@@ -89,7 +89,7 @@ export default function Products() {
   // PHẦN PHÂN TRANG
   // Tính tổng số trang
   // const totalPages = Math.ceil(products.length / itemsPerPage)
-  const [inputPage, setInputPage] = useState(currentPage)
+  const [inputPage, setInputPage] = useState('')
 
   // Lấy danh sách sản phẩm cho trang hiện tại
   const filteredProducts = products.filter(filterByCategory)
@@ -99,7 +99,6 @@ export default function Products() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    setInputPage(page) // đồng bộ input
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -214,21 +213,40 @@ export default function Products() {
 
                     {/* Ô nhập trang */}
                     <div className='flex items-center gap-2 ml-4'>
-                      <span className='text-sm'>Go to</span>
+                      <span className='text-sm'>Page</span>
                       <input
-                        type='number'
-                        min={1}
-                        max={totalPages}
+                        type='text' // use text instead of number to control formatting
                         value={inputPage}
-                        onChange={(e) => setInputPage(Number(e.target.value))}
+                        onChange={(e) => {
+                          const rawValue = e.target.value
+                          // Only allow digits
+                          if (/^\d*$/.test(rawValue)) {
+                            // Remove leading zeroes unless it's '0'
+                            const cleaned = rawValue.replace(/^0+(?=\d)/, '')
+                            setInputPage(cleaned)
+                          }
+                        }}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter' && inputPage >= 1 && inputPage <= totalPages) {
-                            handlePageChange(inputPage)
+                          const pageNum = Number(inputPage)
+                          if (e.key === 'Enter' && pageNum >= 1 && pageNum <= totalPages) {
+                            handlePageChange(pageNum)
                           }
                         }}
                         className='w-16 px-2 py-1 border rounded text-sm text-center'
+                        inputMode='numeric'
                       />
                       <span className='text-sm'>/ {totalPages}</span>
+                      <button
+                        onClick={() => {
+                          const pageNum = Number(inputPage)
+                          if (pageNum >= 1 && pageNum <= totalPages) {
+                            handlePageChange(pageNum)
+                          }
+                        }}
+                        className='px-3 py-1 text-sm border rounded hover:bg-gray-100'
+                      >
+                        Go
+                      </button>
                     </div>
                   </PaginationContent>
                 </Pagination>
