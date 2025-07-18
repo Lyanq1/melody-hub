@@ -1,31 +1,34 @@
-import express from 'express';
-import { 
-  getAllCategories, 
-  getCategoryById, 
-  createCategory, 
-  updateCategory, 
+import express from 'express'
+import {
+  getAllCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
   deleteCategory,
   getChildCategories
-} from '../controllers/category.controller.js';
+} from '../controllers/category.controller.js'
 
-const router = express.Router();
+const router = express.Router()
 
 // Get all categories
-router.get('/', getAllCategories);
+router.get('/', async (req, res) => {
+  const categories = await Category.find()
+  res.json(categories)
+})
 
 // Get category by ID
-router.get('/:id', getCategoryById);
+router.get('/:id', getCategoryById)
 
 // Create new category
-router.post('/', createCategory);
+router.post('/', createCategory)
 
 // Update category
-router.put('/:id', updateCategory);
+router.put('/:id', updateCategory)
 
 // Delete category
-router.delete('/:id', deleteCategory);
+router.delete('/:id', deleteCategory)
 
 // Get child categories
-router.get('/:id/children', getChildCategories);
+router.get('/:id/children', getChildCategories)
 
-export default router; 
+export default router
