@@ -22,6 +22,8 @@ export default function Products() {
     name: string
   }
 
+  const [categories, setCategories] = useState<Category[]>([])
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -33,7 +35,7 @@ export default function Products() {
     }
     fetchCategories()
   }, [])
-  const [categories, setCategories] = useState<Category[]>([])
+
   type Product = {
     _id: string
     name: string
@@ -173,7 +175,7 @@ export default function Products() {
         <h1 className='text-[40px] font-bold mb-8 text-left font-[MicaValo]'>OUR PRODUCTS</h1>
 
         <div className='flex flex-col sm:flex-row gap-6'>
-          <ProductCategory categories={categories} />
+          <ProductCategory />
 
           <div className='flex-1'>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-center'>
