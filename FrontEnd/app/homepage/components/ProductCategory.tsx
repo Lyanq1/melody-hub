@@ -1,37 +1,52 @@
-// ProductCategory.tsx
-
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
-type Category = {
-  _id: string
-  name: string
-}
+const categories = [
+  { label: 'Tất cả', value: '' },
+
+  { label: 'CD / DVD', value: '687a5c8eaea60fd849fc0847' },
+  { label: 'Đĩa Than / Vinyl', value: '687a5c8eaea60fd849fc0848' },
+  { label: 'Băng Cassette', value: '687a5c8eaea60fd849fc0849' },
+  { label: 'Merch', value: '687a5c8eaea60fd849fc084a' }
+]
 
 export default function ProductCategory() {
-  const [categories, setCategories] = useState<Category[]>([])
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const selected = searchParams.get('category') || ''
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const res = await fetch('/api/categories')
-      const data = await res.json()
-      setCategories(data)
+  const handleClick = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value === selected) {
+      params.delete('category')
+    } else {
+      params.set('category', value)
     }
-
-    fetchCategories()
-  }, [])
+    router.push(`/products?${params.toString()}`)
+  }
 
   return (
-    <div className='p-4'>
-      <h3 className='text-lg font-semibold mb-2'>DANH MỤC SẢN PHẨM</h3>
+    <aside className='w-full sm:w-64 mb-8 sm:mb-0 sm:pr-8'>
+      <h2 className='text-3xl font-bold mb-4 border-b pb-2 border-gray-500 uppercase'>Danh mục sản phẩm</h2>
       <ul className='space-y-2'>
         {categories.map((cat) => (
-          <li key={cat._id} className='text-gray-800 hover:underline cursor-pointer'>
-            {cat.name}
+          <li key={cat.value}>
+            <Button
+              variant='ghost'
+              className={cn(
+                'justify-start w-full hover:bg-muted rounded-none text-xl border-b',
+                selected === cat.value ? 'text-primary font-semibold' : 'text-gray-700'
+              )}
+              onClick={() => handleClick(cat.value)}
+            >
+              {cat.label}
+            </Button>
           </li>
         ))}
       </ul>
-    </div>
+    </aside>
   )
 }

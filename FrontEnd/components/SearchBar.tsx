@@ -41,7 +41,7 @@ export default function SearchBar() {
 
     const timeout = setTimeout(async () => {
       try {
-        const res = await axios.get('https://melody-hub-vhml.onrender.com/api/products')
+        const res = await axios.get('http://localhost:5000/api/products')
         const filtered = res.data.filter((product: Product) =>
           product.name?.toLowerCase().includes(query.toLowerCase())
         )

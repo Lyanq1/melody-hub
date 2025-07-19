@@ -6,20 +6,53 @@ const uri =
 const client = new MongoClient(uri)
 const dbName = 'Melody-Hub'
 
-const vietnameseRegex = /[ăâêôơưđáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/i
-
-// Từ khóa để nhận diện loại sản phẩm
-const categoryMap = [
-  { keyword: 'vinyl', name: 'Đĩa Than / Vinyl' },
-  { keyword: 'đĩa than', name: 'Đĩa Than / Vinyl' },
-  { keyword: 'cd', name: 'CD / DVD' },
-  { keyword: 'dvd', name: 'CD / DVD' },
-  { keyword: 'cassette', name: 'Băng Cassette' },
-  { keyword: 'merch', name: 'Merch' },
-  { keyword: 'poster', name: 'Merch' },
-  { keyword: 'áo', name: 'Merch' },
-  { keyword: 'signed', name: 'Ấn bản có chữ ký' },
-  { keyword: 'chữ ký', name: 'Ấn bản có chữ ký' }
+// Dữ liệu phân loại theo từ khóa
+const categoryRules = [
+  {
+    _id: '687a5c8eaea60fd849fc0847',
+    name: 'CD / DVD',
+    keywords: ['đĩa cd', 'cd', 'đĩa dvd', 'dvd']
+  },
+  {
+    _id: '687a5c8eaea60fd849fc0848',
+    name: 'Đĩa Than / Vinyl',
+    keywords: ['đĩa than']
+  },
+  {
+    _id: '687a5c8eaea60fd849fc0849',
+    name: 'Băng Cassette',
+    keywords: ['băng cassette']
+  },
+  {
+    _id: '687a5c8eaea60fd849fc084a',
+    name: 'Merch',
+    keywords: [
+      'merch',
+      'áo thun',
+      'magazine',
+      'lanyard',
+      'multicolor',
+      'book',
+      'sách',
+      'túi',
+      'vòng tay',
+      'sổ tay',
+      'áp phích',
+      'huy hiệu',
+      'đĩa usb',
+      'thẻ nhớ'
+    ]
+  },
+  {
+    _id: '687a5c8eaea60fd849fc084b',
+    name: 'Ấn bản có chữ ký',
+    keywords: ['chữ ký']
+  },
+  {
+    _id: '687a5c8eaea60fd849fc0844', // fallback: Tất cả
+    name: 'Tất cả',
+    keywords: []
+  }
 ]
 
 async function updateCategoryIds() {
@@ -28,39 +61,34 @@ async function updateCategoryIds() {
     const db = client.db(dbName)
 
     const discs = db.collection('disc')
-    const categories = db.collection('categories')
-
-    const allCategories = await categories.find().toArray()
     const allDiscs = await discs.find().toArray()
 
     for (const product of allDiscs) {
       const name = product.name?.toLowerCase() || ''
-      let matchedCategoryName = null
+      let matchedRule = null
 
-      // Ưu tiên phân loại loại hình sản phẩm trước (CD/DVD, Vinyl...)
-      for (const { keyword, name: categoryName } of categoryMap) {
-        if (name.includes(keyword)) {
-          matchedCategoryName = categoryName
+      // So khớp theo từng danh mục
+      for (const rule of categoryRules) {
+        if (rule.keywords.some((kw) => name.includes(kw.toLowerCase()))) {
+          matchedRule = rule
           break
         }
       }
 
-      // Nếu không tìm thấy loại, phân loại theo quốc gia
-      if (!matchedCategoryName) {
-        matchedCategoryName = vietnameseRegex.test(name) ? 'Nhạc Việt' : 'Nhạc Nước Ngoài'
+      // Nếu không trùng từ khóa nào, gán vào "Tất cả"
+      if (!matchedRule) {
+        matchedRule = categoryRules.find((r) => r.name === 'Tất cả')
       }
 
-      const matchedCategory = allCategories.find((c) => c.name === matchedCategoryName)
-
-      if (matchedCategory) {
-        await discs.updateOne({ _id: product._id }, { $set: { categoryId: matchedCategory._id.toString() } })
-        console.log(`✅ ${product.name} → ${matchedCategoryName}`)
+      if (matchedRule) {
+        await discs.updateOne({ _id: product._id }, { $set: { categoryId: new ObjectId(matchedRule._id) } })
+        console.log(`✅ ${product.name} → ${matchedRule.name}`)
       } else {
-        console.log(`❌ Không tìm thấy category "${matchedCategoryName}"`)
+        console.log(`❌ Không tìm thấy category cho ${product.name}`)
       }
     }
 
-    console.log('🎉 Đã hoàn tất cập nhật categoryId cho toàn bộ disc!')
+    console.log('🎉 Đã hoàn tất cập nhật categoryId cho toàn bộ sản phẩm!')
   } catch (err) {
     console.error('❌ Lỗi:', err)
   } finally {
