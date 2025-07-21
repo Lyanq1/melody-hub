@@ -17,30 +17,12 @@ import {
 import axios from 'axios'
 
 export default function Products() {
-  interface Category {
-    _id: string
-    name: string
-  }
-
-  const [categories, setCategories] = useState<Category[]>([])
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get('https://melody-hub-vhml.onrender.com/api/categories')
-        setCategories(response.data)
-      } catch (error) {
-        console.error('Error fetching categories:', error)
-      }
-    }
-    fetchCategories()
-  }, [])
-
   type Product = {
     _id: string
     name: string
     price: string
     image: string
+    categoryId: string
     // Add more fields if needed
   }
 
@@ -54,49 +36,16 @@ export default function Products() {
   const searchParams = useSearchParams()
   const selectedCategory = searchParams.get('category')
   const filterByCategory = (product: Product) => {
-    if (!product.name) return false // an toàn: nếu name undefined thì bỏ
-
-    const name = product.name.toLowerCase()
-
-    switch (selectedCategory) {
-      case 'vietnamese':
-        return /[àáảãạăằắẳẵặâầấẩẫậđèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ]/i.test(name)
-      case 'international':
-        return !/[àáảãạăằắẳẵặâầấẩẫậđèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ]/i.test(name)
-      case 'cd-dvd':
-        return name.includes('cd') || name.includes('dvd')
-      case 'vinyl':
-        return name.includes('đĩa than') || name.includes('vinyl')
-      case 'cassette':
-        return name.includes('cassette')
-      case 'merch':
-        return [
-          'áo',
-          'ví',
-          'móc khóa',
-          'tuyển tập',
-          'túi',
-          'nhật ký',
-          'sách',
-          'merch',
-          'lanyard',
-          'mũ',
-          'khẩu trang',
-          'book',
-          'phone',
-          'magazine'
-        ].some((keyword) => name.includes(keyword))
-      case 'signed':
-        return name.includes('chữ ký')
-      default:
-        return true
-    }
+    if (!selectedCategory) return true
+    return product.categoryId === selectedCategory
   }
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('https://melody-hub-vhml.onrender.com/api/products')
+        // const response = await axios.get('https://melody-hub-vhml.onrender.com/api/products')
+        const response = await axios.get('http://localhost:5000/api/products')
+
         setProducts(response.data)
       } catch (error) {
         console.error('Error fetching products:', error)
@@ -108,7 +57,7 @@ export default function Products() {
   // PHẦN PHÂN TRANG
   // Tính tổng số trang
   // const totalPages = Math.ceil(products.length / itemsPerPage)
-  const [inputPage, setInputPage] = useState('')
+  const [inputPage, setInputPage] = useState(currentPage)
 
   // Lấy danh sách sản phẩm cho trang hiện tại
   const filteredProducts = products.filter(filterByCategory)
@@ -118,6 +67,7 @@ export default function Products() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
+    setInputPage(page) // đồng bộ input
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -232,40 +182,21 @@ export default function Products() {
 
                     {/* Ô nhập trang */}
                     <div className='flex items-center gap-2 ml-4'>
-                      <span className='text-sm'>Page</span>
+                      <span className='text-sm'>Go to</span>
                       <input
-                        type='text' // use text instead of number to control formatting
+                        type='number'
+                        min={1}
+                        max={totalPages}
                         value={inputPage}
-                        onChange={(e) => {
-                          const rawValue = e.target.value
-                          // Only allow digits
-                          if (/^\d*$/.test(rawValue)) {
-                            // Remove leading zeroes unless it's '0'
-                            const cleaned = rawValue.replace(/^0+(?=\d)/, '')
-                            setInputPage(cleaned)
-                          }
-                        }}
+                        onChange={(e) => setInputPage(Number(e.target.value))}
                         onKeyDown={(e) => {
-                          const pageNum = Number(inputPage)
-                          if (e.key === 'Enter' && pageNum >= 1 && pageNum <= totalPages) {
-                            handlePageChange(pageNum)
+                          if (e.key === 'Enter' && inputPage >= 1 && inputPage <= totalPages) {
+                            handlePageChange(inputPage)
                           }
                         }}
                         className='w-16 px-2 py-1 border rounded text-sm text-center'
-                        inputMode='numeric'
                       />
                       <span className='text-sm'>/ {totalPages}</span>
-                      <button
-                        onClick={() => {
-                          const pageNum = Number(inputPage)
-                          if (pageNum >= 1 && pageNum <= totalPages) {
-                            handlePageChange(pageNum)
-                          }
-                        }}
-                        className='px-3 py-1 text-sm border rounded hover:bg-gray-100'
-                      >
-                        Go
-                      </button>
                     </div>
                   </PaginationContent>
                 </Pagination>

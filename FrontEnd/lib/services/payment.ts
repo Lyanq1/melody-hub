@@ -8,7 +8,17 @@ export interface PaymentResponse {
   message?: string;
   error?: string;
   verified?: boolean;
-  data?: any;
+  data?: {
+    partnerCode?: string;
+    orderId?: string;
+    requestId?: string;
+    amount?: number;
+    responseTime?: number;
+    message?: string;
+    resultCode?: number | string;
+    payUrl?: string;
+    shortLink?: string;
+  };
 }
 
 /**

@@ -8,13 +8,15 @@ import axios from 'axios'
 export default function Homepage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
-  
+
   useEffect(() => {
     const token = localStorage.getItem('token')
     setIsAuthenticated(!!token)
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('https://melody-hub-vhml.onrender.com/api/products')
+        //         const response = await axios.get('https://melody-hub-vhml.onrender.com/api/products')
+
+        const response = await axios.get('http://localhost:5000/api/products')
         setFeaturedProducts(response.data.slice(0, 12))
       } catch (error) {
         console.error('Error fetching products:', error)
@@ -25,9 +27,11 @@ export default function Homepage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-4">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Please log in to view products</h2>
-        <a href="/login" className="text-primary hover:underline font-medium">Login here</a>
+      <div className='min-h-[60vh] flex flex-col items-center justify-center p-4'>
+        <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Please log in to view products</h2>
+        <a href='/login' className='text-primary hover:underline font-medium'>
+          Login here
+        </a>
       </div>
     )
   }
@@ -55,4 +59,4 @@ export default function Homepage() {
       </div>
     </div>
   )
-} 
+}

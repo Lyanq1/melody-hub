@@ -3,7 +3,7 @@ import Disc from '../models/disc.model.js'
 
 export const getAllDiscs = async (req, res) => {
   try {
-    const discs = await Disc.find({}).limit(40)
+    const discs = await Disc.find({})
     console.log(discs)
     if (discs.length === 0) {
       return res.status(404).json({ message: 'No discs found' })

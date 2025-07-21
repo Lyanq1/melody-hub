@@ -17,7 +17,7 @@ export default function CheckoutSuccess() {
   const orderId = searchParams.get('orderId') || searchParams.get('orderid');
   const resultCode = searchParams.get('resultCode') || searchParams.get('resultcode');
   const message = searchParams.get('message') || searchParams.get('errorMessage');
-  const extraData = searchParams.get('extraData');
+  // const extraData = searchParams.get('extraData');
 
   useEffect(() => {
     const verifyPayment = async () => {
