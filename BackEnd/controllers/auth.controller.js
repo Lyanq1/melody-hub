@@ -4,6 +4,7 @@ import {
   findAccountByEmail,
   findOrCreateFacebookAccount
 } from '../models/account.model.js'
+import Account from '../models/account.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import axios from 'axios'
@@ -143,3 +144,39 @@ export const facebookLogin = async (req, res) => {
     res.status(500).json({ message: 'Error logging in with Facebook', error: error.message })
   }
 }
+
+export const getUserInfo = async (req, res) => {
+  const { username } = req.params
+  try {
+    const account = await Account.findOne({ Username: username }).select('-Password')
+    if (!account) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+    res.status(200).json(account)
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
+// PUT /api/user/:username
+export const updateUserInfo = async (req, res) => {
+  const { username } = req.params
+  const updatedData = req.body
+
+  try {
+    const account = await Account.findOneAndUpdate(
+      { Username: username },
+      { ...updatedData, UpdatedAt: new Date() },
+      { new: true, runValidators: true }
+    ).select('-Password')
+
+    if (!account) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    res.status(200).json({ message: 'User updated successfully', user: account })
+  } catch (error) {
+    res.status(500).json({ message: 'Update failed', error: error.message })
+  }
+}
+
