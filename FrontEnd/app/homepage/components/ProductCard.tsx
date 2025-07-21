@@ -4,6 +4,7 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/comp
 import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 interface ProductCardProps {
   id: string
@@ -52,7 +53,7 @@ const addToWishlist = (id: string, name: string, price: string, imageUrl: string
 export function ProductCard({ id, name, price, imageUrl, isNew = false, onAddToCart }: ProductCardProps) {
   return (
     <Card className='w-full overflow-hidden flex flex-col h-full group font-[Ceflinty]'>
-      <div className='relative h-[250px] w-full'>
+      <Link href={`/product/${id}`} className='relative h-[250px] w-full'>
         <Image src={imageUrl} alt={name} fill className='object-cover' sizes='(max-width: 300px) 100vw, 300px' />
         {isNew && (
           <span className='absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded-md text-sm font-medium'>
@@ -61,7 +62,10 @@ export function ProductCard({ id, name, price, imageUrl, isNew = false, onAddToC
         )}
         <div className='hidden group-hover:block absolute bottom-0 left-0 w-full bg-gray-800 bg-opacity-75 text-white py-2 text-center transition-all duration-300'>
           <button
-            onClick={() => addToWishlist(id, name, price, imageUrl)}
+            onClick={(e) => {
+              e.preventDefault();
+              addToWishlist(id, name, price, imageUrl);
+            }}
             className='text-xl focus:outline-none relative group/button'
             aria-label='Add to wishlist'
           >
@@ -69,11 +73,13 @@ export function ProductCard({ id, name, price, imageUrl, isNew = false, onAddToC
             <HeartIconSolid className='w-6 h-6 text-white opacity-0 group-hover/button:opacity-100 transition-opacity duration-200' />
           </button>
         </div>
-      </div>
+      </Link>
 
       <div className='flex-1 flex flex-col'>
         <CardHeader>
-          <CardTitle className='text-lg'>{name}</CardTitle>
+          <Link href={`/product/${id}`}>
+            <CardTitle className='text-lg hover:text-primary transition-colors'>{name}</CardTitle>
+          </Link>
         </CardHeader>
       </div>
 
