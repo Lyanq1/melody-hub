@@ -127,7 +127,6 @@
   }
 }
 
-
 @font-face {
   font-family: 'LoraItalic';
   src: url('/fonts/Lora-Italic-VariableFont_wght.ttf') format('truetype');
@@ -166,6 +165,13 @@
 @font-face {
   font-family: 'Ceflinty';
   src: url('/fonts/TF-Ceflinty-9gyh28.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Classma';
+  src: url('/fonts/TF-Classma-qvcegf.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
