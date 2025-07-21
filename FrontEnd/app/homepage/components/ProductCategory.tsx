@@ -25,7 +25,7 @@ export default function ProductCategory() {
     } else {
       params.set('category', value)
     }
-    router.push(`/products?${params.toString()}`)
+    router.push(`/product?${params.toString()}`)
   }
 
   return (
