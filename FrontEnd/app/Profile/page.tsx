@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 
 export default function Profile() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showAvatarOptions, setShowAvatarOptions] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
@@ -39,7 +41,6 @@ export default function Profile() {
           setPhone(data.Phone || "");
           setAddress(data.Address || "");
           setAvatarUrl(data.AvatarURL || "");
-
         })
         .catch((err) => {
           console.error("Lỗi khi tải thông tin người dùng:", err);
@@ -76,38 +77,46 @@ export default function Profile() {
     }
   };
 
+  const handleAvatarClick = () => {
+    setShowAvatarOptions((prev) => !prev);
+  };
+
+  const handleChooseFile = () => {
+    setShowAvatarOptions(false);
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="flex flex-col md:flex-row max-w-6xl mx-auto px-4 py-10 gap-10">
       {/* Sidebar */}
-    <aside className="space-y-4 text-sm font-medium w-64">
-      <div className="border-b pb-2">
-        <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">
-          Thông tin tài khoản
-        </p>
-      </div>
+      <aside className="space-y-4 text-sm font-medium w-64">
+        <div className="border-b pb-2">
+          <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">
+            Thông tin tài khoản
+          </p>
+        </div>
 
-      <div className="border-b pb-2 cursor-pointer hover:text-blue-600">
-        <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">Đơn hàng đã mua</p>
-      </div>
+        <div className="border-b pb-2 cursor-pointer hover:text-blue-600">
+          <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">
+            Đơn hàng đã mua
+          </p>
+        </div>
 
-      <div className="border-b pb-2 cursor-pointer hover:text-red-600">
-        <button
-          onClick={handleLogout}
-          className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer text-left"
-        >
-          Thoát
-        </button>
-      </div>
-    </aside>
-
-
-
+        <div className="border-b pb-2 cursor-pointer hover:text-red-600">
+          <button
+            onClick={handleLogout}
+            className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer text-left"
+          >
+            Thoát
+          </button>
+        </div>
+      </aside>
 
       {/* Main content */}
-      <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow space-y-7">
-
+      <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow space-y-7 relative">
         {/* Avatar */}
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           id="avatar-upload"
@@ -115,30 +124,37 @@ export default function Profile() {
           onChange={async (e) => {
             const file = e.target.files?.[0];
             if (file) {
-              // Convert to base64 để lưu vào DB
               const reader = new FileReader();
               reader.onloadend = () => {
                 const base64 = reader.result as string;
-                setAvatarUrl(base64); // Set base64 để xem trước và lưu
+                setAvatarUrl(base64);
               };
               reader.readAsDataURL(file);
             }
           }}
         />
 
-
-        <label htmlFor="avatar-upload" className="cursor-pointer">
-          <div className="flex justify-center">
+        <div className="flex justify-center relative">
+          <div onClick={handleAvatarClick} className="cursor-pointer">
             <Avatar className="h-40 w-40 border-2 border-gray-300 hover:border-blue-500">
               <AvatarImage src={avatarUrl || "https://github.com/shadcn.png"} />
               <AvatarFallback>NA</AvatarFallback>
             </Avatar>
           </div>
-        </label>
 
+          {showAvatarOptions && (
+            <div className="absolute top-full mt-2 bg-white border rounded shadow w-56 text-sm z-10">
+              <button
+                onClick={handleChooseFile}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100"
+              >
+                Đổi ảnh đại diện
+              </button>
+            </div>
+          )}
+        </div>
 
-
-        {/* Tên hiển thị */}
+        {/* Display Name */}
         <div className="space-y-2">
           <Label className="text-lg font-semibold">Tên hiển thị *</Label>
           {loading ? (
@@ -166,7 +182,7 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Địa chỉ */}
+        {/* Address */}
         <div className="space-y-2">
           <Label className="text-lg font-semibold">Địa chỉ *</Label>
           {loading ? (
@@ -180,7 +196,7 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Số điện thoại */}
+        {/* Phone */}
         <div className="space-y-2">
           <Label className="text-lg font-semibold">Số điện thoại *</Label>
           {loading ? (
@@ -207,4 +223,3 @@ export default function Profile() {
     </div>
   );
 }
-
