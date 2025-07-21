@@ -1,142 +1,210 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Tab } from '@headlessui/react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { UserCircle } from 'lucide-react'
-import { toast } from 'sonner'
-const ProfilePage = () => {
-  const [selectedTab, setSelectedTab] = useState(0)
-  const [fullName, setFullName] = useState('')
-  const [address, setAddress] = useState('')
-  const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
-  const [displayedName, setDisplayedName] = useState('Chưa có tên')
-  // Lấy email từ localStorage
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { toast } from "sonner";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+
+export default function Profile() {
+  const router = useRouter();
+
+  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState("");
+
+  const [displayedName, setDisplayedName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+
   useEffect(() => {
-    const storedEmail = localStorage.getItem('userEmail')
-    const storedName = localStorage.getItem('userDisplayName')
-    if (storedEmail) {
-      setEmail(storedEmail)
-    } else {
-      setEmail('example@email.com')
-    }
-    if (storedName) {
-      setDisplayedName(storedName)
-      setFullName(storedName)
-    }
-  }, [])
+    const storedUsername = localStorage.getItem("username");
+    setUsername(storedUsername || "");
 
-  const handleSave = () => {
-    // TODO: Có thể gửi lên server tại đây
-    setDisplayedName(fullName)
-    localStorage.setItem('userDisplayName', fullName)
-    toast.success('Thông tin đã được lưu')
-  }
+    if (storedUsername) {
+      axios
+        .get(`http://localhost:5000/api/auth/user/${storedUsername}`)
+        .then((res) => {
+          const data = res.data;
+          setFullName(data.DisplayName || "");
+          setDisplayedName(data.DisplayName || "Chưa có tên");
+          setEmail(data.Email || "");
+          setPhone(data.Phone || "");
+          setAddress(data.Address || "");
+          setAvatarUrl(data.AvatarURL || "");
+
+        })
+        .catch((err) => {
+          console.error("Lỗi khi tải thông tin người dùng:", err);
+          toast.error("Lỗi khi tải thông tin người dùng.");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("username");
+    localStorage.removeItem("token");
+    router.push("/");
+  };
+
+  const handleSave = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/auth/user/${username}`, {
+        DisplayName: fullName,
+        Email: email,
+        Address: address,
+        Phone: phone,
+        AvatarURL: avatarUrl,
+      });
+      toast.success("Cập nhật thông tin thành công!");
+      setDisplayedName(fullName);
+    } catch (err) {
+      console.error("Lỗi khi cập nhật thông tin:", err);
+      toast.error("Đã xảy ra lỗi khi cập nhật.");
+    }
+  };
 
   return (
-    <div className='container mx-auto px-4 py-8'>
-      <h1 className='text-3xl font-bold mb-8 text-center text-blue-600'>Trang Cá Nhân</h1>
+    <div className="flex flex-col md:flex-row max-w-6xl mx-auto px-4 py-10 gap-10">
+      {/* Sidebar */}
+    <aside className="space-y-4 text-sm font-medium w-64">
+      <div className="border-b pb-2">
+        <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">
+          Thông tin tài khoản
+        </p>
+      </div>
 
-      <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
-        <div className='flex justify-center mb-8 gap-4 border-b border-gray-200'>
-          {['Thông tin tài khoản', 'Đơn hàng đã mua'].map((tab, index) => (
-            <Tab
-              key={index}
-              className={({ selected }) =>
-                `px-4 py-2 font-semibold text-sm sm:text-base focus:outline-none transition-all ${
-                  selected ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'
-                }`
-              }
-            >
-              {tab}
-            </Tab>
-          ))}
+      <div className="border-b pb-2 cursor-pointer hover:text-blue-600">
+        <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">Đơn hàng đã mua</p>
+      </div>
+
+      <div className="border-b pb-2 cursor-pointer hover:text-red-600">
+        <button
+          onClick={handleLogout}
+          className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer text-left"
+        >
+          Thoát
+        </button>
+      </div>
+    </aside>
+
+
+
+
+      {/* Main content */}
+      <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow space-y-7">
+
+        {/* Avatar */}
+        <input
+          type="file"
+          accept="image/*"
+          id="avatar-upload"
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              // Convert to base64 để lưu vào DB
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                const base64 = reader.result as string;
+                setAvatarUrl(base64); // Set base64 để xem trước và lưu
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+        />
+
+
+        <label htmlFor="avatar-upload" className="cursor-pointer">
+          <div className="flex justify-center">
+            <Avatar className="h-40 w-40 border-2 border-gray-300 hover:border-blue-500">
+              <AvatarImage src={avatarUrl || "https://github.com/shadcn.png"} />
+              <AvatarFallback>NA</AvatarFallback>
+            </Avatar>
+          </div>
+        </label>
+
+
+
+        {/* Tên hiển thị */}
+        <div className="space-y-2">
+          <Label className="text-lg font-semibold">Tên hiển thị *</Label>
+          {loading ? (
+            <Skeleton className="h-12 w-full rounded-md" />
+          ) : (
+            <Input
+              className="h-12 text-lg"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+          )}
         </div>
 
-        <Tab.Panels>
-          <Tab.Panel>
-            <Card className='shadow-lg'>
-              <CardHeader>
-                <CardTitle className='text-xl sm:text-2xl text-blue-600 text-center'>Thông tin tài khoản</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-8'>
-                {/* Avatar */}
-                <div className='flex items-center gap-6'>
-                  <div className='w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-md'>
-                    <UserCircle className='w-12 h-12' />
-                  </div>
-                  <div>
-                    <p className='text-lg font-semibold'>{displayedName}</p>
-                    <p className='text-muted-foreground'>{email}</p>
-                  </div>
-                </div>
+        {/* Email */}
+        <div className="space-y-2">
+          <Label className="text-lg font-semibold">Email *</Label>
+          {loading ? (
+            <Skeleton className="h-12 w-full rounded-md" />
+          ) : (
+            <Input
+              className="h-12 text-lg"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          )}
+        </div>
 
-                {/* Editable fields */}
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                  <div>
-                    <Label>Họ và tên</Label>
-                    <Input
-                      type='text'
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder='Nhập họ và tên'
-                      className='mt-2'
-                    />
-                  </div>
-                  <div>
-                    <Label>Email</Label>
-                    <Input value={email} type='email' disabled className='mt-2' />
-                  </div>
-                  <div>
-                    <Label>Địa chỉ giao hàng</Label>
-                    <Input
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder='Nhập địa chỉ'
-                      className='mt-2'
-                    />
-                  </div>
-                  <div>
-                    <Label>Số điện thoại</Label>
-                    <Input
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder='Nhập số điện thoại'
-                      className='mt-2'
-                    />
-                  </div>
-                </div>
+        {/* Địa chỉ */}
+        <div className="space-y-2">
+          <Label className="text-lg font-semibold">Địa chỉ *</Label>
+          {loading ? (
+            <Skeleton className="h-12 w-full rounded-md" />
+          ) : (
+            <Input
+              className="h-12 text-lg"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+          )}
+        </div>
 
-                <div className='flex justify-end gap-4 pt-4'>
-                  <Button variant='outline' onClick={() => alert('Đăng xuất thành công!')}>
-                    Đăng xuất
-                  </Button>
-                  <Button onClick={handleSave} className='bg-blue-600 hover:bg-blue-700'>
-                    Lưu thay đổi
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </Tab.Panel>
+        {/* Số điện thoại */}
+        <div className="space-y-2">
+          <Label className="text-lg font-semibold">Số điện thoại *</Label>
+          {loading ? (
+            <Skeleton className="h-12 w-full rounded-md" />
+          ) : (
+            <Input
+              className="h-12 text-lg"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          )}
+        </div>
 
-          <Tab.Panel>
-            <Card className='shadow-lg'>
-              <CardHeader>
-                <CardTitle className='text-xl sm:text-2xl text-blue-600 text-center'>Đơn hàng đã mua</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className='text-muted-foreground'>Chưa có dữ liệu đơn hàng.</p>
-              </CardContent>
-            </Card>
-          </Tab.Panel>
-        </Tab.Panels>
-      </Tab.Group>
+        {/* Buttons */}
+        <div className="pt-4 flex justify-end">
+          <Button
+            onClick={handleSave}
+            className="bg-black text-white hover:bg-gray-800 font-semibold"
+          >
+            Lưu thay đổi
+          </Button>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
 
-export default ProfilePage

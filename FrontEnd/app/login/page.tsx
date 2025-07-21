@@ -55,6 +55,7 @@ const LoginPage = () => {
       const response = await axios.post('https://melody-hub-vhml.onrender.com/api/auth/login', { username, password })
       const { token, user } = response.data
       localStorage.setItem('token', token)
+      localStorage.setItem('username', username)
       // alert(`Login successful! Welcome, ${user.displayName}`)
       toast.success(`Login successful! Welcome, ${user.displayName}`)
       window.location.href = '/'
