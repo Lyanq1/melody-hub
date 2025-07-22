@@ -4,7 +4,8 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { LayoutDashboard, Disc, ShoppingCart, Users, Bell } from 'lucide-react'
+import { LayoutDashboard, Disc, ShoppingCart, Users } from 'lucide-react'
+import Link from 'next/link'
 
 const salesData = [
   { month: 'Jan', sales: 1200 },
@@ -27,37 +28,16 @@ const recentOrders = [
   { id: '#1003', customer: 'Lê Văn C', total: '2.000.000₫', status: 'Đã hủy' }
 ]
 
-const notifications = [
-  { id: 1, message: 'Có 2 đơn hàng mới vừa được đặt!', time: '2 phút trước' },
-  { id: 2, message: "Sản phẩm 'The Beatles - Abbey Road' sắp hết hàng.", time: '10 phút trước' }
-]
-
 export default function Dashboard() {
   return (
-    <div className='font-[JaJP] min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 p-6 space-y-8'>
+    <div className='font-[JaJP] p-6 space-y-8'>
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
         <h1 className='text-4xl font-bold text-gray-900'>ADMIN DASHBOARD</h1>
         <div className='flex items-center gap-4'>
-          <Button variant='outline' className='flex items-center gap-2 border-gray-300'>
-            <Bell className='w-5 h-5 text-yellow-500' />
-            Thông báo
-          </Button>
-          <Button className='bg-black text-white hover:bg-gray-800'>Quản lý sản phẩm</Button>
+          <Link href="/dashboard/products">
+            <Button className='bg-black text-white hover:bg-gray-800'>Quản lý sản phẩm</Button>
+          </Link>
         </div>
-      </div>
-
-      {/* Thông báo mới */}
-      <div className='flex flex-wrap gap-4'>
-        {notifications.map((n) => (
-          <div
-            key={n.id}
-            className='flex items-center gap-2 bg-white rounded-lg px-4 py-2 shadow border-l-4 border-yellow-400'
-          >
-            <Bell className='w-4 h-4 text-yellow-500' />
-            <span className='text-gray-700'>{n.message}</span>
-            <span className='ml-2 text-xs text-gray-400'>{n.time}</span>
-          </div>
-        ))}
       </div>
 
       {/* Thống kê tổng quan */}
@@ -157,7 +137,9 @@ export default function Dashboard() {
       </Card>
 
       <div className='flex justify-end'>
-        <Button className='bg-black text-white hover:bg-gray-800'>Xem tất cả đơn hàng</Button>
+        <Link href="/dashboard/orders">
+          <Button className='bg-black text-white hover:bg-gray-800'>Xem tất cả đơn hàng</Button>
+        </Link>
       </div>
     </div>
   )
