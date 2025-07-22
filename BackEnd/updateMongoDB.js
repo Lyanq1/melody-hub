@@ -1,7 +1,6 @@
 import { MongoClient, ObjectId } from 'mongodb'
 
-const uri =
-  'mongodb+srv://anhquan2004162:melodyhub123@melody-hub.vsg0hab.mongodb.net/Melody-Hub?retryWrites=true&w=majority&appName=Melody-Hub'
+const uri = process.env.MONGODB_URI
 
 const client = new MongoClient(uri)
 const dbName = 'Melody-Hub'

@@ -10,13 +10,13 @@ interface CatalogItem {
 
 // Dữ liệu mẫu cho catalog (bạn có thể lấy từ API hoặc một nguồn khác)
 const catalogItems: CatalogItem[] = [
-  { id: '1', name: 'Pop', link: '/products?category=pop' },
-  { id: '2', name: 'Rock', link: '/products?category=rock' },
-  { id: '3', name: 'Indie', link: '/products?category=indie' },
-  { id: '4', name: 'EDM', link: '/products?category=edm' },
-  { id: '5', name: 'Hip-Hop', link: '/products?category=hip-hop' },
-  { id: '6', name: 'Classical', link: '/products?category=classical' },
-  { id: '7', name: 'Jazzed', link: '/products?category=jazz' }
+  { id: '1', name: 'Pop', link: '/product?category=pop' },
+  { id: '2', name: 'Rock', link: '/product?category=rock' },
+  { id: '3', name: 'Indie', link: '/product?category=indie' },
+  { id: '4', name: 'EDM', link: '/product?category=edm' },
+  { id: '5', name: 'Hip-Hop', link: '/product?category=hip-hop' },
+  { id: '6', name: 'Classical', link: '/product?category=classical' },
+  { id: '7', name: 'Jazzed', link: '/product?category=jazz' }
   // Thêm các danh mục khác nếu cần
 ]
 

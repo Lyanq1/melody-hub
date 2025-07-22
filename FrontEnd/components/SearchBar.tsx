@@ -41,7 +41,7 @@ export default function SearchBar() {
 
     const timeout = setTimeout(async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/products')
+        const res = await axios.get('http://localhost:5000/api/product')
         const filtered = res.data.filter((product: Product) =>
           product.name?.toLowerCase().includes(query.toLowerCase())
         )
@@ -58,14 +58,14 @@ export default function SearchBar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (query.trim()) {
-      router.push(`/products?search=${encodeURIComponent(query)}`)
+      router.push(`/product?search=${encodeURIComponent(query)}`)
       setSuggestions([])
       setShowSuggestions(false)
     }
   }
 
   const handleSuggestionClick = (name: string) => {
-    router.push(`/products?search=${encodeURIComponent(name)}`)
+    router.push(`/product?search=${encodeURIComponent(name)}`)
     setQuery(name)
     setSuggestions([])
     setShowSuggestions(false)

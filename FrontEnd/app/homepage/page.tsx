@@ -8,6 +8,7 @@ import axios from 'axios'
 export default function Homepage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -16,22 +17,21 @@ export default function Homepage() {
       try {
         //         const response = await axios.get('https://melody-hub-vhml.onrender.com/api/products')
 
-        const response = await axios.get('http://localhost:5000/api/products')
+        const response = await axios.get('http://localhost:5000/api/product')
         setFeaturedProducts(response.data.slice(0, 12))
       } catch (error) {
         console.error('Error fetching products:', error)
+      } finally {
+        setLoading(false)
       }
     }
     fetchProducts()
   }, [])
 
-  if (!isAuthenticated) {
+  if (loading) {
     return (
       <div className='min-h-[60vh] flex flex-col items-center justify-center p-4'>
-        <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Please log in to view products</h2>
-        <a href='/login' className='text-primary hover:underline font-medium'>
-          Login here
-        </a>
+        <div className="animate-pulse text-xl">Loading products...</div>
       </div>
     )
   }

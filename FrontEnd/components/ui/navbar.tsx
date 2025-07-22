@@ -159,7 +159,7 @@ export const Navbar = () => {
         <Link href='/'>ECHO RECORDS</Link>
         <div className='flex gap-10 text-center'>
           <Link href='/'>Home</Link>
-          <Link href='/products'>Products</Link>
+          <Link href='/product'>Products</Link>
         </div>
         <SearchBar />
 

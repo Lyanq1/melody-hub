@@ -44,7 +44,7 @@ export default function Products() {
     const fetchProducts = async () => {
       try {
         // const response = await axios.get('https://melody-hub-vhml.onrender.com/api/products')
-        const response = await axios.get('http://localhost:5000/api/products')
+        const response = await axios.get('http://localhost:5000/api/product')
 
         setProducts(response.data)
       } catch (error) {

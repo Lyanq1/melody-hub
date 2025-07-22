@@ -74,7 +74,7 @@ export default function Cart() {
         <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Bạn hiện chưa có sản phẩm nào trong giỏ hàng!</h2>
         <div className='flex gap-4 flex-wrap justify-center'>
           <Button asChild className='bg-primary hover:bg-primary/90'>
-            <a href='/products'>Tiếp tục mua sắm</a>
+            <a href='/product'>Tiếp tục mua sắm</a>
           </Button>
           <Button asChild className='bg-primary hover:bg-primary/90'>
             <a href='/wishlist'>Wishlist của tôi</a>
