@@ -4,18 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
+import { Camera } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Profile() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showAvatarOptions, setShowAvatarOptions] = useState(false);
-
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
 
@@ -55,9 +60,22 @@ export default function Profile() {
   }, []);
 
   const handleLogout = () => {
+    // Remove local storage items
     localStorage.removeItem("username");
     localStorage.removeItem("token");
-    router.push("/");
+    
+    // Create and dispatch the logout event
+    const logoutEvent = new CustomEvent('user-logout', {
+      detail: { timestamp: Date.now() }
+    });
+    
+    // Use setTimeout to ensure event is processed before navigation
+    window.dispatchEvent(logoutEvent);
+    
+    // Small delay to ensure state updates complete
+    setTimeout(() => {
+      router.push("/");
+    }, 100);
   };
 
   const handleSave = async () => {
@@ -69,6 +87,10 @@ export default function Profile() {
         Phone: phone,
         AvatarURL: avatarUrl,
       });
+      
+      // Dispatch event before toast to ensure immediate update
+      window.dispatchEvent(new Event('avatar-update'));
+      
       toast.success("Cập nhật thông tin thành công!");
       setDisplayedName(fullName);
     } catch (err) {
@@ -77,13 +99,17 @@ export default function Profile() {
     }
   };
 
-  const handleAvatarClick = () => {
-    setShowAvatarOptions((prev) => !prev);
-  };
-
-  const handleChooseFile = () => {
-    setShowAvatarOptions(false);
-    fileInputRef.current?.click();
+  // When file is selected for avatar
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setAvatarUrl(base64);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -121,37 +147,31 @@ export default function Profile() {
           accept="image/*"
           id="avatar-upload"
           className="hidden"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                const base64 = reader.result as string;
-                setAvatarUrl(base64);
-              };
-              reader.readAsDataURL(file);
-            }
-          }}
+          onChange={handleFileChange}
         />
 
         <div className="flex justify-center relative">
-          <div onClick={handleAvatarClick} className="cursor-pointer">
-            <Avatar className="h-40 w-40 border-2 border-gray-300 hover:border-blue-500">
-              <AvatarImage src={avatarUrl || "https://github.com/shadcn.png"} />
-              <AvatarFallback>NA</AvatarFallback>
-            </Avatar>
-          </div>
-
-          {showAvatarOptions && (
-            <div className="absolute top-full mt-2 bg-white border rounded shadow w-56 text-sm z-10">
-              <button
-                onClick={handleChooseFile}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                Đổi ảnh đại diện
-              </button>
-            </div>
-          )}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="relative">
+                  <Avatar className="h-40 w-40 border-2 border-gray-300">
+                    <AvatarImage src={avatarUrl || "https://github.com/shadcn.png"} />
+                    <AvatarFallback>NA</AvatarFallback>
+                  </Avatar>
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <Camera className="h-5 w-5 text-gray-600" />
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Nhấp vào icon để thay đổi ảnh đại diện</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Display Name */}
