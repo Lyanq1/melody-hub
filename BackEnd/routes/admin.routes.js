@@ -1,8 +1,8 @@
 import express from 'express'
-import { getAllArtists } from '../controllers/artist.controller.js'
+import { placeholder } from '../controllers/admin.controller.js'
 
 const router = express.Router()
 
-router.get('/', getAllArtists)
+router.get('/', placeholder)
 
 export default router

@@ -1,11 +1,16 @@
-import express from 'express'
-import { register, login, facebookLogin, updateUserInfo, getUserInfo } from '../controllers/auth.controller.js'
+import { Router } from 'express';
+import { register, login, facebookLogin, updateUserInfo, getUserInfo } from '../controllers/auth.controller.js';
+import { verifyToken } from '../middleware/auth.middleware.js';
 
-const router = express.Router()
+const router = Router();
 
-router.post('/register', register)
-router.post('/login', login)
-router.post('/facebook', facebookLogin)
-router.put('/user/:username', updateUserInfo)
-router.get('/user/:username', getUserInfo)
-export default router
+// Auth routes
+router.post('/register', register);
+router.post('/login', login);
+router.post('/facebook', facebookLogin);
+
+// User routes (protected)
+router.put('/user/:username', verifyToken, updateUserInfo);
+router.get('/user/:username', verifyToken, getUserInfo);
+
+export default router;

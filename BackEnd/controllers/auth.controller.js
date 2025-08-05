@@ -12,6 +12,7 @@ import sendVerificationEmail from '../utils/email.js'
 
 // Đăng ký
 export const register = async (req, res) => {
+
   console.log('Register endpoint hit with data:', JSON.stringify(req.body, null, 2))
   const { username, password, email, displayName, phone, address, role } = req.body
 

@@ -36,7 +36,7 @@ const accountSchema = new mongoose.Schema({
   },
   Role: {
     type: String,
-    enum: ['Customer', 'Artist', 'Admin'],
+    enum: ['Customer', 'Admin'],
     default: 'Customer'
   },
   Phone: {

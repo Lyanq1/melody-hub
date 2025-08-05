@@ -2,6 +2,7 @@ import Disc from '../models/disc.model.js'
 // nháp comment
 
 export const getAllDiscs = async (req, res) => {
+  
   try {
     const discs = await Disc.find({})
     console.log(discs)

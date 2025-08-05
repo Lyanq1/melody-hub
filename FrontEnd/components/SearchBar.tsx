@@ -64,9 +64,9 @@ export default function SearchBar() {
     }
   }
 
-  const handleSuggestionClick = (name: string) => {
-    router.push(`/product?search=${encodeURIComponent(name)}`)
-    setQuery(name)
+  const handleSuggestionClick = (product: Product) => {
+    router.push(`/product/${product._id}`)
+    setQuery(product.name)
     setSuggestions([])
     setShowSuggestions(false)
   }
@@ -92,7 +92,7 @@ export default function SearchBar() {
           {suggestions.map((item) => (
             <li
               key={item._id}
-              onClick={() => handleSuggestionClick(item.name)}
+              onClick={() => handleSuggestionClick(item)}
               className='flex items-center gap-3 px-4 py-2 text-sm text-white hover:bg-[#3d3b3a] cursor-pointer transition duration-150'
             >
               <Image src={item.image} alt={item.name} width={48} height={48} className='rounded-lg' />
