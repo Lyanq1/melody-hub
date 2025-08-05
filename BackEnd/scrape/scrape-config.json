@@ -3,7 +3,7 @@
     "enabled": true,
     "cronExpression": "*/30 * * * *"
   },
-  "lastRun": "2025-07-22T02:49:15.993Z",
+  "lastRun": "2025-08-05T14:00:00.035Z",
   "sources": [
     {
       "name": "hangDiaThoiDai",
