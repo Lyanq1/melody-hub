@@ -1,19 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
+import { Camera } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Profile() {
   const router = useRouter();
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
 
@@ -39,7 +46,6 @@ export default function Profile() {
           setPhone(data.Phone || "");
           setAddress(data.Address || "");
           setAvatarUrl(data.AvatarURL || "");
-
         })
         .catch((err) => {
           console.error("Lỗi khi tải thông tin người dùng:", err);
@@ -54,9 +60,22 @@ export default function Profile() {
   }, []);
 
   const handleLogout = () => {
+    // Remove local storage items
     localStorage.removeItem("username");
     localStorage.removeItem("token");
-    router.push("/");
+    
+    // Create and dispatch the logout event
+    const logoutEvent = new CustomEvent('user-logout', {
+      detail: { timestamp: Date.now() }
+    });
+    
+    // Use setTimeout to ensure event is processed before navigation
+    window.dispatchEvent(logoutEvent);
+    
+    // Small delay to ensure state updates complete
+    setTimeout(() => {
+      router.push("/");
+    }, 100);
   };
 
   const handleSave = async () => {
@@ -68,6 +87,10 @@ export default function Profile() {
         Phone: phone,
         AvatarURL: avatarUrl,
       });
+      
+      // Dispatch event before toast to ensure immediate update
+      window.dispatchEvent(new Event('avatar-update'));
+      
       toast.success("Cập nhật thông tin thành công!");
       setDisplayedName(fullName);
     } catch (err) {
@@ -76,69 +99,82 @@ export default function Profile() {
     }
   };
 
+  // When file is selected for avatar
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setAvatarUrl(base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row max-w-6xl mx-auto px-4 py-10 gap-10">
       {/* Sidebar */}
-    <aside className="space-y-4 text-sm font-medium w-64">
-      <div className="border-b pb-2">
-        <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">
-          Thông tin tài khoản
-        </p>
-      </div>
+      <aside className="space-y-4 text-sm font-medium w-64">
+        <div className="border-b pb-2">
+          <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">
+            Thông tin tài khoản
+          </p>
+        </div>
 
-      <div className="border-b pb-2 cursor-pointer hover:text-blue-600">
-        <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">Đơn hàng đã mua</p>
-      </div>
+        <div className="border-b pb-2 cursor-pointer hover:text-blue-600">
+          <p className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer">
+            Đơn hàng đã mua
+          </p>
+        </div>
 
-      <div className="border-b pb-2 cursor-pointer hover:text-red-600">
-        <button
-          onClick={handleLogout}
-          className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer text-left"
-        >
-          Thoát
-        </button>
-      </div>
-    </aside>
-
-
-
+        <div className="border-b pb-2 cursor-pointer hover:text-red-600">
+          <button
+            onClick={handleLogout}
+            className="text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer text-left"
+          >
+            Thoát
+          </button>
+        </div>
+      </aside>
 
       {/* Main content */}
-      <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow space-y-7">
-
+      <div className="w-full md:w-3/4 bg-white p-6 rounded-lg shadow space-y-7 relative">
         {/* Avatar */}
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           id="avatar-upload"
           className="hidden"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              // Convert to base64 để lưu vào DB
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                const base64 = reader.result as string;
-                setAvatarUrl(base64); // Set base64 để xem trước và lưu
-              };
-              reader.readAsDataURL(file);
-            }
-          }}
+          onChange={handleFileChange}
         />
 
+        <div className="flex justify-center relative">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="relative">
+                  <Avatar className="h-40 w-40 border-2 border-gray-300">
+                    <AvatarImage src={avatarUrl || "https://github.com/shadcn.png"} />
+                    <AvatarFallback>NA</AvatarFallback>
+                  </Avatar>
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <Camera className="h-5 w-5 text-gray-600" />
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Nhấp vào icon để thay đổi ảnh đại diện</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
 
-        <label htmlFor="avatar-upload" className="cursor-pointer">
-          <div className="flex justify-center">
-            <Avatar className="h-40 w-40 border-2 border-gray-300 hover:border-blue-500">
-              <AvatarImage src={avatarUrl || "https://github.com/shadcn.png"} />
-              <AvatarFallback>NA</AvatarFallback>
-            </Avatar>
-          </div>
-        </label>
-
-
-
-        {/* Tên hiển thị */}
+        {/* Display Name */}
         <div className="space-y-2">
           <Label className="text-lg font-semibold">Tên hiển thị *</Label>
           {loading ? (
@@ -166,7 +202,7 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Địa chỉ */}
+        {/* Address */}
         <div className="space-y-2">
           <Label className="text-lg font-semibold">Địa chỉ *</Label>
           {loading ? (
@@ -180,7 +216,7 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Số điện thoại */}
+        {/* Phone */}
         <div className="space-y-2">
           <Label className="text-lg font-semibold">Số điện thoại *</Label>
           {loading ? (
@@ -207,4 +243,3 @@ export default function Profile() {
     </div>
   );
 }
-
