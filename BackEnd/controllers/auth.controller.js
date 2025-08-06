@@ -3,8 +3,8 @@ import {
   findAccountByUsername,
   findAccountByEmail,
   findOrCreateFacebookAccount
-} from '../models/account.model.js'
-import Account from '../models/account.model.js'
+} from '../models/auth/account.model.js'
+import Account from '../models/auth/account.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import axios from 'axios'

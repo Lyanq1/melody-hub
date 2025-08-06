@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Account from './account.model.js';
+import Account from '../auth/account.model.js';
 
 export const createCustomer = async (accountID, phone, address) => {
   try {

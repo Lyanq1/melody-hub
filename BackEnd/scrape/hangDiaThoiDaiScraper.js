@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
-import Disc from '../models/disc.model.js';
+import Disc from '../models/product/disc.model.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

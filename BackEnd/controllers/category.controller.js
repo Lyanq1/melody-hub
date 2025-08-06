@@ -1,4 +1,4 @@
-import Category from '../models/category.model.js';
+import Category from '../models/product/category.model.js';
 import { ObjectId } from 'mongodb';
 
 // Get all categories

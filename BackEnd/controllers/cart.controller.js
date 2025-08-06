@@ -1,5 +1,5 @@
-import Cart from '../models/cart.model.js';
-import Disc from '../models/disc.model.js';
+import Cart from '../models/order/cart.model.js';
+import Disc from '../models/product/disc.model.js';
 
 // Get cart by user ID
 export const getCartByUserId = async (req, res) => {

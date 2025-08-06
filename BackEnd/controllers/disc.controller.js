@@ -1,4 +1,4 @@
-import Disc from '../models/disc.model.js'
+import Disc from '../models/product/disc.model.js'
 import redisClient from '../config/redis.js'
 
 const CACHE_EXPIRATION = 500; // Cache for 1 hour
