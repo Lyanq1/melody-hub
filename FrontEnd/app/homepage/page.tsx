@@ -31,7 +31,7 @@ export default function Homepage() {
   if (loading) {
     return (
       <div className='min-h-[60vh] flex flex-col items-center justify-center p-4'>
-        <div className="animate-pulse text-xl">Loading products...</div>
+        <div className='animate-pulse text-xl'>Loading products...</div>
       </div>
     )
   }
