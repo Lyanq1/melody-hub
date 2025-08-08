@@ -23,6 +23,7 @@
     "mongoose": "^8.15.2",
     "mysql2": "^3.14.1",
     "node-cron": "^4.2.1",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.3",
     "nodemon": "^3.1.10",
     "puppeteer": "^24.14.0",

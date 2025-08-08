@@ -11,8 +11,8 @@ import axios from 'axios'
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [cartCount, setCartCount] = useState(0)
-  const [avatarUrl, setAvatarUrl] = useState("")
-  const [username, setUsername] = useState("")
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [username, setUsername] = useState('')
 
   // Cart count effect
   useEffect(() => {
@@ -31,9 +31,9 @@ export const Navbar = () => {
   const fetchUserData = async (username: string) => {
     try {
       const res = await axios.get(`http://localhost:5000/api/auth/user/${username}`)
-      setAvatarUrl(res.data.AvatarURL || "")
+      setAvatarUrl(res.data.AvatarURL || '')
     } catch (err) {
-      console.error("Error fetching user data:", err)
+      console.error('Error fetching user data:', err)
     }
   }
 
@@ -56,14 +56,14 @@ export const Navbar = () => {
       const tokenvalue = localStorage.getItem('token')
       const storedUsername = localStorage.getItem('username')
       const loggedIn = !!tokenvalue
-      
+
       setIsLoggedIn(loggedIn)
-      setUsername(storedUsername || "")
+      setUsername(storedUsername || '')
 
       if (loggedIn && storedUsername) {
         fetchUserData(storedUsername)
       } else {
-        setAvatarUrl("")
+        setAvatarUrl('')
       }
     }
 
@@ -74,9 +74,9 @@ export const Navbar = () => {
     const handleLogout = () => {
       // Immediately update state
       setIsLoggedIn(false)
-      setUsername("")
-      setAvatarUrl("")
-      
+      setUsername('')
+      setAvatarUrl('')
+
       // Force a re-render by updating login state
       updateLoginState()
     }
@@ -88,7 +88,7 @@ export const Navbar = () => {
 
     window.addEventListener('user-logout', handleLogout)
     window.addEventListener('storage', handleStorageChange)
-    
+
     return () => {
       window.removeEventListener('user-logout', handleLogout)
       window.removeEventListener('storage', handleStorageChange)
@@ -102,6 +102,7 @@ export const Navbar = () => {
         <div className='flex gap-10 text-center'>
           <Link href='/'>Home</Link>
           <Link href='/product'>Products</Link>
+          <Link href='/worldmap'>World Vinyl</Link>
         </div>
         <SearchBar />
 
@@ -133,10 +134,10 @@ export const Navbar = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className='flex items-center gap-2 focus:outline-none'>
-                <Avatar className="h-[35px] w-[35px] cursor-pointer">
-                  <AvatarImage src={avatarUrl || "https://github.com/shadcn.png"} />
-                  <AvatarFallback className="text-sm">
-                    {username ? username.charAt(0).toUpperCase() : "U"}
+                <Avatar className='h-[35px] w-[35px] cursor-pointer'>
+                  <AvatarImage src={avatarUrl || 'https://github.com/shadcn.png'} />
+                  <AvatarFallback className='text-sm'>
+                    {username ? username.charAt(0).toUpperCase() : 'U'}
                   </AvatarFallback>
                 </Avatar>
               </button>

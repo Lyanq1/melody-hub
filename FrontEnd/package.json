@@ -29,6 +29,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.6.2",
+    "react-svg-worldmap": "^2.0.0-alpha.16",
     "react-toastify": "^11.0.5",
     "recharts": "^3.0.2",
     "sonner": "^2.0.5",
