@@ -1,7 +1,7 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 import { SpeakerWaveIcon } from '@heroicons/react/24/outline'
@@ -33,13 +33,14 @@ interface Product {
   trackList?: string[]
 }
 
-export default function ProductDetail({ params }: { params: { id: string } }) {
+export default function ProductDetail({ params }: { params: Promise< { id: string }> }) {
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [similarProducts, setSimilarProducts] = useState<Product[]>([])
   const router = useRouter()
+  const {id} = use(params)
 
   // Extract artist name from product name (everything before the first '-')
   const extractArtistFromName = (name: string): string => {
@@ -60,12 +61,12 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/product/${params.id}`)
+        const response = await axios.get(`http://localhost:5000/api/product/${id}`)
         setProduct(response.data)
         
         // Check if product is in wishlist
         const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]')
-        setIsInWishlist(wishlist.some((item: { id: string }) => item.id === params.id))
+        setIsInWishlist(wishlist.some((item: { id: string }) => item.id === id))
         
         // Fetch similar products
         fetchSimilarProducts(response.data.categoryId)
@@ -78,7 +79,7 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
     }
 
     fetchProduct()
-  }, [params.id])
+  }, [id])
 
   const fetchSimilarProducts = async (categoryId: string) => {
     if (!categoryId) return
@@ -87,7 +88,7 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
       const response = await axios.get(`http://localhost:5000/api/product?category=${categoryId}`)
       // Filter out current product and limit to 4 items
       const filtered = response.data
-        .filter((item: Product) => item._id !== params.id)
+        .filter((item: Product) => item._id !== id)
         .slice(0, 4)
       
       setSimilarProducts(filtered)

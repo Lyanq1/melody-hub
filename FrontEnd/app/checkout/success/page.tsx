@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { verifyMoMoPayment } from '@/lib/services/payment'
 
-export default function CheckoutSuccess() {
+function CheckoutSuccessContent() {
   // const router = useRouter();
   const searchParams = useSearchParams()
   const [verifying, setVerifying] = useState(true)
@@ -136,5 +136,24 @@ export default function CheckoutSuccess() {
         )}
       </div>
     </div>
+  )
+}
+export default function CheckoutSuccess() {
+  return (
+    <Suspense fallback={
+      <div className='container mx-auto px-4 py-8'>
+        <div className='max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden md:max-w-2xl p-8'>
+          <div className='text-center'>
+            <div className='mb-4'>
+              <div className='w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto'></div>
+            </div>
+            <h1 className='text-2xl font-bold text-gray-800 mb-4'>Loading...</h1>
+            <p className='text-gray-600'>Please wait...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <CheckoutSuccessContent />
+    </Suspense>
   )
 }

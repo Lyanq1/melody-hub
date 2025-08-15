@@ -1,7 +1,7 @@
 'use client'
 import Ecatalog from '@/components/ECatalog'
 import { ProductCard } from '@/components/ui/product-card'
-import { useEffect, useState } from 'react'
+import { useEffect, useState,  Suspense} from 'react'
 import ProductCategory from '../homepage/components/ProductCategory'
 import { useSearchParams } from 'next/navigation'
 // Import các component Pagination từ Shadcn UI
@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/pagination' // Điều chỉnh đường dẫn import nếu cần thiết
 import axios from 'axios'
 
-export default function Products() {
+function ProductsContent() {
   type Product = {
     _id: string
     name: string
@@ -206,5 +206,38 @@ export default function Products() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Products() {
+  return (
+    <Suspense fallback={
+      <div className='container mx-auto py-8'>
+        <div className='flex flex-col sm:flex-row gap-6'>
+          <div className='w-full sm:w-64 mb-8 sm:mb-0 sm:pr-8'>
+            <div className='animate-pulse'>
+              <div className='h-8 bg-gray-200 rounded mb-4'></div>
+              <div className='space-y-2'>
+                {Array(4).fill(0).map((_, i) => (
+                  <div key={i} className='h-6 bg-gray-200 rounded'></div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className='flex-1'>
+            <div className='animate-pulse'>
+              <div className='h-10 bg-gray-200 rounded mb-8'></div>
+              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+                {Array(16).fill(0).map((_, i) => (
+                  <div key={i} className='aspect-[3/4] bg-gray-200 rounded'></div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   )
 }

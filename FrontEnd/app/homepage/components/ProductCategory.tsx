@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -13,7 +14,7 @@ const categories = [
   { label: 'Merch', value: '687a5c8eaea60fd849fc084a' }
 ]
 
-export default function ProductCategory() {
+function ProductCategoryContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const selected = searchParams.get('category') || ''
@@ -48,5 +49,24 @@ export default function ProductCategory() {
         ))}
       </ul>
     </aside>
+  )
+}
+
+export default function ProductCategory() {
+  return (
+    <Suspense fallback={
+      <aside className='w-full sm:w-64 mb-8 sm:mb-0 sm:pr-8'>
+        <div className='animate-pulse'>
+          <div className='h-8 bg-gray-200 rounded mb-4'></div>
+          <div className='space-y-2'>
+            {Array(4).fill(0).map((_, i) => (
+              <div key={i} className='h-6 bg-gray-200 rounded'></div>
+            ))}
+          </div>
+        </div>
+      </aside>
+    }>
+      <ProductCategoryContent />
+    </Suspense>
   )
 }
