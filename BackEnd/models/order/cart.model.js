@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { ObjectId } from 'mongodb';
 
 const cartItemSchema = new mongoose.Schema({
   discId: {
-    type: ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Disc',
     required: true
   },
   quantity: {
@@ -15,19 +15,23 @@ const cartItemSchema = new mongoose.Schema({
 
 const cartSchema = new mongoose.Schema({
   userId: {
-    type: Number,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account', // Assuming your user model is named 'Account'
     required: true
   },
   items: [cartItemSchema],
   total: {
-    type: Number,
-    default: 0
+    type: String,
+    default: '0'
   }
 }, {
   collection: 'cart',
   timestamps: true
 });
 
+// Add index for faster queries
+cartSchema.index({ userId: 1 });
+
 const Cart = mongoose.model('Cart', cartSchema);
 
-export default Cart; 
+export default Cart;

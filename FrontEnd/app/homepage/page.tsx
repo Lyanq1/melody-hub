@@ -5,6 +5,7 @@ import { ProductCard } from './components/ProductCard'
 import Carousel from './components/Carousel'
 import axios from 'axios'
 
+
 export default function Homepage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
