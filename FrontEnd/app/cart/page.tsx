@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Trash2, Plus, Minus } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-
+import Link from 'next/link'
 type CartItem = {
   id: string
   name: string
@@ -74,10 +74,10 @@ export default function Cart() {
         <h2 className='text-2xl font-semibold text-gray-800 mb-4'>Bạn hiện chưa có sản phẩm nào trong giỏ hàng!</h2>
         <div className='flex gap-4 flex-wrap justify-center'>
           <Button asChild className='bg-primary hover:bg-primary/90'>
-            <a href='/product'>Tiếp tục mua sắm</a>
+            <Link href='/product'>Tiếp tục mua sắm</Link>
           </Button>
           <Button asChild className='bg-primary hover:bg-primary/90'>
-            <a href='/wishlist'>Wishlist của tôi</a>
+            <Link href='/wishlist'>Wishlist của tôi</Link>
           </Button>
         </div>
       </div>
