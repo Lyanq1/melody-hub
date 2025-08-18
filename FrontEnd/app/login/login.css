@@ -114,6 +114,19 @@
     align-items: center;
 }
 
+.wrapper .forgot-password-link{
+    text-align: right;
+    font-size: 14.5px;
+    margin: -15px 0 15px;
+}
+.wrapper .forgot-password-link a{
+    color: #000000;
+    text-decoration: none;
+}
+.wrapper .forgot-password-link a:hover{
+    text-decoration: underline;
+}
+
 .wrapper .register-link{
     text-align: center;
     font-size: 14.5px;

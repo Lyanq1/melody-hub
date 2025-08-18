@@ -2,13 +2,15 @@ import {
   createAccount,
   findAccountByUsername,
   findAccountByEmail,
-  findOrCreateFacebookAccount
+  findOrCreateFacebookAccount,
+  updateAccount
 } from '../models/auth/account.model.js'
 import Account from '../models/auth/account.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import axios from 'axios'
-import sendVerificationEmail from '../utils/email.js'
+import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email.js'
+import { createResetToken, findResetToken, markTokenAsUsed } from '../models/auth/resettoken.model.js'
 
 // Đăng ký
 export const register = async (req, res) => {
@@ -251,3 +253,132 @@ export const updateUserInfo = async (req, res) => {
   }
 }
 
+// Hàm tạo mã xác thực ngẫu nhiên
+const generateResetToken = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // 6 chữ số
+};
+
+// Gửi mã xác thực khôi phục mật khẩu
+export const requestPasswordReset = async (req, res) => {
+  const { username } = req.body;
+
+  try {
+    // Tìm tài khoản theo username
+    const account = await findAccountByUsername(username);
+    if (!account) {
+      return res.status(404).json({ message: 'Tài khoản không tồn tại' });
+    }
+
+    // Kiểm tra xem tài khoản có email không
+    if (!account.Email) {
+      return res.status(400).json({ message: 'Tài khoản này không có email để gửi mã xác thực' });
+    }
+
+    // Kiểm tra format email (optional - nếu muốn validation chặt chẽ hơn)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(account.Email)) {
+      return res.status(400).json({ message: 'Email không hợp lệ' });
+    }
+
+    // Tạo mã xác thực
+    const resetToken = generateResetToken();
+
+    // Lưu token vào database
+    await createResetToken(account.Username, account.Email, resetToken, 15); // 15 phút
+
+    // Gửi email chứa mã xác thực
+    await sendPasswordResetEmail(account.Email, account.DisplayName, resetToken);
+
+    res.status(200).json({ 
+      message: 'Mã xác thực đã được gửi đến email của bạn',
+      email: account.Email // Trả về email để frontend có thể hiển thị
+    });
+  } catch (error) {
+    console.error('Error requesting password reset:', error);
+    res.status(500).json({ message: 'Lỗi khi gửi mã xác thực', error: error.message });
+  }
+};
+
+// Xác thực mã reset password
+export const verifyResetCode = async (req, res) => {
+  const { username, token } = req.body;
+
+  try {
+    console.log('Verifying reset code for username:', username, 'token:', token);
+
+    // Tìm tài khoản
+    const account = await findAccountByUsername(username);
+    if (!account) {
+      console.log('Account not found for username:', username);
+      return res.status(404).json({ message: 'Tài khoản không tồn tại' });
+    }
+
+    console.log('Account found:', account.Username);
+
+    // Tìm và xác thực token
+    const resetToken = await findResetToken(token);
+    if (!resetToken) {
+      console.log('Reset token not found or expired for token:', token);
+      return res.status(400).json({ message: 'Mã xác thực không hợp lệ hoặc đã hết hạn' });
+    }
+
+    console.log('Reset token found:', {
+      username: resetToken.username,
+      token: resetToken.token,
+      isUsed: resetToken.isUsed,
+      expiresAt: resetToken.expiresAt
+    });
+
+    // Kiểm tra xem token có đúng cho username này không
+    if (resetToken.username !== username) {
+      console.log('Token username mismatch:', resetToken.username, 'vs', username);
+      return res.status(400).json({ message: 'Mã xác thực không đúng cho tài khoản này' });
+    }
+
+    console.log('Token verification successful');
+    res.status(200).json({ message: 'Mã xác thực hợp lệ' });
+  } catch (error) {
+    console.error('Error verifying reset code:', error);
+    res.status(500).json({ message: 'Lỗi khi xác thực mã', error: error.message });
+  }
+};
+
+// Xác thực mã và đặt lại mật khẩu
+export const resetPassword = async (req, res) => {
+  const { username, token, newPassword } = req.body;
+
+  try {
+    // Tìm tài khoản
+    const account = await findAccountByUsername(username);
+    if (!account) {
+      return res.status(404).json({ message: 'Tài khoản không tồn tại' });
+    }
+
+    // Tìm và xác thực token
+    const resetToken = await findResetToken(token);
+    if (!resetToken) {
+      return res.status(400).json({ message: 'Mã xác thực không hợp lệ hoặc đã hết hạn' });
+    }
+
+    // Kiểm tra xem token có đúng cho username này không
+    if (resetToken.username !== username) {
+      return res.status(400).json({ message: 'Mã xác thực không đúng cho tài khoản này' });
+    }
+
+    // Kiểm tra xem token đã được sử dụng chưa
+    if (resetToken.isUsed) {
+      return res.status(400).json({ message: 'Mã xác thực đã được sử dụng' });
+    }
+
+    // Cập nhật mật khẩu mới (sẽ được hash trong pre-save middleware)
+    await updateAccount(account._id, { Password: newPassword });
+
+    // Đánh dấu token đã sử dụng
+    await markTokenAsUsed(token);
+
+    res.status(200).json({ message: 'Mật khẩu đã được đặt lại thành công' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ message: 'Lỗi khi đặt lại mật khẩu', error: error.message });
+  }
+};

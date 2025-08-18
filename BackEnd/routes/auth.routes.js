@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { register, login, facebookLogin, updateUserInfo, getUserInfo, checkDashboardAccess, getCurrentUser } from '../controllers/auth.controller.js';
+import { register, login, facebookLogin, updateUserInfo, getUserInfo, checkDashboardAccess, getCurrentUser,
+    requestPasswordReset, verifyResetCode, resetPassword
+ } from '../controllers/auth.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = Router();
@@ -12,6 +14,11 @@ router.post('/facebook', facebookLogin);
 // User routes (protected)
 router.put('/user/:username', verifyToken, updateUserInfo);
 router.get('/user/:username', verifyToken, getUserInfo);
+
+// Password reset routes
+router.post('/forgot-password', requestPasswordReset);
+router.post('/verify-reset-code', verifyResetCode);
+router.post('/reset-password', resetPassword);
 
 // Dashboard access check (protected)
 router.get('/dashboard/access', verifyToken, checkDashboardAccess);

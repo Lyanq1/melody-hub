@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import './register.css'
-
+import { AUTH_ENDPOINTS } from '@/lib/config'
 export default function RegisterPage() {
   // Định nghĩa interface cho formData
   interface FormData {
@@ -62,7 +62,7 @@ export default function RegisterPage() {
     }
     // http://localhost:5000/api/auth/register
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', formData, {
+      const response = await axios.post(AUTH_ENDPOINTS.REGISTER, formData, {
         headers: {
           'Content-Type': 'application/json'
         }

@@ -14,7 +14,7 @@ const accountSchema = new mongoose.Schema({
     type: String,
     required: function() {
       // Password is required only for non-Facebook accounts
-      return !this.Username.startsWith('fb_');
+      return this.Username && !this.Username.startsWith('fb_');
     }
   },
   Email: {
@@ -154,12 +154,18 @@ export const findOrCreateFacebookAccount = async (facebookId, email, displayName
 // Hàm cập nhật thông tin tài khoản
 export const updateAccount = async (accountId, updateData) => {
   try {
-    const account = await Account.findByIdAndUpdate(
-      accountId,
-      { ...updateData, UpdatedAt: new Date() },
-      { new: true, runValidators: true }
-    );
-    return account;
+    const account = await Account.findById(accountId);
+    if (!account) {
+      throw new Error('Account not found');
+    }
+    
+    // Cập nhật các trường
+    Object.assign(account, updateData);
+    account.UpdatedAt = new Date();
+    
+    // Lưu để trigger pre-save middleware (hash password)
+    const updatedAccount = await account.save();
+    return updatedAccount;
   } catch (error) {
     throw new Error('Error updating account: ' + error.message);
   }

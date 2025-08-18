@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import './login.css'
 import { toast } from 'sonner'
+import { AUTH_ENDPOINTS } from '@/lib/config'
 declare global {
   interface Window {
     FB: any
@@ -52,7 +53,7 @@ const LoginPage = () => {
     setError('')
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { username, password })
+      const response = await axios.post(AUTH_ENDPOINTS.LOGIN, { username, password })
       const { token, user } = response.data
       
       // Lưu token và thông tin user vào localStorage
@@ -107,7 +108,7 @@ const LoginPage = () => {
               })
 
             axios
-              .post('https://melody-hub-vhml.onrender.com/api/auth/facebook', { accessToken, role })
+              .post(AUTH_ENDPOINTS.FACEBOOK_LOGIN, { accessToken, role })
               .then((res) => {
                 const { token, user } = res.data
                 
@@ -173,7 +174,11 @@ const LoginPage = () => {
               required
             />
           </div>
-
+          <div className='forgot-password-link'>
+            <a href='/forgot-password' style={{ fontFamily: 'MicaValo' }}>
+              Forgot Password?
+            </a>
+          </div>
           <button type='submit' disabled={isLoading} className='btn font-[Tangkiwood] mt-5'>
             <span>{isLoading ? 'Logging in...' : 'LOGIN'}</span>
           </button>
