@@ -7,7 +7,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import SearchBar from '../SearchBar'
 import axios from 'axios'
+import { cartService } from '@/lib/services/cart'
 import { useAuth } from '@/hooks/use-auth'
+import { User2Icon } from 'lucide-react'
 
 export const Navbar = () => {
   const { user, isAdmin, isAuthenticated, logout } = useAuth()
@@ -17,18 +19,41 @@ export const Navbar = () => {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [username, setUsername] = useState('')
 
-  // Cart count effect
+  const handleLogout = () => {
+    logout()
+    // Redirect to home after logout
+    if (typeof window !== 'undefined') {
+      window.location.href = '/'
+    }
+  }
+
+  // Cart count effect (sync with DB by user)
   useEffect(() => {
-    const getCartCount = () => {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]')
-      const uniqueCount = cart.length
-      setCartCount(uniqueCount)
+    let isMounted = true
+
+    const fetchCartCount = async () => {
+      try {
+        if (!isAuthenticated || !user?.accountID) {
+          if (isMounted) setCartCount(0)
+          return
+        }
+        const cart = await cartService.getCartByUserId(user.accountID)
+        if (isMounted) setCartCount(cart?.items?.length || 0)
+      } catch (error) {
+        console.error('Error fetching cart count:', error)
+        if (isMounted) setCartCount(0)
+      }
     }
 
-    getCartCount()
-    window.addEventListener('cart-updated', getCartCount)
-    return () => window.removeEventListener('cart-updated', getCartCount)
-  }, [])
+    fetchCartCount()
+
+    const onCartUpdated = () => fetchCartCount()
+    window.addEventListener('cart-updated', onCartUpdated)
+    return () => {
+      isMounted = false
+      window.removeEventListener('cart-updated', onCartUpdated)
+    }
+  }, [isAuthenticated, user?.accountID])
 
   // Fetch user data function
   const fetchUserData = async (username: string) => {
@@ -40,18 +65,10 @@ export const Navbar = () => {
     }
   }
 
-  // Helper function để lấy username từ cookies
-  const getCookie = (name: string): string | null => {
-    const value = `; ${document.cookie}`
-    const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop()?.split(';').shift() || null
-    return null
-  }
-
   // Handle avatar updates
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      const storedUsername = getCookie('username')
+      const storedUsername = localStorage.getItem('username')
       if (storedUsername) {
         fetchUserData(storedUsername)
       }
@@ -64,7 +81,7 @@ export const Navbar = () => {
   // Handle login state and initial data fetch
   useEffect(() => {
     const updateLoginState = () => {
-      const storedUsername = getCookie('username')
+      const storedUsername = localStorage.getItem('username')
       setUsername(storedUsername || '')
 
       if (isAuthenticated && storedUsername) {
@@ -254,21 +271,7 @@ export const Navbar = () => {
                       href='/profile'
                       className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
                     >
-                      <svg
-                        xmlns='http://www.w3.org/2000/svg'
-                        width='24'
-                        height='24'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='#ffffff'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        className='lucide lucide-user-icon lucide-user transition-colors duration-200 group-hover:stroke-black'
-                      >
-                        <path d='M20 21v-2a4 4 0 0 0-4 4v2' />
-                        <circle cx='12' cy='7' r='4' />
-                      </svg>
+                      <User2Icon className='w-4 h-4' />
                       Tài khoản
                     </Link>
                   </DropdownMenuItem>
@@ -329,7 +332,7 @@ export const Navbar = () => {
                   
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
-                    onClick={logout}
+                    onClick={handleLogout}
                     className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200 cursor-pointer'
                   >
                     <svg

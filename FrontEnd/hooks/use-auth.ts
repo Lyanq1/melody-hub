@@ -22,24 +22,6 @@ interface AuthState {
 
 const API_BASE_URL = 'http://localhost:5000/api'
 
-// Helper functions để làm việc với cookies
-const setCookie = (name: string, value: string, days: number = 7) => {
-  const expires = new Date()
-  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
-  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
-}
-
-const getCookie = (name: string): string | null => {
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; ${name}=`)
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null
-  return null
-}
-
-const removeCookie = (name: string) => {
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`
-}
-
 export const useAuth = (): AuthState & {
   login: (token: string, user: User) => void
   logout: () => void
@@ -62,7 +44,7 @@ export const useAuth = (): AuthState & {
 
   const checkAuthStatus = async () => {
     try {
-      const token = getCookie('token')
+      const token = localStorage.getItem('token')
       console.log('🔍 Checking auth status, token:', token ? 'Present' : 'Missing')
       
       if (!token) {
@@ -81,9 +63,7 @@ export const useAuth = (): AuthState & {
       // Kiểm tra token với backend
       console.log('🔐 Validating token with backend...')
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
       })
 
       console.log('📡 Backend response status:', response.status)
@@ -103,10 +83,10 @@ export const useAuth = (): AuthState & {
           isAuthenticated: true
         })
       } else {
-        // Token không hợp lệ, xóa khỏi cookies
-        console.log('❌ Token invalid, clearing cookies')
-        removeCookie('token')
-        removeCookie('username')
+        // Token không hợp lệ, xóa khỏi localStorage
+        console.log('❌ Token invalid, clearing localStorage')
+        localStorage.removeItem('token')
+        localStorage.removeItem('username')
         
         setAuthState({
           user: null,
@@ -131,8 +111,8 @@ export const useAuth = (): AuthState & {
   }
 
   const login = (token: string, user: User) => {
-    setCookie('token', token, 7) // Lưu token trong 7 ngày
-    setCookie('username', user.username, 7)
+    localStorage.setItem('token', token)
+    localStorage.setItem('username', user.username)
     
     setAuthState({
       user,
@@ -145,8 +125,8 @@ export const useAuth = (): AuthState & {
   }
 
   const logout = () => {
-    removeCookie('token')
-    removeCookie('username')
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
     
     setAuthState({
       user: null,
@@ -160,16 +140,14 @@ export const useAuth = (): AuthState & {
 
   const checkDashboardAccess = async (): Promise<boolean> => {
     try {
-      const token = getCookie('token')
+      const token = localStorage.getItem('token')
       
       if (!token) {
         return false
       }
 
       const response = await fetch(`${API_BASE_URL}/auth/dashboard/access`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
       })
 
       if (response.ok) {
@@ -186,16 +164,14 @@ export const useAuth = (): AuthState & {
 
   const refreshUserInfo = async () => {
     try {
-      const token = getCookie('token')
+      const token = localStorage.getItem('token')
       
       if (!token) {
         return
       }
 
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
       })
 
       if (response.ok) {

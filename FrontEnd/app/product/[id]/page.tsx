@@ -13,6 +13,8 @@ import { ProductCard } from '@/components/ui/product-card'
 import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cartService } from '@/lib/services/cart'
+import { getCurrentUserId, isAuthenticated } from '@/lib/utils'
 
 interface Product {
   _id: string
@@ -114,31 +116,39 @@ export default function ProductDetail({ params }: { params: Promise< { id: strin
     setQuantity(quantity + 1)
   }
 
-  const addToCart = () => {
+  const addToCart = async () => {
     if (!product) return
 
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]')
-    const existingItem = cart.find((item: { id: string }) => item.id === product._id)
-
-    if (existingItem) {
-      existingItem.quantity += quantity
-    } else {
-      cart.push({
-        id: product._id,
-        name: product.name,
-        price: product.price,
-        imageUrl: product.image,
-        quantity: quantity
-      })
+    try {
+      if (!isAuthenticated()) {
+        toast.error('Please login to add items to cart')
+        return
+      }
+      // Get user ID from authentication
+      const userId = getCurrentUserId()
+      if (!userId) {
+        toast.error('Unable to get user information')
+        return
+      }
+      
+      console.log(`🛒 Adding product to cart: ${product.name} (${product._id}) for user ${userId}`);
+      const result = await cartService.addToCart(userId, product._id, quantity)
+      
+      if (result) {
+        toast.success('Product added to cart', {
+          description: `${quantity} x "${product.name}" has been added successfully.`,
+          duration: 2500
+        })
+        
+        // Gửi sự kiện ra toàn window để Navbar biết
+        window.dispatchEvent(new Event('cart-updated'))
+      } else {
+        toast.error('Failed to add product to cart')
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+      toast.error('Failed to add product to cart')
     }
-
-    localStorage.setItem('cart', JSON.stringify(cart))
-    window.dispatchEvent(new Event('cart-updated'))
-
-    toast.success('Product added to cart', {
-      description: `${quantity} x "${product.name}" has been added successfully.`,
-      duration: 2500
-    })
   }
 
   const toggleWishlist = () => {

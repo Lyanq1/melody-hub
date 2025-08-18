@@ -44,21 +44,11 @@ export default function AdminPage() {
     }
   }, [isAdmin])
 
-  // Helper function để lấy token từ cookies
-  const getCookie = (name: string): string | null => {
-    const value = `; ${document.cookie}`
-    const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop()?.split(';').shift() || null
-    return null
-  }
-
   const fetchUsers = async () => {
     try {
-      const token = getCookie('token')
-      const response = await fetch('https://melody-hub-vhml.onrender.com/api/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const token = localStorage.getItem('token')
+      const response = await fetch('http://localhost:5000/api/admin/users', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
       })
       
       if (response.ok) {
@@ -91,12 +81,12 @@ export default function AdminPage() {
     if (!selectedUser) return
 
     try {
-      const token = getCookie('token')
-      const response = await fetch(`https://melody-hub-vhml.onrender.com/api/admin/users/${selectedUser._id}`, {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`http://localhost:5000/api/admin/users/${selectedUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify(editForm)
       })
@@ -120,12 +110,10 @@ export default function AdminPage() {
     if (!confirm('Bạn có chắc chắn muốn xóa người dùng này?')) return
 
     try {
-      const token = getCookie('token')
-      const response = await fetch(`https://melody-hub-vhml.onrender.com/api/admin/users/${userId}`, {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
       })
 
       if (response.ok) {
@@ -143,12 +131,12 @@ export default function AdminPage() {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      const token = getCookie('token')
-      const response = await fetch(`https://melody-hub-vhml.onrender.com/api/admin/users/${userId}/role`, {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/role`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({ newRole })
       })
@@ -183,7 +171,7 @@ export default function AdminPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Vui lòng đăng nhập</h1>
-          <p className="text-gray-600">Bạn cần đăng nhập để truy cập trang admin</p>
+          <p className="text-gray-600">Bạn cần đăng nhập để truy cập</p>
         </div>
       </div>
     )

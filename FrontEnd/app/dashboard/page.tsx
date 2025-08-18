@@ -69,21 +69,11 @@ export default function Dashboard() {
     )
   }
 
-  // Helper function để lấy token từ cookies
-  const getCookie = (name: string): string | null => {
-    const value = `; ${document.cookie}`
-    const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop()?.split(';').shift() || null
-    return null
-  }
-
   const fetchSystemStats = async () => {
     try {
-      const token = getCookie('token')
+      const token = localStorage.getItem('token')
       const response = await fetch('http://localhost:5000/api/admin/stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
       })
       
       if (response.ok) {

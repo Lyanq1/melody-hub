@@ -1,10 +1,12 @@
-import Image from 'next/image'
-import { Button } from './button'
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
+import Image from 'next/image'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { cartService } from '@/lib/services/cart'
+import { getCurrentUserId, isAuthenticated } from '@/lib/utils'
 
 interface ProductCardProps {
   id: string
@@ -16,20 +18,37 @@ interface ProductCardProps {
   onAddToCart?: (id: string) => void
 }
 
-const addToLocalStorage = (id: string, name: string, price: string, imageUrl: string) => {
-  const cart = JSON.parse(localStorage.getItem('cart') || '[]')
-  if (!cart.some((item: { id: string }) => item.id === id)) {
-    cart.push({ id, name, price, imageUrl, quantity: 1 })
-    localStorage.setItem('cart', JSON.stringify(cart))
-  }
-
-  // Gửi sự kiện ra toàn window để Navbar biết
-  window.dispatchEvent(new Event('cart-updated'))
-
-  toast.success('Product added to cart', {
-    description: `"${name}" has been added successfully.`,
-    duration: 2500
-  })
+const addToCart = async (discId: string, name: string) => {
+  try {
+    if (!isAuthenticated()) {
+      toast.error('Please login to add items to cart')
+      return
+    }
+        // Get user ID from authentication
+        const userId = getCurrentUserId()
+        if (!userId) {
+          toast.error('Unable to get user information')
+          return
+        }
+        
+        console.log(`🛒 Adding product to cart: ${name} (${discId}) for user ${userId}`);
+        const result = await cartService.addToCart(userId, discId, 1)
+        
+        if (result) {
+          toast.success('Product added to cart', {
+            description: `"${name}" has been added successfully.`,
+            duration: 2500
+          })
+          
+          // Gửi sự kiện ra toàn window để Navbar biết
+          window.dispatchEvent(new Event('cart-updated'))
+        } else {
+          toast.error('Failed to add product to cart')
+        }
+      } catch (error) {
+        console.error('Error adding to cart:', error)
+        toast.error('Failed to add product to cart')
+      }
 }
 
 const addToWishlist = (id: string, name: string, price: string, imageUrl: string) => {
@@ -93,7 +112,7 @@ export function ProductCard({ id, name, price, imageUrl, isNew = false, onAddToC
           className='w-full'
           onClick={() => {
             onAddToCart?.(id)
-            addToLocalStorage(id, name, price, imageUrl)
+            addToCart(id, name)
           }}
         >
           ADD TO CART

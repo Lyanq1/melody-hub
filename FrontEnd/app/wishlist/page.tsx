@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { cartService } from '@/lib/services/cart'
 
 interface WishlistItem {
   id: string
@@ -65,18 +66,35 @@ const WishlistPage = () => {
                     className='w-full sm:w-auto cursor-pointers hover:bg-primary hover:text-white'
                     variant='outline'
                     size='sm'
-                    onClick={() => {
-                      const cart = JSON.parse(localStorage.getItem('cart') || '[]')
-                      if (!cart.some((cartItem: { id: string }) => cartItem.id === item.id)) {
-                        cart.push({ ...item, quantity: 1 })
-                        localStorage.setItem('cart', JSON.stringify(cart))
-                        toast.success('Product added to cart', {
-                          duration: 2500
-                        })
-                      } else {
-                        toast.info('Product already in cart', {
-                          duration: 2000
-                        })
+                    onClick={async () => {
+                      try {
+                        const token = localStorage.getItem('token')
+                        if (!token) {
+                          toast.error('Please login to add items to cart')
+                          return
+                        }
+
+                        const payload = JSON.parse(atob(token.split('.')[1]))
+                        const userId = payload.accountID
+
+                        if (!userId) {
+                          toast.error('Unable to get user information')
+                          return
+                        }
+
+                        const result = await cartService.addToCart(userId, item.id, 1)
+                        
+                        if (result) {
+                          toast.success('Product added to cart', {
+                            duration: 2500
+                          })
+                          window.dispatchEvent(new Event('cart-updated'))
+                        } else {
+                          toast.error('Failed to add product to cart')
+                        }
+                      } catch (error) {
+                        console.error('Error adding to cart:', error)
+                        toast.error('Failed to add product to cart')
                       }
                     }}
                   >

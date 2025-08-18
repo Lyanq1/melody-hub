@@ -55,15 +55,9 @@ const LoginPage = () => {
       const response = await axios.post('http://localhost:5000/api/auth/login', { username, password })
       const { token, user } = response.data
       
-      // Lưu token và thông tin user vào cookies
-      const setCookie = (name: string, value: string, days: number = 7) => {
-        const expires = new Date()
-        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
-        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
-      }
-      
-      setCookie('token', token, 7)
-      setCookie('username', username, 7)
+      // Lưu token và thông tin user vào localStorage
+      localStorage.setItem('token', token)
+      localStorage.setItem('username', username)
       
       toast.success(`Login successful! Welcome, ${user.displayName}`)
       
@@ -117,15 +111,9 @@ const LoginPage = () => {
               .then((res) => {
                 const { token, user } = res.data
                 
-                // Lưu token vào cookies
-                const setCookie = (name: string, value: string, days: number = 7) => {
-                  const expires = new Date()
-                  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
-                  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
-                }
-                
-                setCookie('token', token, 7)
-                setCookie('username', user.username, 7)
+                // Lưu token vào localStorage
+                localStorage.setItem('token', token)
+                localStorage.setItem('username', user.username)
                 
                 toast.success(`Facebook login successful! Welcome, ${user.displayName}`)
                 

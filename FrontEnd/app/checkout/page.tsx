@@ -3,6 +3,7 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import MoMoPaymentButton from '@/components/ui/momo-payment-button';
+import axios from 'axios';
 
 interface CartItem {
   id: string;
@@ -26,18 +27,43 @@ export default function Checkout() {
   });
   const [formValid, setFormValid] = useState(false);
 
-  // Fetch cart items from localStorage
+  // Fetch cart items from API
   useEffect(() => {
-    const fetchCart = () => {
+    const fetchCart = async () => {
       try {
-        const stored = localStorage.getItem('cart');
-        if (stored) {
-          const parsedCart = JSON.parse(stored) as CartItem[];
-          setCartItems(parsedCart);
-          
-          // Calculate total amount
-          const total = parsedCart.reduce((sum, item) => {
-            let price = 0;
+        const token = localStorage.getItem('token')
+        if (!token) {
+          router.push('/login')
+          return
+        }
+
+        // Get user ID from token
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        const userId = payload.accountID
+  
+        if (!userId) {
+          router.push('/login')
+          return
+        }
+  
+        // Fetch cart from API
+        const response = await axios.get(`http://localhost:5000/api/cart/${userId}`)
+        const cart = response.data
+        
+        if (cart && cart.items && cart.items.length > 0) {
+          // Transform cart items to match CartItem interface
+          const transformedItems: CartItem[] = cart.items.map((item: any) => ({
+            id: item.discId,
+            name: item.product?.name || 'Product',
+            price: item.product?.price || '0',
+            quantity: item.quantity,
+            imageUrl: item.product?.image || '/placeholder-image.jpg'
+          }))
+
+          setCartItems(transformedItems)
+          // Calculate total amount from transformedItems
+          const total = transformedItems.reduce((sum, item) => {
+            let price = 0
             if (typeof item.price === 'string') {
               price = parseInt(item.price.replace(/[^\d]/g, ''), 10) || 0;
             } else if (typeof item.price === 'number') {
@@ -62,6 +88,7 @@ export default function Checkout() {
     fetchCart();
   }, [router]);
 
+  
   // Validate form when customer info changes
   useEffect(() => {
     const { name, email, phone, address } = customerInfo;

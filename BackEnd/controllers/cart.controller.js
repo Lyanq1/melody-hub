@@ -1,27 +1,68 @@
 import Cart from '../models/order/cart.model.js';
 import Disc from '../models/product/disc.model.js';
+import redisClient from '../config/redis.js';
 import mongoose from 'mongoose';
+const CART_CACHE_EXPIRATION = 1800; // 30 phút cho cart
+
+// Helper function to update cart cache with fresh data
+const updateCartCacheHelper = async (userId) => {
+  try {
+    const cacheKey = `melody_hub:cart:${userId}`;
+    
+    // Get fresh data from database
+    const freshCart = await Cart.findOne({ userId });
+    
+    if (freshCart) {
+      // Update cache with fresh data
+      await redisClient.setEx(cacheKey, CART_CACHE_EXPIRATION, JSON.stringify(freshCart));
+      console.log(`✅ Cart cache updated for user ${userId} with fresh data`);
+    } else {
+      // If no cart exists, remove from cache
+      await redisClient.del(cacheKey);
+      console.log(`🗑️ Cart cache removed for user ${userId} (no cart exists)`);
+    }
+  } catch (error) {
+    console.error('Error updating cart cache:', error);
+  }
+};
+
 
 // Get cart by user ID
 export const getCartByUserId = async (req, res) => {
   try {
     const userId = req.params.userId;
+    const cacheKey = `melody_hub:cart:${userId}`;
     
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ message: 'Invalid user ID format' });
     }
 
+    // Try to get data from cache first
+    const cachedCart = await redisClient.get(cacheKey);
+    if (cachedCart) {
+      console.log(`Fetching cart for user ${userId} from Redis cache`);
+      res.set('X-Cache-Status', 'HIT');
+      return res.json(JSON.parse(cachedCart));
+    }
+
+    // If not in cache, get from database
+    console.log(`Fetching cart for user from Database`);
+    console.log(`Fetching cart for user ${userId} from Database`);
     const cart = await Cart.findOne({ userId: new mongoose.Types.ObjectId(userId) })
-      .populate({
-        path: 'items.discId',
-        select: 'title price imageUrl artist' // Select the fields you need
-      });
-    
+      // .populate({
+      //   path: 'items.discId',
+      //   select: 'title price imageUrl artist' // Select the fields you need
+      // });
+
+
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found for this user' });
     }
-    
+    // Store in cache for next request
+    await redisClient.setEx(cacheKey, CART_CACHE_EXPIRATION, JSON.stringify(cart));
+
+    res.set('X-Cache-Status', 'MISS');
     res.json(cart);
   } catch (error) {
     console.error('Cart fetch error:', error);
@@ -53,7 +94,7 @@ export const addToCart = async (req, res) => {
       cart = new Cart({
         userId: new mongoose.Types.ObjectId(userId),
         items: [{ discId: new mongoose.Types.ObjectId(discId), quantity }],
-        total: disc.price * quantity
+        total:  (Number(disc.price) || 0) * (Number(quantity) || 0)
       });
     } else {
       // Check if item already exists in cart
@@ -63,21 +104,37 @@ export const addToCart = async (req, res) => {
       
       if (itemIndex > -1) {
         // Update quantity if item exists
-        cart.items[itemIndex].quantity += quantity;
+        cart.items[itemIndex].quantity += Number(quantity) || 0;
       } else {
         // Add new item
         cart.items.push({ 
           discId: new mongoose.Types.ObjectId(discId), 
-          quantity 
+          quantity: Number(quantity) || 0
         });
       }
       
-      // Recalculate total
-      cart.total = await calculateCartTotal(cart);
+      // Calculate total amount
+      let total = 0;
+      for (const item of cart.items) {
+        const product = await Disc.findById(item.discId);
+        if (!product) continue;
+
+        let price = 0;
+        if (typeof product.price === 'string') {
+          price = parseInt(product.price.replace(/[^\d]/g, ''), 10) || 0;
+        } else if (typeof product.price === 'number') {
+          price = product.price;
+        }
+        total += price * (Number(item.quantity) || 0);
+      }
+      cart.total = total;
     }
     
     await cart.save();
     
+    // Update cache with fresh data after modification
+    await updateCartCacheHelper(userId);
+
     // Populate the cart before sending response
     await cart.populate({
       path: 'items.discId',
@@ -94,7 +151,8 @@ export const addToCart = async (req, res) => {
 // Update cart item quantity
 export const updateCartItem = async (req, res) => {
   try {
-    const { userId, discId, quantity } = req.body;
+    const { quantity } = req.body; // userId is already string
+    const { userId, discId } = req.params;
     
     // Validate ObjectIds
     if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(discId)) {
@@ -119,14 +177,30 @@ export const updateCartItem = async (req, res) => {
       cart.items.splice(itemIndex, 1);
     } else {
       // Update quantity
-      cart.items[itemIndex].quantity = quantity;
+      cart.items[itemIndex].quantity = Number(quantity) || 0;
     }
     
-    // Recalculate total
-    cart.total = await calculateCartTotal(cart);
+    // Recalculate total manually to avoid NaN
+    let total = 0;
+    for (const item of cart.items) {
+      const product = await Disc.findById(item.discId);
+      if (!product) continue;
+
+      let price = 0;
+      if (typeof product.price === 'string') {
+        price = parseInt(product.price.replace(/[^\d]/g, ''), 10) || 0;
+      } else if (typeof product.price === 'number') {
+        price = product.price;
+      }
+      total += price * (Number(item.quantity) || 0);
+    }
+    cart.total = total;
     
     await cart.save();
-    
+
+    // Update cache with fresh data after modification
+    await updateCartCacheHelper(userId);
+
     // Populate the cart before sending response
     await cart.populate({
       path: 'items.discId',
@@ -166,11 +240,32 @@ export const removeFromCart = async (req, res) => {
     // Remove item
     cart.items.splice(itemIndex, 1);
     
-    // Recalculate total
-    cart.total = await calculateCartTotal(cart);
+    // Lấy thông tin sản phẩm để tính lại total
+    const populatedCart = await cart.populate("items.discId"); 
+    const parsedCart = populatedCart.items.map(item => ({
+      price: String(item.discId?.price || "0"),  
+      quantity: Number(item.quantity)            
+    }));
+
+
+    // Calculate total amount
+    const total = parsedCart.reduce((sum, item) => {
+      let price = 0;
+      if (typeof item.price === 'string') {
+        price = parseInt(item.price.replace(/[^\d]/g, ''), 10) || 0;
+      } else if (typeof item.price === 'number') {
+        price = item.price;
+      }
+      return sum + price * item.quantity;
+    }, 0);
+
+    cart.total = total;
     
     await cart.save();
     
+    // Update cache with fresh data after modification
+    await updateCartCacheHelper(userId);
+
     // Populate the cart before sending response
     await cart.populate({
       path: 'items.discId',
@@ -203,6 +298,8 @@ export const clearCart = async (req, res) => {
     cart.total = 0;
     
     await cart.save();
+    // Update cache with fresh data after modification
+    await updateCartCacheHelper(userId);
     res.json({ message: 'Cart cleared successfully', cart });
   } catch (error) {
     console.error('Clear cart error:', error);

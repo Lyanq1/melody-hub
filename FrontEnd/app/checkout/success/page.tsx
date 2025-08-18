@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { verifyMoMoPayment } from '@/lib/services/payment'
+import axios from 'axios'
 
 function CheckoutSuccessContent() {
   // const router = useRouter();
@@ -51,10 +52,27 @@ function CheckoutSuccessContent() {
 
   // Clear cart after successful payment
   useEffect(() => {
-    if (resultCode === '0' && verified) {
-      localStorage.removeItem('cart');
+    const clearCart = async () => {
+      if (resultCode === '0' && verified) {
+        try {
+          const token = localStorage.getItem('token')
+          if (token) {
+            const payload = JSON.parse(atob(token.split('.')[1]))
+            const userId = payload.accountID
+            
+            if (userId) {
+              await axios.delete(`http://localhost:5000/api/cart/${userId}`)
+              console.log('Cart cleared after successful payment')
+            }
+          }
+        } catch (error) {
+          console.error('Error clearing cart:', error)
+        }
+      }
     }
-  }, [resultCode, verified]);
+
+    clearCart()
+  }, [resultCode, verified])
 
   if (verifying) {
     return (
