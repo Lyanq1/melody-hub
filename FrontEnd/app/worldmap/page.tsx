@@ -62,7 +62,7 @@ const VinylWorldMap = () => {
     <div className='flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4'>
       <h1 className='text-3xl font-bold mb-4 text-center text-gray-800'>Vinyl Records by Country</h1>
       {loading ? (
-        <div className='text-gray-600'>Loading map...</div>
+        <div className='text-gray-600'>Loading Vynil World Map...</div>
       ) : (
         <div className='w-full md:w-[90%] lg:w-[80%] xl:w-[70%] relative'>
           <WorldMap color='#9810fa' size='xl' value-suffix='vinyls' data={data} onClickFunction={handleCountryClick} />
