@@ -3,13 +3,16 @@
 import Link from 'next/link'
 import './components.css'
 import { useState, useEffect } from 'react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import SearchBar from '../SearchBar'
 import axios from 'axios'
+import { useAuth } from '@/hooks/use-auth'
 
 export const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { user, isAdmin, isAuthenticated, logout } = useAuth()
+  
+  console.log('🧭 Navbar state:', { user, isAdmin, isAuthenticated })
   const [cartCount, setCartCount] = useState(0)
   const [avatarUrl, setAvatarUrl] = useState('')
   const [username, setUsername] = useState('')
@@ -37,10 +40,18 @@ export const Navbar = () => {
     }
   }
 
+  // Helper function để lấy username từ cookies
+  const getCookie = (name: string): string | null => {
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+    return null
+  }
+
   // Handle avatar updates
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      const storedUsername = localStorage.getItem('username')
+      const storedUsername = getCookie('username')
       if (storedUsername) {
         fetchUserData(storedUsername)
       }
@@ -53,14 +64,10 @@ export const Navbar = () => {
   // Handle login state and initial data fetch
   useEffect(() => {
     const updateLoginState = () => {
-      const tokenvalue = localStorage.getItem('token')
-      const storedUsername = localStorage.getItem('username')
-      const loggedIn = !!tokenvalue
-
-      setIsLoggedIn(loggedIn)
+      const storedUsername = getCookie('username')
       setUsername(storedUsername || '')
 
-      if (loggedIn && storedUsername) {
+      if (isAuthenticated && storedUsername) {
         fetchUserData(storedUsername)
       } else {
         setAvatarUrl('')
@@ -70,30 +77,17 @@ export const Navbar = () => {
     // Initial state
     updateLoginState()
 
-    // Handle logout event
-    const handleLogout = () => {
-      // Immediately update state
-      setIsLoggedIn(false)
-      setUsername('')
-      setAvatarUrl('')
-
-      // Force a re-render by updating login state
-      updateLoginState()
-    }
-
     // Handle storage changes
     const handleStorageChange = () => {
       updateLoginState()
     }
 
-    window.addEventListener('user-logout', handleLogout)
     window.addEventListener('storage', handleStorageChange)
 
     return () => {
-      window.removeEventListener('user-logout', handleLogout)
       window.removeEventListener('storage', handleStorageChange)
     }
-  }, [])
+  }, [isAuthenticated])
 
   return (
     <nav style={{ backgroundColor: '#323031', fontSize: '20px' }} className='sticky top-0 z-50 text-white shadow-md'>
@@ -202,7 +196,7 @@ export const Navbar = () => {
                   Theo dõi đơn hàng
                 </Link>
               </DropdownMenuItem>
-              {!isLoggedIn ? (
+              {!isAuthenticated ? (
                 <>
                   <DropdownMenuItem asChild>
                     <Link
@@ -254,10 +248,89 @@ export const Navbar = () => {
                   </DropdownMenuItem>
                 </>
               ) : (
-                <DropdownMenuItem asChild>
-                  <Link
-                    href='/profile'
-                    className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href='/profile'
+                      className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                    >
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        width='24'
+                        height='24'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='#ffffff'
+                        strokeWidth='2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        className='lucide lucide-user-icon lucide-user transition-colors duration-200 group-hover:stroke-black'
+                      >
+                        <path d='M20 21v-2a4 4 0 0 0-4 4v2' />
+                        <circle cx='12' cy='7' r='4' />
+                      </svg>
+                      Tài khoản
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href='/dashboard'
+                          className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                        >
+                          <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            width='24'
+                            height='24'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='#ffffff'
+                            strokeWidth='2'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            className='lucide lucide-layout-dashboard transition-colors duration-200 group-hover:stroke-black'
+                          >
+                            <path d='M3 3h6v6H3z' />
+                            <path d='M14 3h7v6h-7z' />
+                            <path d='M14 14h7v7h-7z' />
+                            <path d='M3 14h6v7H3z' />
+                          </svg>
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href='/admin'
+                          className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                        >
+                          <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            width='24'
+                            height='24'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='#ffffff'
+                            strokeWidth='2'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            className='lucide lucide-settings transition-colors duration-200 group-hover:stroke-black'
+                          >
+                            <circle cx='12' cy='12' r='3' />
+                            <path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z' />
+                          </svg>
+                          Quản lý hệ thống
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={logout}
+                    className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200 cursor-pointer'
                   >
                     <svg
                       xmlns='http://www.w3.org/2000/svg'
@@ -269,14 +342,15 @@ export const Navbar = () => {
                       strokeWidth='2'
                       strokeLinecap='round'
                       strokeLinejoin='round'
-                      className='lucide lucide-user-icon lucide-user transition-colors duration-200 group-hover:stroke-black'
+                      className='lucide lucide-log-out transition-colors duration-200 group-hover:stroke-black'
                     >
-                      <path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' />
-                      <circle cx='12' cy='7' r='4' />
+                      <path d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' />
+                      <polyline points='16,17 21,12 16,7' />
+                      <line x1='21' x2='9' y1='12' y2='12' />
                     </svg>
-                    Tài khoản
-                  </Link>
-                </DropdownMenuItem>
+                    Đăng xuất
+                  </DropdownMenuItem>
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

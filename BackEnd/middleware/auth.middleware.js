@@ -19,7 +19,7 @@ export const verifyToken = (req, res, next) => {
 };
 
 export const isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  if (req.user && req.user.role === 'Admin') {
     next();
   } else {
     res.status(403).json({ message: 'Access denied. Admin privileges required.' });
@@ -27,9 +27,35 @@ export const isAdmin = (req, res, next) => {
 };
 
 export const isCustomer = (req, res, next) => {
-  if (req.user && req.user.role === 'customer') {
+  if (req.user && req.user.role === 'Customer') {
     next();
   } else {
     res.status(403).json({ message: 'Access denied. Customer privileges required.' });
+  }
+};
+
+export const isArtist = (req, res, next) => {
+  if (req.user && req.user.role === 'Artist') {
+    next();
+  } else {
+    res.status(403).json({ message: 'Access denied. Artist privileges required.' });
+  }
+};
+
+// Middleware kiểm tra quyền truy cập dashboard
+export const canAccessDashboard = (req, res, next) => {
+  if (req.user && (req.user.role === 'Admin' || req.user.role === 'Artist')) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Access denied. Dashboard access requires Admin or Artist privileges.' });
+  }
+};
+
+// Middleware kiểm tra quyền quản lý hệ thống
+export const canManageSystem = (req, res, next) => {
+  if (req.user && req.user.role === 'Admin') {
+    next();
+  } else {
+    res.status(403).json({ message: 'Access denied. System management requires Admin privileges.' });
   }
 };

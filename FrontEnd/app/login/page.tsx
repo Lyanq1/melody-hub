@@ -52,13 +52,27 @@ const LoginPage = () => {
     setError('')
 
     try {
-      const response = await axios.post('https://melody-hub-vhml.onrender.com/api/auth/login', { username, password })
+      const response = await axios.post('http://localhost:5000/api/auth/login', { username, password })
       const { token, user } = response.data
-      localStorage.setItem('token', token)
-      localStorage.setItem('username', username)
-      // alert(`Login successful! Welcome, ${user.displayName}`)
+      
+      // Lưu token và thông tin user vào cookies
+      const setCookie = (name: string, value: string, days: number = 7) => {
+        const expires = new Date()
+        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
+        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
+      }
+      
+      setCookie('token', token, 7)
+      setCookie('username', username, 7)
+      
       toast.success(`Login successful! Welcome, ${user.displayName}`)
-      window.location.href = '/'
+      
+      // Redirect dựa trên role
+      if (user.role === 'Admin' || user.role === 'Artist') {
+        window.location.href = '/dashboard'
+      } else {
+        window.location.href = '/'
+      }
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message || 'Login failed')
@@ -102,9 +116,25 @@ const LoginPage = () => {
               .post('https://melody-hub-vhml.onrender.com/api/auth/facebook', { accessToken, role })
               .then((res) => {
                 const { token, user } = res.data
-                localStorage.setItem('token', token)
-                alert(`Facebook login successful! Welcome, ${user.displayName}`)
-                window.location.href = '/'
+                
+                // Lưu token vào cookies
+                const setCookie = (name: string, value: string, days: number = 7) => {
+                  const expires = new Date()
+                  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
+                  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
+                }
+                
+                setCookie('token', token, 7)
+                setCookie('username', user.username, 7)
+                
+                toast.success(`Facebook login successful! Welcome, ${user.displayName}`)
+                
+                // Redirect dựa trên role
+                if (user.role === 'Admin' || user.role === 'Artist') {
+                  window.location.href = '/dashboard'
+                } else {
+                  window.location.href = '/'
+                }
               })
               .catch((err) => {
                 console.error('Facebook login error:', err.response?.data || err.message)

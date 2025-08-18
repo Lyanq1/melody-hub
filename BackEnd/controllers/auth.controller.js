@@ -159,6 +159,76 @@ export const getUserInfo = async (req, res) => {
   }
 }
 
+// Kiểm tra quyền truy cập dashboard
+export const checkDashboardAccess = async (req, res) => {
+  try {
+    // Token đã được verify bởi middleware
+    const { accountID, username, role } = req.user;
+    
+    // Kiểm tra quyền truy cập dashboard
+    const canAccess = role === 'Admin' || role === 'Artist';
+    
+    if (!canAccess) {
+      return res.status(403).json({ 
+        message: 'Access denied. Dashboard access requires Admin or Artist privileges.',
+        canAccess: false
+      });
+    }
+    
+    // Lấy thông tin user từ database
+    const account = await Account.findById(accountID).select('-Password');
+    if (!account) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.status(200).json({
+      message: 'Access granted',
+      canAccess: true,
+      user: {
+        accountID: account._id,
+        username: account.Username,
+        email: account.Email,
+        displayName: account.DisplayName,
+        avatarURL: account.AvatarURL,
+        role: account.Role
+      }
+    });
+  } catch (error) {
+    console.error('Error checking dashboard access:', error);
+    res.status(500).json({ message: 'Error checking access', error: error.message });
+  }
+};
+
+// Lấy thông tin user hiện tại từ token
+export const getCurrentUser = async (req, res) => {
+  try {
+    // Token đã được verify bởi middleware
+    const { accountID, username, role } = req.user;
+    
+    // Lấy thông tin user từ database
+    const account = await Account.findById(accountID).select('-Password');
+    if (!account) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.status(200).json({
+      user: {
+        accountID: account._id,
+        username: account.Username,
+        email: account.Email,
+        displayName: account.DisplayName,
+        avatarURL: account.AvatarURL,
+        role: account.Role,
+        phone: account.Phone,
+        address: account.Address
+      }
+    });
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    res.status(500).json({ message: 'Error getting user info', error: error.message });
+  }
+};
+
 // PUT /api/user/:username
 export const updateUserInfo = async (req, res) => {
   const { username } = req.params

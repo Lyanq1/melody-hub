@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import { Camera } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ import {
 
 export default function Profile() {
   const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
@@ -32,50 +34,26 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username");
-    setUsername(storedUsername || "");
+    // if (!isAuthenticated) {
+    //   router.push('/login');
+    //   return;
+    // }
 
-    if (storedUsername) {
-      axios
-        .get(`http://localhost:5000/api/auth/user/${storedUsername}`)
-        .then((res) => {
-          const data = res.data;
-          setFullName(data.DisplayName || "");
-          setDisplayedName(data.DisplayName || "Chưa có tên");
-          setEmail(data.Email || "");
-          setPhone(data.Phone || "");
-          setAddress(data.Address || "");
-          setAvatarUrl(data.AvatarURL || "");
-        })
-        .catch((err) => {
-          console.error("Lỗi khi tải thông tin người dùng:", err);
-          toast.error("Lỗi khi tải thông tin người dùng.");
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
+    if (user) {
+      setUsername(user.username);
+      setFullName(user.displayName || "");
+      setDisplayedName(user.displayName || "Chưa có tên");
+      setEmail(user.email || "");
+      setPhone(user.phone || "");
+      setAddress(user.address || "");
+      setAvatarUrl(user.avatarURL || "");
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated, user, router]);
 
   const handleLogout = () => {
-    // Remove local storage items
-    localStorage.removeItem("username");
-    localStorage.removeItem("token");
-    
-    // Create and dispatch the logout event
-    const logoutEvent = new CustomEvent('user-logout', {
-      detail: { timestamp: Date.now() }
-    });
-    
-    // Use setTimeout to ensure event is processed before navigation
-    window.dispatchEvent(logoutEvent);
-    
-    // Small delay to ensure state updates complete
-    setTimeout(() => {
-      router.push("/");
-    }, 100);
+    logout();
+    router.push("/");
   };
 
   const handleSave = async () => {
@@ -98,7 +76,12 @@ export default function Profile() {
       toast.error("Đã xảy ra lỗi khi cập nhật.");
     }
   };
-
+  const getCookie = (name: string): string | null => {
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+    return null
+  }
   // When file is selected for avatar
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
