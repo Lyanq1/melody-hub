@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import routes from './routes/index.js';
+import { stripeWebhook } from './controllers/stripe.controller.js';
 
 const app = express();
 // Cấu hình CORS
@@ -16,6 +17,9 @@ app.use(
     credentials: true
   })
 );
+
+// Stripe webhook MUST be mounted before express.json() to receive the raw body
+app.post('/api/payment/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 
 // Middleware
 app.use(express.json());

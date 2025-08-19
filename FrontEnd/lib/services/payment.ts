@@ -21,6 +21,14 @@ export interface PaymentResponse {
   };
 }
 
+export interface StripeCheckoutResponse {
+  success: boolean;
+  url?: string;
+  id?: string;
+  message?: string;
+  error?: string;
+}
+
 /**
  * Create a MoMo payment request
  * @param amount - The payment amount in VND
@@ -93,3 +101,37 @@ export const verifyMoMoPayment = async (orderId: string, resultCode: string): Pr
     };
   }
 }; 
+
+/**
+ * Create Stripe Checkout Session
+ * @param amount - smallest currency unit (e.g., VND integer)
+ * @param description - description for the line item
+ */
+export const createStripeCheckoutSession = async (
+  amount: number,
+  description?: string
+): Promise<StripeCheckoutResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/payment/stripe/checkout-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ amount, description }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create Stripe Checkout Session');
+    }
+
+    return data as StripeCheckoutResponse;
+  } catch (error) {
+    console.error('Error creating Stripe Checkout Session:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to create Stripe Checkout Session',
+    };
+  }
+};

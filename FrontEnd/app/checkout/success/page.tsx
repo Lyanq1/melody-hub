@@ -18,6 +18,7 @@ function CheckoutSuccessContent() {
   const orderId = searchParams.get('orderId') || searchParams.get('orderid');
   const resultCode = searchParams.get('resultCode') || searchParams.get('resultcode');
   const message = searchParams.get('message') || searchParams.get('errorMessage');
+  const stripeSessionId = searchParams.get('session_id');
   // const extraData = searchParams.get('extraData');
 
   useEffect(() => {
@@ -40,6 +41,11 @@ function CheckoutSuccessContent() {
         } finally {
           setVerifying(false)
         }
+      } else if (stripeSessionId) {
+        // For Stripe, successful redirect includes session_id. We consider it success for UI purposes.
+        // The definitive record should be confirmed via webhook on backend.
+        setVerified(true)
+        setVerifying(false)
       } else {
         setVerifying(false)
         setError('Missing payment information')
@@ -53,7 +59,7 @@ function CheckoutSuccessContent() {
   // Clear cart after successful payment
   useEffect(() => {
     const clearCart = async () => {
-      if (resultCode === '0' && verified) {
+      if ((resultCode === '0' || stripeSessionId) && verified) {
         try {
           const token = localStorage.getItem('token')
           if (token) {
@@ -72,7 +78,7 @@ function CheckoutSuccessContent() {
     }
 
     clearCart()
-  }, [resultCode, verified])
+  }, [resultCode, stripeSessionId, verified])
 
   if (verifying) {
     return (
@@ -93,7 +99,7 @@ function CheckoutSuccessContent() {
   return (
     <div className='container mx-auto px-4 py-8'>
       <div className='max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden md:max-w-2xl p-8'>
-        {resultCode === '0' && verified ? (
+        {(resultCode === '0' || stripeSessionId) && verified ? (
           <div className='text-center'>
             <div className='mb-4 text-green-500'>
               <svg

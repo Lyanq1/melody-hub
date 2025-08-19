@@ -3,7 +3,9 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import MoMoPaymentButton from '@/components/ui/momo-payment-button';
+import { createStripeCheckoutSession } from '@/lib/services/payment';
 import axios from 'axios';
+import { productService } from '@/lib/services/product';
 
 interface CartItem {
   id: string;
@@ -51,28 +53,36 @@ export default function Checkout() {
         const cart = response.data
         
         if (cart && cart.items && cart.items.length > 0) {
-          // Transform cart items to match CartItem interface
-          const transformedItems: CartItem[] = cart.items.map((item: any) => ({
-            id: item.discId,
-            name: item.product?.name || 'Product',
-            price: item.product?.price || '0',
-            quantity: item.quantity,
-            imageUrl: item.product?.image || '/placeholder-image.jpg'
-          }))
+          // Ensure we have accurate product data (especially price as string like "120.000₫")
+          const transformedItems: CartItem[] = await Promise.all(
+            cart.items.map(async (item: any) => {
+              const product = item.product ? item.product : await productService.getProductById(item.discId)
+              return {
+                id: item.discId,
+                name: product?.name || 'Product',
+                price: product?.price || '0',
+                quantity: Number(item.quantity) || 0,
+                imageUrl: product?.image || '/placeholder-image.jpg'
+              }
+            })
+          )
 
           setCartItems(transformedItems)
-          // Calculate total amount from transformedItems
+          // Calculate total amount robustly from transformedItems
           const total = transformedItems.reduce((sum, item) => {
-            let price = 0
+            let priceNumber = 0
             if (typeof item.price === 'string') {
-              price = parseInt(item.price.replace(/[^\d]/g, ''), 10) || 0;
+              // remove all non-digits (handles formats like "120.000₫" or "120,000 VND")
+              priceNumber = parseInt(item.price.replace(/[^\d]/g, ''), 10) || 0
             } else if (typeof item.price === 'number') {
-              price = item.price;
+              priceNumber = item.price
             }
-            return sum + price * item.quantity;
-          }, 0);
+            return sum + priceNumber * (Number(item.quantity) || 0)
+          }, 0)
           
-          setTotalAmount(total.toString());
+          // Prefer backend cart.total if valid; otherwise use computed total
+          const backendTotal = typeof cart.total === 'number' ? cart.total : null
+          setTotalAmount(String(backendTotal ?? total))
         } else {
           // Redirect to cart if no items
           router.push('/cart');
@@ -112,6 +122,27 @@ export default function Checkout() {
   const handlePaymentError = (errorMessage: string) => {
     setError(errorMessage);
   };
+
+  const handleStripeCheckout = async () => {
+    if (!formValid) {
+      setError('Please fill in all customer information fields');
+      return;
+    }
+    try {
+      setError('');
+      // Save customer info for later order processing
+      localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
+      const amountNumber = parseInt(totalAmount, 10) || 0;
+      const res = await createStripeCheckoutSession(amountNumber, 'MelodyHub Order');
+      if (res.success && res.url) {
+        window.location.href = res.url;
+      } else {
+        setError(res.message || 'Failed to start Stripe checkout');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start Stripe checkout');
+    }
+  }
 
   const handleCashOnDelivery = () => {
     if (!formValid) {
@@ -245,6 +276,14 @@ export default function Checkout() {
                     className="w-full"
                     disabled={!formValid}
                   />
+                  
+                  <button
+                    className="w-full px-6 py-3 bg-black text-white rounded-lg hover:opacity-90 transition-colors"
+                    onClick={handleStripeCheckout}
+                    disabled={!formValid}
+                  >
+                    Pay with Stripe
+                  </button>
                   
                   <button 
                     className="w-full px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
