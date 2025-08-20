@@ -80,9 +80,8 @@ export default function Checkout() {
             return sum + priceNumber * (Number(item.quantity) || 0)
           }, 0)
           
-          // Prefer backend cart.total if valid; otherwise use computed total
-          const backendTotal = typeof cart.total === 'number' ? cart.total : null
-          setTotalAmount(String(backendTotal ?? total))
+          // Store the numeric total for order creation
+          setTotalAmount(String(total))
         } else {
           // Redirect to cart if no items
           router.push('/cart');

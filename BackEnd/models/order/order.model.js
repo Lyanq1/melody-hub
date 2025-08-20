@@ -4,10 +4,10 @@ const orderSchema = new mongoose.Schema({
   userId: { type: mongoose.Types.ObjectId, required: true },
   items: [
     {
+      discId: mongoose.Types.ObjectId,
       name: String,
-      price: String,
-      quantity: Number,
-      discId: mongoose.Types.ObjectId
+      price: Number, // Changed from String to Number for proper currency handling
+      quantity: Number
     }
   ],
   totalPrice: Number,
@@ -16,11 +16,21 @@ const orderSchema = new mongoose.Schema({
     city: String,
     country: String,
     postalCode: Number,
-    },
+  },
   status: {
     type: String,
     enum: ['Confirmed', 'Processing', 'Shipped', 'Delivered'],
     default: 'Confirmed'
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['Stripe', 'MoMo', 'Cash on Delivery'], // Removed 'Unknown'
+    required: true
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['Pending', 'Completed', 'Failed'],
+    default: 'Pending'
   },
   createdDate: {
     type: Date,

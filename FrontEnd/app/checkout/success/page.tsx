@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { verifyMoMoPayment } from '@/lib/services/payment'
+import { createOrder, type Order } from '@/lib/services/order'
 import axios from 'axios'
 
 function CheckoutSuccessContent() {
@@ -12,6 +13,8 @@ function CheckoutSuccessContent() {
   const [verifying, setVerifying] = useState(true)
   const [verified, setVerified] = useState(false)
   const [error, setError] = useState('')
+  const [order, setOrder] = useState<Order | null>(null)
+  const [orderCreating, setOrderCreating] = useState(false)
 
   // Get payment status from URL parameters
   // MoMo might return different parameter names depending on the version
@@ -54,7 +57,76 @@ function CheckoutSuccessContent() {
     }
 
     verifyPayment()
-  }, [orderId, resultCode])
+  }, [orderId, resultCode, stripeSessionId])
+
+  // Create order after successful payment
+  useEffect(() => {
+    const createOrderAfterPayment = async () => {
+      if ((resultCode === '0' || stripeSessionId) && verified && !order) {
+        try {
+          setOrderCreating(true)
+          
+          // Get customer info from localStorage
+          const customerInfoStr = localStorage.getItem('customerInfo')
+          if (!customerInfoStr) {
+            console.error('No customer info found')
+            return
+          }
+
+          const customerInfo = JSON.parse(customerInfoStr)
+          
+          // Get user ID from token
+          const token = localStorage.getItem('token')
+          if (!token) {
+            console.error('No token found')
+            return
+          }
+
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          const userId = payload.accountID
+
+          if (!userId) {
+            console.error('No user ID found in token')
+            return
+          }
+
+          // Determine payment method and status
+          let paymentMethod: 'Stripe' | 'MoMo' | 'Cash on Delivery' = 'Cash on Delivery'
+          let paymentStatus: 'Pending' | 'Completed' | 'Failed' = 'Completed'
+
+          if (stripeSessionId) {
+            paymentMethod = 'Stripe'
+          } else if (resultCode === '0') {
+            paymentMethod = 'MoMo'
+          } else if (orderId?.startsWith('COD-')) {
+            paymentMethod = 'Cash on Delivery'
+          }
+
+          // Create order
+          const orderResponse = await createOrder({
+            userId,
+            customerInfo,
+            paymentMethod,
+            paymentStatus
+          })
+
+          if (orderResponse.success && orderResponse.order) {
+            setOrder(orderResponse.order)
+            console.log('Order created successfully:', orderResponse.order)
+          } else {
+            console.error('Failed to create order:', orderResponse.message)
+          }
+
+        } catch (error) {
+          console.error('Error creating order:', error)
+        } finally {
+          setOrderCreating(false)
+        }
+      }
+    }
+
+    createOrderAfterPayment()
+  }, [resultCode, stripeSessionId, verified, order])
 
   // Clear cart after successful payment
   useEffect(() => {
@@ -80,7 +152,7 @@ function CheckoutSuccessContent() {
     clearCart()
   }, [resultCode, stripeSessionId, verified])
 
-  if (verifying) {
+  if (verifying || orderCreating) {
     return (
       <div className='container mx-auto px-4 py-8'>
         <div className='max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden md:max-w-2xl p-8'>
@@ -88,8 +160,12 @@ function CheckoutSuccessContent() {
             <div className='mb-4'>
               <div className='w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto'></div>
             </div>
-            <h1 className='text-2xl font-bold text-gray-800 mb-4'>Verifying Payment</h1>
-            <p className='text-gray-600'>Please wait while we verify your payment...</p>
+            <h1 className='text-2xl font-bold text-gray-800 mb-4'>
+              {verifying ? 'Verifying Payment' : 'Creating Order'}
+            </h1>
+            <p className='text-gray-600'>
+              {verifying ? 'Please wait while we verify your payment...' : 'Please wait while we create your order...'}
+            </p>
           </div>
         </div>
       </div>
@@ -116,7 +192,18 @@ function CheckoutSuccessContent() {
             <p className='text-gray-600 mb-6'>
               Thank you for your purchase. Your order has been processed successfully.
             </p>
-            <p className='text-sm text-gray-500 mb-6'>Order ID: {orderId}</p>
+            
+            {order && (
+              <div className='mb-6 text-left bg-gray-50 p-4 rounded-lg'>
+                <h3 className='font-semibold mb-2'>Order Details:</h3>
+                <p className='text-sm text-gray-600 mb-1'>Order ID: {order._id}</p>
+                <p className='text-sm text-gray-600 mb-1'>Total: {order.totalPrice?.toLocaleString('vi-VN')}₫</p>
+                <p className='text-sm text-gray-600 mb-1'>Status: {order.status}</p>
+                <p className='text-sm text-gray-600 mb-1'>Payment Method: {order.paymentMethod}</p>
+                <p className='text-sm text-gray-600'>Date: {new Date(order.createdDate).toLocaleDateString('vi-VN')}</p>
+              </div>
+            )}
+            
             <div className='mt-6'>
               <Link
                 href='/homepage'

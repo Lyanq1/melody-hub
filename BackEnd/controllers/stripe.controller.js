@@ -1,5 +1,8 @@
 import Stripe from 'stripe'
 import { env } from '../config/environment.js'
+import Order from '../models/order/order.model.js'
+import Cart from '../models/order/cart.model.js'
+import mongoose from 'mongoose'
 
 // Ensure Stripe is initialized with a valid secret key
 const assertStripeConfigured = () => {
@@ -84,7 +87,7 @@ export const stripeWebhook = async (req, res) => {
       case 'checkout.session.completed': {
         const session = event.data.object
         console.log('Checkout session completed:', session.id)
-        // TODO: fulfill the order, mark paid in DB, send emails, etc.
+        // Note: Order creation is now handled on the frontend after successful redirect
         break
       }
       case 'payment_intent.succeeded': {
@@ -95,6 +98,7 @@ export const stripeWebhook = async (req, res) => {
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object
         console.log('PaymentIntent failed:', paymentIntent.id)
+        // Note: Order creation is now handled on the frontend after successful redirect
         break
       }
       default:
