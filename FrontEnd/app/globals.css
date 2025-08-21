@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -45,7 +45,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #FAF5F4;
+  --background: #faf5f4;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -137,7 +137,7 @@
 @font-face {
   font-family: 'Lora';
   src: url('/fonts/Lora-VariableFont_wght.ttf') format('truetype');
-  font-weight: normal; 
+  font-weight: normal;
   font-style: normal;
 }
 
@@ -174,4 +174,26 @@
   src: url('/fonts/TF-Classma-qvcegf.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+}
+
+/* Line clamp utilities for text truncation */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
