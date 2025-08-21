@@ -9,7 +9,7 @@ import SearchBar from '../SearchBar'
 import axios from 'axios'
 import { cartService } from '@/lib/services/cart'
 import { useAuth } from '@/hooks/use-auth'
-import { User2Icon } from 'lucide-react'
+import { UserRound } from 'lucide-react';
 
 export const Navbar = () => {
   const { user, isAdmin, isAuthenticated, logout } = useAuth()
@@ -107,17 +107,18 @@ export const Navbar = () => {
   }, [isAuthenticated])
 
   return (
-    <nav style={{ backgroundColor: '#323031', fontSize: '20px' }} className='sticky top-0 z-50 text-white shadow-md'>
-      <div style={{ fontFamily: 'MicaValo' }} className='container mx-auto flex items-center justify-between p-4'>
-        <Link href='/'>ECHO RECORDS</Link>
-        <div className='flex gap-10 text-center'>
+    <nav className='bg-[#323031] text-[20px] sticky top-0 z-50 text-white shadow-md font-[Inter_Tight]'>
+      <div className='container mx-auto flex items-center justify-between p-4'>
+        <Link className='text-white text-4xl font-black font-[Inter_Tight]' href='/'>er.</Link>
+        <div className='flex gap-10 text-center font-bold'>
           <Link href='/'>Home</Link>
           <Link href='/product'>Products</Link>
           <Link href='/worldmap'>World Vinyl</Link>
         </div>
-        <SearchBar />
+        
 
         <div className='flex gap-8 text-center'>
+          <SearchBar />
           <Link href='/cart' className='relative flex items-center gap-2'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -136,7 +137,7 @@ export const Navbar = () => {
               <path d='M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12' />
             </svg>
             {cartCount >= 1 && (
-              <span className='absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
+              <span className='absolute -top-0 -right-2 bg-[#BB3C36] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
                 {cartCount}
               </span>
             )}
@@ -160,7 +161,7 @@ export const Navbar = () => {
                 backgroundColor: '#323031',
                 color: 'white',
                 border: '1px solid #444',
-                fontFamily: 'MicaValo'
+                fontFamily: 'InterTight'
               }}
             >
               <DropdownMenuItem asChild>
@@ -271,7 +272,7 @@ export const Navbar = () => {
                       href='/profile'
                       className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
                     >
-                      <User2Icon className='w-4 h-4' />
+                      <UserRound className='w-4 h-4 stroke-white transition-colors duration-200 group-hover:stroke-black' />
                       Tài khoản
                     </Link>
                   </DropdownMenuItem>

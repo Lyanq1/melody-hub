@@ -4,6 +4,8 @@ import { ProductCard } from '@/components/ui/product-card'
 import { useEffect, useState,  Suspense} from 'react'
 import ProductCategory from '../homepage/components/ProductCategory'
 import { useSearchParams } from 'next/navigation'
+import { ChevronDown } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 // Import các component Pagination từ Shadcn UI
 import {
   Pagination,
@@ -117,16 +119,122 @@ function ProductsContent() {
     return pageNumbers
   }
 
+  const [sortOption, setSortOption] = useState("price-desc")
+  const [genre, setGenre] = useState("all")
+
   return (
     <div>
-      <Ecatalog />
-
       <div className='container mx-auto py-8'>
-        <h1 className='text-[40px] font-bold mb-8 text-left font-[MicaValo]'>OUR PRODUCTS</h1>
+        <ProductCategory />
+        
+        <div className="w-full mt-10 flex justify-between items-end">
+          {/* SHOP label + line */}
+          <div className="flex flex-col items-start">
+            <h2 className="text-5xl font-bold font-[DrukWideBold] text-neutral-800">SHOP</h2>
+            <div className="w-52 h-2 bg-[#BB3C36] mt-2"></div>
+          </div>
 
-        <div className='flex flex-col sm:flex-row gap-6'>
-          <ProductCategory />
+          {/* SORT BY + dropdowns */}
+          <div className="flex items-center gap-6">
+            <span className="text-xl font-semibold text-black font-['InterTight']">SORT BY:</span>
 
+            <div className="flex gap-4">
+              {/* Sort Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-1 text-neutral-600 text-xl font-semibold font-['InterTight'] focus:outline-none">
+                    {sortOption === "price-desc" && "PRICE, DESCENDING"}
+                    {sortOption === "price-asc" && "PRICE, ASCENDING"}
+                    {sortOption === "name-asc" && "NAME, A → Z"}
+                    {sortOption === "name-desc" && "NAME, Z → A"}
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-56"
+                >
+                  <DropdownMenuItem
+                    onClick={() => setSortOption("price-desc")}
+                    className="px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    PRICE, DESCENDING
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSortOption("price-asc")}
+                    className="px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    PRICE, ASCENDING
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSortOption("name-asc")}
+                    className="px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    NAME, A → Z
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSortOption("name-desc")}
+                    className="px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    NAME, Z → A
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Category Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-1 text-neutral-600 text-xl font-semibold font-['InterTight'] focus:outline-none">
+                    {genre === "all" && "ALL GENRES"}
+                    {genre === "classical" && "CLASSICAL"}
+                    {genre === "jazz" && "JAZZ"}
+                    {genre === "rock" && "ROCK"}
+                    {genre === "pop" && "POP"}
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-56"
+                >
+                  <DropdownMenuItem
+                    onClick={() => setGenre("all")}
+                    className="px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    ALL GENRES
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setGenre("classical")}
+                    className="px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    CLASSICAL
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setGenre("jazz")}
+                    className="px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    JAZZ
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setGenre("rock")}
+                    className="px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    ROCK
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setGenre("pop")}
+                    className="px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    POP
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+
+        <div className='flex flex-col sm:flex-row gap-6 mt-10'>
+          
           <div className='flex-1'>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-center'>
               {currentItems.map((product) => (
