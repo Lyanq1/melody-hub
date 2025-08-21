@@ -12,6 +12,7 @@ declare global {
     fbAsyncInit: () => void
   }
 }
+import { signIn } from 'next-auth/react'
 
 const LoginPage = () => {
   const [username, setUsername] = useState('')
@@ -143,6 +144,14 @@ const LoginPage = () => {
     }
   }
 
+  const handleGoogle = async () => {
+    try {
+      await signIn('google', { callbackUrl: '/' })
+    } catch (e) {
+      toast.error('Google sign-in failed')
+    }
+  }
+
   return (
     <div
       className='min-h-[calc(100vh-64px)] bg-cover bg-center flex items-center justify-center'
@@ -187,6 +196,20 @@ const LoginPage = () => {
         {/* <p className='text-2xl text-center mt-4'>Login with Facebook</p> */}
         <button onClick={handleFacebookLogin} disabled={isLoading} className='btn font-[Tangkiwood] text-white mt-5'>
           <span>{isLoading ? 'Logging in...' : 'FACEBOOK LOGIN'}</span>
+        </button>
+
+        <button
+          onClick={handleGoogle}
+          className='btn font-[Tangkiwood] text-white mt-3 flex items-center justify-center gap-2'
+        >
+          <img
+            src='https://toppng.com/uploads/preview/google-g-logo-icon-11609362962anodywxeaz.png'
+            alt='Google'
+            width={18}
+            height={18}
+            style={{ background: 'white', borderRadius: 2 }}
+          />
+          <span>CONTINUE WITH GOOGLE</span>
         </button>
 
         <div style={{ fontFamily: 'MicaValo' }} className='register-link'>
