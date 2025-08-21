@@ -18,10 +18,10 @@ function CheckoutSuccessContent() {
 
   // Get payment status from URL parameters
   // MoMo might return different parameter names depending on the version
-  const orderId = searchParams.get('orderId') || searchParams.get('orderid');
-  const resultCode = searchParams.get('resultCode') || searchParams.get('resultcode');
-  const message = searchParams.get('message') || searchParams.get('errorMessage');
-  const stripeSessionId = searchParams.get('session_id');
+  const orderId = searchParams.get('orderId') || searchParams.get('orderid')
+  const resultCode = searchParams.get('resultCode') || searchParams.get('resultcode')
+  const message = searchParams.get('message') || searchParams.get('errorMessage')
+  const stripeSessionId = searchParams.get('session_id')
   // const extraData = searchParams.get('extraData');
 
   useEffect(() => {
@@ -65,7 +65,7 @@ function CheckoutSuccessContent() {
       if ((resultCode === '0' || stripeSessionId) && verified && !order) {
         try {
           setOrderCreating(true)
-          
+
           // Get customer info from localStorage
           const customerInfoStr = localStorage.getItem('customerInfo')
           if (!customerInfoStr) {
@@ -74,7 +74,7 @@ function CheckoutSuccessContent() {
           }
 
           const customerInfo = JSON.parse(customerInfoStr)
-          
+
           // Get user ID from token
           const token = localStorage.getItem('token')
           if (!token) {
@@ -92,7 +92,7 @@ function CheckoutSuccessContent() {
 
           // Determine payment method and status
           let paymentMethod: 'Stripe' | 'MoMo' | 'Cash on Delivery' = 'Cash on Delivery'
-          let paymentStatus: 'Pending' | 'Completed' | 'Failed' = 'Completed'
+          const paymentStatus: 'Pending' | 'Completed' | 'Failed' = 'Completed'
 
           if (stripeSessionId) {
             paymentMethod = 'Stripe'
@@ -116,7 +116,6 @@ function CheckoutSuccessContent() {
           } else {
             console.error('Failed to create order:', orderResponse.message)
           }
-
         } catch (error) {
           console.error('Error creating order:', error)
         } finally {
@@ -137,7 +136,7 @@ function CheckoutSuccessContent() {
           if (token) {
             const payload = JSON.parse(atob(token.split('.')[1]))
             const userId = payload.accountID
-            
+
             if (userId) {
               await axios.delete(`http://localhost:5000/api/cart/${userId}`)
               console.log('Cart cleared after successful payment')
@@ -192,7 +191,7 @@ function CheckoutSuccessContent() {
             <p className='text-gray-600 mb-6'>
               Thank you for your purchase. Your order has been processed successfully.
             </p>
-            
+
             {order && (
               <div className='mb-6 text-left bg-gray-50 p-4 rounded-lg'>
                 <h3 className='font-semibold mb-2'>Order Details:</h3>
@@ -203,7 +202,7 @@ function CheckoutSuccessContent() {
                 <p className='text-sm text-gray-600'>Date: {new Date(order.createdDate).toLocaleDateString('vi-VN')}</p>
               </div>
             )}
-            
+
             <div className='mt-6'>
               <Link
                 href='/homepage'
@@ -251,19 +250,21 @@ function CheckoutSuccessContent() {
 }
 export default function CheckoutSuccess() {
   return (
-    <Suspense fallback={
-      <div className='container mx-auto px-4 py-8'>
-        <div className='max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden md:max-w-2xl p-8'>
-          <div className='text-center'>
-            <div className='mb-4'>
-              <div className='w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto'></div>
+    <Suspense
+      fallback={
+        <div className='container mx-auto px-4 py-8'>
+          <div className='max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden md:max-w-2xl p-8'>
+            <div className='text-center'>
+              <div className='mb-4'>
+                <div className='w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto'></div>
+              </div>
+              <h1 className='text-2xl font-bold text-gray-800 mb-4'>Loading...</h1>
+              <p className='text-gray-600'>Please wait...</p>
             </div>
-            <h1 className='text-2xl font-bold text-gray-800 mb-4'>Loading...</h1>
-            <p className='text-gray-600'>Please wait...</p>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CheckoutSuccessContent />
     </Suspense>
   )
