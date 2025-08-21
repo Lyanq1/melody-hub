@@ -114,6 +114,7 @@ export const Navbar = () => {
           <Link href='/'>Home</Link>
           <Link href='/product'>Products</Link>
           <Link href='/worldmap'>World Vinyl</Link>
+          <Link href='/preorder'> Pre Order</Link>
         </div>
         <SearchBar />
 
