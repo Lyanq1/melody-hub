@@ -15,6 +15,12 @@ interface CartItem {
   imageUrl: string;
 }
 
+interface DeliveryFee {
+  toDistrict: string;
+  fromDistrict: string;
+  deliveryFee: number;
+}
+
 export default function Checkout() {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -25,9 +31,12 @@ export default function Checkout() {
     name: '',
     email: '',
     phone: '',
-    address: ''
+    address: '',
+    district: '' // Thêm trường district
   });
   const [formValid, setFormValid] = useState(false);
+  const [districts, setDistricts] = useState<string[]>([]);
+  const [deliveryFee, setDeliveryFee] = useState<number>(0);
 
   // Fetch cart items from API
   useEffect(() => {
@@ -97,14 +106,55 @@ export default function Checkout() {
     fetchCart();
   }, [router]);
 
+  // Fetch districts from API
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/delivery-fees');
+        if (response.data.success) {
+          const districtList = response.data.data.map((fee: DeliveryFee) => fee.toDistrict);
+          setDistricts(districtList);
+        }
+      } catch (err) {
+        console.error('Error fetching districts:', err);
+      }
+    };
+
+    fetchDistricts();
+  }, []);
+
+  // Fetch delivery fee when district changes
+  useEffect(() => {
+    const fetchDeliveryFee = async () => {
+      if (!customerInfo.district) return;
+
+      try {
+        const response = await axios.get(`http://localhost:5000/api/delivery-fees/${customerInfo.district}`);
+        if (response.data.success) {
+          setDeliveryFee(response.data.data.deliveryFee);
+        }
+      } catch (err) {
+        console.error('Error fetching delivery fee:', err);
+        setDeliveryFee(0);
+      }
+    };
+
+    fetchDeliveryFee();
+  }, [customerInfo.district]);
   
   // Validate form when customer info changes
   useEffect(() => {
-    const { name, email, phone, address } = customerInfo;
-    setFormValid(name.trim() !== '' && email.trim() !== '' && phone.trim() !== '' && address.trim() !== '');
+    const { name, email, phone, address, district } = customerInfo;
+    setFormValid(
+      name.trim() !== '' && 
+      email.trim() !== '' && 
+      phone.trim() !== '' && 
+      address.trim() !== '' &&
+      district.trim() !== ''
+    );
   }, [customerInfo]);
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setCustomerInfo(prev => ({
       ...prev,
@@ -113,7 +163,6 @@ export default function Checkout() {
   };
 
   const handlePaymentInitiated = () => {
-    // Save customer info to localStorage for order processing
     localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
     console.log('Payment initiated for amount:', totalAmount);
   };
@@ -129,10 +178,9 @@ export default function Checkout() {
     }
     try {
       setError('');
-      // Save customer info for later order processing
       localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
       const amountNumber = parseInt(totalAmount, 10) || 0;
-      const res = await createStripeCheckoutSession(amountNumber, 'MelodyHub Order');
+      const res = await createStripeCheckoutSession(amountNumber + deliveryFee, 'MelodyHub Order');
       if (res.success && res.url) {
         window.location.href = res.url;
       } else {
@@ -149,10 +197,7 @@ export default function Checkout() {
       return;
     }
     
-    // Save order information
     localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
-    
-    // Redirect to success page with COD flag
     router.push('/checkout/success?resultCode=0&orderId=COD-' + Date.now() + '&message=Cash on Delivery');
   };
 
@@ -165,6 +210,8 @@ export default function Checkout() {
       </div>
     );
   }
+
+  const finalTotal = parseInt(totalAmount) + deliveryFee;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -225,6 +272,23 @@ export default function Checkout() {
                 required
               />
             </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">District</label>
+              <select
+                name="district"
+                value={customerInfo.district}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                required
+              >
+                <option value="">Select District</option>
+                {districts.map((district) => (
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
         
@@ -257,11 +321,11 @@ export default function Checkout() {
                   </div>
                   <div className="flex justify-between mb-2">
                     <p>Shipping</p>
-                    <p>Free</p>
+                    <p>{deliveryFee > 0 ? deliveryFee.toLocaleString('vi-VN') + '₫' : 'Select district'}</p>
                   </div>
                   <div className="flex justify-between font-bold text-lg">
                     <p>Total</p>
-                    <p>{parseInt(totalAmount).toLocaleString('vi-VN')}₫</p>
+                    <p>{finalTotal.toLocaleString('vi-VN')}₫</p>
                   </div>
                 </div>
                 
@@ -269,7 +333,7 @@ export default function Checkout() {
                   <h3 className="font-semibold">Payment Methods</h3>
                   
                   <MoMoPaymentButton 
-                    amount={totalAmount}
+                    amount={String(finalTotal)}
                     onPaymentInitiated={handlePaymentInitiated}
                     onPaymentError={handlePaymentError}
                     className="w-full"

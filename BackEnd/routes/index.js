@@ -7,6 +7,7 @@ import categoryRoutes from './category.routes.js';
 import paymentRoutes from './payment.routes.js';
 import orderRoutes from './order.routes.js';
 import scrapeRoutes from './scrape.routes.js';
+import deliveryFeeRoutes from './deliveryFee.routes.js';
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use('/categories', categoryRoutes);
 router.use('/payment', paymentRoutes);
 router.use('/orders', orderRoutes);
 router.use('/scrape', scrapeRoutes);
+router.use('/delivery-fees', deliveryFeeRoutes);
 
 export default router;
