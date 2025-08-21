@@ -40,6 +40,7 @@ import { Navbar } from '@/components/ui/navbar'
 import Footer from '@/components/Footer'
 import { Toaster } from "sonner";
 import './globals.css'
+import AuthSessionProvider from '@/components/auth-session-provider'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -58,12 +59,14 @@ export default function CartLayout({
 }) {
   return (
     <html lang="en">
-      <head>{/* Không thêm Facebook SDK ở đây */}</head>
+      <head></head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}>
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-        <Toaster position="top-center" richColors closeButton />
+        <AuthSessionProvider>
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+          <Toaster position="top-center" richColors closeButton />
+        </AuthSessionProvider>
       </body>
     </html>
   );

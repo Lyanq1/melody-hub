@@ -382,3 +382,63 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ message: 'Lỗi khi đặt lại mật khẩu', error: error.message });
   }
 };
+
+// Upsert Google user sent from NextAuth callback
+export const googleSync = async (req, res) => {
+  try {
+    console.log('[googleSync] incoming body:', JSON.stringify(req.body))
+    const { sub, email, name, picture, role } = req.body || {}
+    const finalRole = ['Customer', 'Artist', 'Admin'].includes(role) ? role : 'Customer'
+
+    if (!email || !sub) {
+      return res.status(400).json({ message: 'Missing required fields: email, sub' })
+    }
+
+    const username = `google_${sub}`
+
+    // Try find by email first
+    let account = await findAccountByEmail(email)
+
+    if (!account) {
+      // If not found, create new account
+      const randomPassword = `GOOGLE_${sub}`
+      const accountID = await createAccount(
+        username,
+        randomPassword,
+        email,
+        name || 'Google User',
+        picture || null,
+        finalRole,
+        null,
+        null
+      )
+      account = await Account.findById(accountID)
+      console.log('[googleSync] created account', accountID)
+    } else {
+      // Update profile fields if changed; do not overwrite Username
+      const update = {}
+      if (name && name !== account.DisplayName) update.DisplayName = name
+      if (picture && picture !== account.AvatarURL) update.AvatarURL = picture
+      if (Object.keys(update).length) {
+        await updateAccount(account._id, update)
+      }
+      account = await Account.findById(account._id)
+      console.log('[googleSync] updated account', account._id.toString())
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        accountID: account._id,
+        username: account.Username,
+        email: account.Email,
+        displayName: account.DisplayName,
+        avatarURL: account.AvatarURL,
+        role: account.Role
+      }
+    })
+  } catch (error) {
+    console.error('googleSync error:', error)
+    return res.status(500).json({ message: 'Failed to sync Google user', error: error.message })
+  }
+}
