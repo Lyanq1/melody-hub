@@ -10,7 +10,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import axios from 'axios'
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email.js'
-import { createResetToken, findResetToken, markTokenAsUsed } from '../models/auth/resettoken.model.js'
+import { createResetToken, findResetToken, markTokenAsUsed, deleteResetTokensByUsername } from '../models/auth/resettoken.model.js'
 
 // Đăng ký
 export const register = async (req, res) => {
