@@ -176,6 +176,20 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'DrukWideBold';
+  src: url('/fonts/DrukWideBold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'InterTight';
+  src: url('/fonts/InterTight-VariableFont_wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Line clamp utilities for text truncation */
 .line-clamp-1 {
   overflow: hidden;
