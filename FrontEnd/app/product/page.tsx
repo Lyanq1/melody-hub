@@ -6,7 +6,7 @@ import ProductCategory from '../homepage/components/ProductCategory'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { ChevronDown, ArrowUpDown } from 'lucide-react'
+import { ChevronDown, ArrowUpDown, X, Search } from 'lucide-react'
 // Import các component Pagination từ Shadcn UI
 import {
   Pagination,
@@ -57,6 +57,17 @@ function ProductsContent() {
   const selectedCategory = searchParams.get('category')
   const selectedSubcategory = searchParams.get('subcategory')
   const selectedSort = searchParams.get('sort') || ''
+  const searchQuery = searchParams.get('search') || ''
+
+  const filterBySearch = useCallback(
+    (product: Product) => {
+      if (!searchQuery.trim()) return true
+      const productName = product.name?.toLowerCase() || ''
+      const query = searchQuery.toLowerCase().trim()
+      return productName.includes(query)
+    },
+    [searchQuery]
+  )
 
   const filterByCategory = useCallback(
     (product: Product) => {
@@ -87,6 +98,18 @@ function ProductsContent() {
       }
     },
     [selectedCategory, selectedSubcategory]
+  )
+
+  const combineFilters = useCallback(
+    (product: Product) => {
+      // Nếu có search query, chỉ filter theo search, bỏ qua category filter
+      if (searchQuery.trim()) {
+        return filterBySearch(product)
+      }
+      // Nếu không có search query, filter theo category như bình thường
+      return filterByCategory(product)
+    },
+    [searchQuery, filterBySearch, filterByCategory]
   )
 
   // Hàm sắp xếp sản phẩm với error handling
@@ -188,6 +211,13 @@ function ProductsContent() {
     [searchParams, selectedSort, router]
   )
 
+  // Handler để clear search
+  const handleClearSearch = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('search')
+    router.push(`/product?${params.toString()}`)
+  }, [searchParams, router])
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -202,11 +232,11 @@ function ProductsContent() {
     fetchProducts()
   }, [])
 
-  // Reset trang về 1 khi thay đổi category hoặc subcategory
+  // Reset trang về 1 khi thay đổi category, subcategory hoặc search query
   useEffect(() => {
     setCurrentPage(1)
     setInputPage(1)
-  }, [selectedCategory, selectedSubcategory])
+  }, [selectedCategory, selectedSubcategory, searchQuery])
 
   // PHẦN PHÂN TRANG
   // Tính tổng số trang
@@ -216,12 +246,12 @@ function ProductsContent() {
   // Memoized filtering và sorting để tối ưu performance
   const filteredProducts = useMemo(() => {
     try {
-      return products.filter(filterByCategory)
+      return products.filter(combineFilters)
     } catch (error) {
       console.warn('Filter error:', error)
       return products
     }
-  }, [products, filterByCategory])
+  }, [products, combineFilters])
 
   const sortedProducts = useMemo(() => {
     try {
@@ -310,6 +340,28 @@ function ProductsContent() {
       <div className='container mx-auto py-8'>
         <h1 className='text-[40px] font-bold mb-8 text-left font-[MicaValo]'>OUR PRODUCTS</h1>
 
+        {/* Search Results Status */}
+        {searchQuery && (
+          <div className='mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-2'>
+                <span className='text-blue-800 dark:text-blue-200'>
+                  Kết quả tìm kiếm cho: <strong>"{searchQuery}"</strong>
+                </span>
+                <span className='text-sm text-blue-600 dark:text-blue-400'>({sortedProducts.length} sản phẩm)</span>
+              </div>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={handleClearSearch}
+                className='text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200'
+              >
+                <X className='h-4 w-4 mr-1' />
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className='flex flex-col sm:flex-row gap-6'>
           <ProductCategory />
 
@@ -344,9 +396,14 @@ function ProductsContent() {
 
             {sortedProducts.length === 0 ? (
               <div className='flex flex-col items-center justify-center py-16 text-center'>
-                <div className='text-6xl mb-4'>😔</div>
-                <h3 className='text-xl font-semibold mb-2'>Không tìm thấy sản phẩm</h3>
-                <p className='text-gray-600'>Không có sản phẩm nào trong danh mục này. Hãy thử chọn danh mục khác.</p>
+                <h3 className='text-xl font-semibold mb-2'>
+                  {searchQuery ? 'Không tìm thấy kết quả' : 'Không tìm thấy sản phẩm'}
+                </h3>
+                <p className='text-gray-600'>
+                  {searchQuery
+                    ? `Không có sản phẩm nào khớp với từ khóa "${searchQuery}". Hãy thử từ khóa khác.`
+                    : 'Không có sản phẩm nào trong danh mục này. Hãy thử chọn danh mục khác.'}
+                </p>
               </div>
             ) : (
               <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-center'>
