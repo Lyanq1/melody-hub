@@ -36,8 +36,7 @@
 
 
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Navbar } from '@/components/ui/navbar'
-import Footer from '@/components/Footer'
+import RootLayoutFrame from '@/components/root-layout-frame'
 import { Toaster } from "sonner";
 import './globals.css'
 import AuthSessionProvider from '@/components/auth-session-provider'
@@ -62,9 +61,9 @@ export default function CartLayout({
       <head></head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}>
         <AuthSessionProvider>
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <Footer />
+          <RootLayoutFrame>
+            {children}
+          </RootLayoutFrame>
           <Toaster position="top-center" richColors closeButton />
         </AuthSessionProvider>
       </body>

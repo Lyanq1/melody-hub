@@ -44,9 +44,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="flex min-h-screen bg-[#faf5f4]">
+      <div className="flex min-h-screen bg-white">
         {/* Sidebar */}
-        <aside className="w-58 bg-[#232227] font-semibold font-['Inter_Tight'] text-white">
+        <aside className="w-58 bg-black font-semibold font-['Inter_Tight'] text-white border-r border-gray-200">
           <div className="p-4">
             <nav>
               <ul className="space-y-2">
