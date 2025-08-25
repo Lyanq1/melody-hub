@@ -88,12 +88,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className='font-[JaJP] p-6 space-y-8'>
+    <div className='font-[Inter_Tight] p-6 space-y-8'>
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
         <div className="flex flex-col items-start">
-            <h2 className="text-5xl font-bold font-[DrukWideBold] text-neutral-800">DASHBOARD</h2>
-            <div className="w-118 h-2 bg-[#BB3C36] mt-2"></div>
-          </div>
+          <h2 className="text-3xl font-bold font-[DrukWideBold] text-neutral-800">DASHBOARD</h2>
+          <div className="w-74 h-2 bg-[#BB3C36] mt-2"></div>
+        </div>
         <div className='flex items-center gap-4'>
           <Link href="/dashboard/products">
             <Button className='bg-black text-white hover:bg-gray-800'>Quản lý sản phẩm</Button>

@@ -166,8 +166,11 @@ export default function Cart() {
   }
 
   return (
-    <div className='container mx-auto px-4 py-8 max-w-7xl font-[Ceflinty]'>
-      <h1 className='text-3xl font-bold mb-8'>Giỏ hàng của bạn</h1>
+    <div className="container mx-auto px-4 py-8 max-w-7xl font-[Inter_Tight]">
+      <div className="flex flex-col items-start mb-10">
+        <h2 className="text-5xl font-bold font-[DrukWideBold] text-neutral-800">MY CART</h2>
+        <div className="w-83 h-2 bg-[#BB3C36] mt-2"></div>
+      </div>
       {/* Cache Status Display */}
       {cart?._cacheInfo && (
         <div className={`p-3 rounded-lg mb-4 ${
@@ -226,9 +229,9 @@ export default function Cart() {
                   </Button>
                 </div>
 
-                <Button variant='destructive' size='sm' onClick={() => handleDelete(item.discId)}>
+                <Button className="bg-[#BB3C36]" variant='destructive' size='sm' onClick={() => handleDelete(item.discId)}>
                   <Trash2 className='h-4 w-4 mr-2' />
-                  Xóa
+                  Delete
                 </Button>
               </div>
             </div>
@@ -238,11 +241,11 @@ export default function Cart() {
 
       <div className='mt-8 p-4 bg-gray-50 rounded-lg'>
         <div className='flex justify-between items-center mb-4'>
-          <span className='text-lg font-semibold'>Tổng cộng:</span>
+          <span className='text-lg font-semibold'>TOTAL:</span>
           <span className='text-xl font-bold'>{calculateTotal()}₫</span>
         </div>
-        <Button className='w-full bg-primary hover:bg-primary/90' size='lg' onClick={handleCheckout}>
-          Thanh toán
+        <Button className='w-full bg-[#DDB351] rounded-[30px] hover:bg-primary/90 font-bold text-2xl text-[#BB3C36]' onClick={handleCheckout}>
+          ABATE
         </Button>
       </div>
     </div>

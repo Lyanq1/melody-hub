@@ -214,8 +214,11 @@ export default function Checkout() {
   const finalTotal = parseInt(totalAmount) + deliveryFee;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+    <div className="container mx-auto px-4 py-8 font-[Inter_Tight]">
+      <div className="flex flex-col items-start mb-10">
+        <h2 className="text-5xl font-bold font-[DrukWideBold] text-neutral-800">CHECKOUT</h2>
+        <div className="w-102 h-2 bg-[#BB3C36] mt-2"></div>
+      </div>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
