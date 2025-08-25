@@ -35,7 +35,6 @@ function ProductCategoryContent() {
   const searchParams = useSearchParams()
   const selected = searchParams.get('category') || ''
   const selectedSubcategory = searchParams.get('subcategory') || ''
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([])
 
   const handleClick = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -63,12 +62,6 @@ function ProductCategoryContent() {
     router.push(`/product?${params.toString()}`)
   }
 
-  const toggleExpanded = (categoryValue: string) => {
-    setExpandedCategories((prev) =>
-      prev.includes(categoryValue) ? prev.filter((cat) => cat !== categoryValue) : [...prev, categoryValue]
-    )
-  }
-
   return (
     <div className='w-full mb-8'>
       {/* Category Navigation */}
@@ -81,16 +74,11 @@ function ProductCategoryContent() {
                 'justify-between hover:bg-muted rounded-none text-2xl sm:text-3xl font-bold uppercase transition-colors px-4 py-2',
                 selected === cat.value ? 'text-[#BB3C36]' : 'text-neutral-800 hover:text-red-500'
               )}
-              onClick={() => {
-                handleClick(cat.value)
-                if (cat.subcategories) {
-                  toggleExpanded(cat.value)
-                }
-              }}
+              onClick={() => handleClick(cat.value)}
             >
               <span>{cat.label}</span>
               {cat.subcategories &&
-                (expandedCategories.includes(cat.value) || selected === cat.value ? (
+                (selected === cat.value ? (
                   <ChevronDown className='h-4 w-4 ml-2' />
                 ) : (
                   <ChevronRight className='h-4 w-4 ml-2' />
@@ -100,35 +88,27 @@ function ProductCategoryContent() {
         ))}
       </div>
 
-      {/* Subcategories Section - Appears below main nav */}
-      {categories.some(
-        (cat) => cat.subcategories && (expandedCategories.includes(cat.value) || selected === cat.value)
-      ) && (
+      {/* Subcategories Section - Only show for currently selected category */}
+      {selected && currentCategory.subcategories && (
         <div className='bg-gray-50 border-b border-gray-300 py-4'>
           <div className='flex justify-center items-center gap-8 flex-wrap'>
-            {categories.map(
-              (cat) =>
-                cat.subcategories &&
-                (expandedCategories.includes(cat.value) || selected === cat.value) && (
-                  <div key={cat.value} className='flex gap-4'>
-                    {cat.subcategories.map((subcat) => (
-                      <Button
-                        key={subcat.value}
-                        variant='ghost'
-                        className={cn(
-                          'px-4 py-2 rounded-md text-base font-medium transition-colors',
-                          selectedSubcategory === subcat.value && selected === cat.value
-                            ? 'bg-[#BB3C36] text-white hover:bg-[#A0342E]'
-                            : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
-                        )}
-                        onClick={() => handleSubcategoryClick(cat.value, subcat.value)}
-                      >
-                        {subcat.label}
-                      </Button>
-                    ))}
-                  </div>
-                )
-            )}
+            <div className='flex gap-4'>
+              {currentCategory.subcategories.map((subcat) => (
+                <Button
+                  key={subcat.value}
+                  variant='ghost'
+                  className={cn(
+                    'px-4 py-2 rounded-md text-base font-medium transition-colors',
+                    selectedSubcategory === subcat.value
+                      ? 'bg-[#BB3C36] text-white hover:bg-[#A0342E]'
+                      : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                  )}
+                  onClick={() => handleSubcategoryClick(currentCategory.value, subcat.value)}
+                >
+                  {subcat.label}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       )}
