@@ -73,7 +73,7 @@ export default function SearchBar() {
   }
 
   return (
-    <div ref={wrapperRef} className='w-[512px] h-12 relative'>
+    <div ref={wrapperRef} className='w-full sm:w-[400px] lg:w-[512px] h-12 relative max-w-lg'>
       <form onSubmit={handleSearch} className='relative flex w-full h-12 rounded-[30px] bg-white overflow-hidden'>
         {/* Input */}
         <input
@@ -84,17 +84,17 @@ export default function SearchBar() {
           onFocus={() => {
             if (suggestions.length > 0) setShowSuggestions(true)
           }}
-          placeholder='Search on the website'
-          className="flex-1 px-4 text-black text-lg font-['Inter_Tight'] placeholder-stone-400 focus:outline-none"
+          placeholder='Search...'
+          className="flex-1 px-3 sm:px-4 text-black text-sm sm:text-lg font-['Inter_Tight'] placeholder-stone-400 focus:outline-none"
         />
 
         {/* Search button */}
         <button
           type='submit'
-          className="flex items-center gap-2 w-30 h-full bg-[#DDB351] rounded-tr-[30px] rounded-br-[30px] px-4 text-white text-lg font-semibold font-['Inter_Tight']"
+          className="flex items-center justify-center gap-1 sm:gap-2 min-w-[60px] sm:w-auto h-full bg-[#DDB351] rounded-tr-[30px] rounded-br-[30px] px-3 sm:px-4 text-white text-sm sm:text-lg font-semibold font-['Inter_Tight']"
         >
-          <Search />
-          Search
+          <Search className='w-4 h-4 sm:w-5 sm:h-5' />
+          <span className='hidden sm:inline'>Search</span>
         </button>
       </form>
 

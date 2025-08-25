@@ -5,7 +5,13 @@ import { useEffect, useState, Suspense, useMemo, useCallback } from 'react'
 import ProductCategory from '../homepage/components/ProductCategory'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
 import { ChevronDown, ArrowUpDown, X, Search } from 'lucide-react'
 // Import các component Pagination từ Shadcn UI
 import {
@@ -335,70 +341,67 @@ function ProductsContent() {
     return pageNumbers
   }
 
-  const [sortOption, setSortOption] = useState("price-desc")
-  const [genre, setGenre] = useState("all")
+  const [sortOption, setSortOption] = useState('price-desc')
+  const [genre, setGenre] = useState('all')
 
   return (
     <div>
-      <div className="container mx-auto py-8">
+      <div className='container mx-auto py-8'>
         {/* Search Results Status */}
         {searchQuery && (
-          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-blue-800 dark:text-blue-200">
+          <div className='mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-2'>
+                <span className='text-blue-800 dark:text-blue-200'>
                   Kết quả tìm kiếm cho: <strong>"{searchQuery}"</strong>
                 </span>
-                <span className="text-sm text-blue-600 dark:text-blue-400">
-                  ({sortedProducts.length} sản phẩm)
-                </span>
+                <span className='text-sm text-blue-600 dark:text-blue-400'>({sortedProducts.length} sản phẩm)</span>
               </div>
               <Button
-                variant="ghost"
-                size="sm"
+                variant='ghost'
+                size='sm'
                 onClick={handleClearSearch}
-                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                className='text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200'
               >
-                <X className="h-4 w-4 mr-1" />
+                <X className='h-4 w-4 mr-1' />
               </Button>
             </div>
           </div>
         )}
 
         {/* 1. Product Category (nằm trên cùng) */}
-        <div className="mb-10">
+        <div className='mb-10'>
           <ProductCategory />
         </div>
 
         {/* 2. SHOP label + Sort Filter */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8">
+        <div className='flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8'>
           {/* SHOP label */}
-          <div className="flex flex-col items-start">
-            <h2 className="text-5xl font-bold font-[DrukWideBold] text-neutral-800">SHOP</h2>
-            <div className="w-52 h-2 bg-[#BB3C36] mt-2"></div>
+          <div className='flex flex-col items-start'>
+            <h2 className='text-5xl font-bold font-[DrukWideBold] text-neutral-800'>SHOP</h2>
+            <div className='w-52 h-2 bg-[#BB3C36] mt-2'></div>
           </div>
 
           {/* Sort Filter */}
-          <div className="mt-4 sm:mt-0">
+          <div className='mt-4 sm:mt-0'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2 w-full sm:w-auto" disabled={isLoading}>
-                  <ArrowUpDown className="h-4 w-4" />
-                  <span className="truncate">
+                <Button variant='outline' className='gap-2 w-full sm:w-auto' disabled={isLoading}>
+                  <ArrowUpDown className='h-4 w-4' />
+                  <span className='truncate'>
                     {isLoading
-                      ? "Đang sắp xếp..."
-                      : sortOptions.find((option) => option.value === selectedSort)?.label ||
-                        "Sắp xếp"}
+                      ? 'Đang sắp xếp...'
+                      : sortOptions.find((option) => option.value === selectedSort)?.label || 'Sắp xếp'}
                   </span>
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className='h-4 w-4' />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align='end' className='w-48'>
                 {sortOptions.map((option) => (
                   <DropdownMenuItem
                     key={option.value}
                     onClick={() => handleSortChange(option.value)}
-                    className={selectedSort === option.value ? "bg-muted font-semibold" : ""}
+                    className={selectedSort === option.value ? 'bg-muted font-semibold' : ''}
                   >
                     {option.label}
                   </DropdownMenuItem>
@@ -410,18 +413,18 @@ function ProductsContent() {
 
         {/* 3. Product List */}
         {sortedProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <h3 className="text-xl font-semibold mb-2">
-              {searchQuery ? "Không tìm thấy kết quả" : "Không tìm thấy sản phẩm"}
+          <div className='flex flex-col items-center justify-center py-16 text-center'>
+            <h3 className='text-xl font-semibold mb-2'>
+              {searchQuery ? 'Không tìm thấy kết quả' : 'Không tìm thấy sản phẩm'}
             </h3>
-            <p className="text-gray-600">
+            <p className='text-gray-600'>
               {searchQuery
                 ? `Không có sản phẩm nào khớp với từ khóa "${searchQuery}". Hãy thử từ khóa khác.`
-                : "Không có sản phẩm nào trong danh mục này. Hãy thử chọn danh mục khác."}
+                : 'Không có sản phẩm nào trong danh mục này. Hãy thử chọn danh mục khác.'}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-center">
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-center'>
             {currentItems.map((product) => (
               <ProductCard
                 key={product._id}
@@ -440,26 +443,26 @@ function ProductsContent() {
 
         {/* 4. Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-8">
+          <div className='flex justify-center mt-8'>
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
                     onClick={() => handlePageChange(currentPage - 1)}
                     isActive={currentPage > 1}
-                    className="cursor-pointer"
+                    className='cursor-pointer'
                   />
                 </PaginationItem>
 
                 {getPageNumbers(currentPage, totalPages).map((page, index) => (
                   <PaginationItem key={index}>
-                    {page === "..." ? (
-                      <PaginationEllipsis className="cursor-default" />
+                    {page === '...' ? (
+                      <PaginationEllipsis className='cursor-default' />
                     ) : (
                       <PaginationLink
                         onClick={() => handlePageChange(page as number)}
                         isActive={page === currentPage}
-                        className="cursor-pointer"
+                        className='cursor-pointer'
                       >
                         {page}
                       </PaginationLink>
@@ -471,15 +474,15 @@ function ProductsContent() {
                   <PaginationNext
                     onClick={() => handlePageChange(currentPage + 1)}
                     isActive={currentPage < totalPages}
-                    className="cursor-pointer"
+                    className='cursor-pointer'
                   />
                 </PaginationItem>
 
                 {/* Ô nhập trang */}
-                <div className="flex items-center gap-2 ml-4">
-                  <span className="text-sm">Go to</span>
+                <div className='flex items-center gap-2 ml-4'>
+                  <span className='text-sm'>Go to</span>
                   <input
-                    type="number"
+                    type='number'
                     min={1}
                     max={totalPages}
                     value={inputPage}
@@ -487,12 +490,12 @@ function ProductsContent() {
                       const value = Number(e.target.value)
                       if (value >= 1 && value <= totalPages) {
                         setInputPage(value)
-                      } else if (e.target.value === "") {
+                      } else if (e.target.value === '') {
                         setInputPage(1)
                       }
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") {
+                      if (e.key === 'Enter') {
                         const validPage = Math.max(1, Math.min(inputPage, totalPages))
                         handlePageChange(validPage)
                       }
@@ -501,9 +504,9 @@ function ProductsContent() {
                       const validPage = Math.max(1, Math.min(inputPage, totalPages))
                       setInputPage(validPage)
                     }}
-                    className="w-16 px-2 py-1 border rounded text-sm text-center"
+                    className='w-16 px-2 py-1 border rounded text-sm text-center'
                   />
-                  <span className="text-sm">/ {totalPages}</span>
+                  <span className='text-sm'>/ {totalPages}</span>
                 </div>
               </PaginationContent>
             </Pagination>

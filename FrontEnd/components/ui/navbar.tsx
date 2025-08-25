@@ -115,19 +115,36 @@ export const Navbar = () => {
   return (
     <nav className='bg-[#323031] text-[20px] sticky top-0 z-50 text-white shadow-md font-[Inter_Tight]'>
       <div className='container mx-auto flex items-center justify-between p-4'>
-        <Link className='text-white text-4xl font-black font-[Inter_Tight] mb-1' href='/'>
+        {/* Logo */}
+        <Link className='text-white text-3xl lg:text-4xl font-black font-[Inter_Tight] mb-1 flex-shrink-0' href='/'>
           er.
         </Link>
-        <div className='flex gap-10 text-center font-bold'>
-          <Link href='/'>Home</Link>
-          <Link href='/product'>Products</Link>
-          <Link href='/worldmap'>World Vinyl</Link>
-          <Link href='/preorder'> Pre Order</Link>
+
+        {/* Desktop Navigation - Hidden on mobile */}
+        <div className='hidden lg:flex gap-6 xl:gap-10 text-center font-bold'>
+          <Link href='/' className='hover:text-gray-300 transition-colors'>
+            Home
+          </Link>
+          <Link href='/product' className='hover:text-gray-300 transition-colors'>
+            Products
+          </Link>
+          <Link href='/worldmap' className='hover:text-gray-300 transition-colors whitespace-nowrap'>
+            World Vinyl
+          </Link>
+          <Link href='/preorder' className='hover:text-gray-300 transition-colors whitespace-nowrap'>
+            Pre Order
+          </Link>
         </div>
 
-        <div className='flex gap-8 text-center'>
-          <SearchBar />
-          <Link href='/cart' className='relative flex items-center gap-2'>
+        {/* Right Side Actions */}
+        <div className='flex items-center gap-3 lg:gap-6 xl:gap-8'>
+          {/* Search Bar - Responsive sizing */}
+          <div className='hidden sm:block'>
+            <SearchBar />
+          </div>
+
+          {/* Cart Icon */}
+          <Link href='/cart' className='relative flex items-center gap-2 flex-shrink-0'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
               width='28'
@@ -151,9 +168,10 @@ export const Navbar = () => {
             )}
           </Link>
 
+          {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className='flex items-center gap-2 focus:outline-none'>
+              <button className='flex items-center gap-2 focus:outline-none flex-shrink-0'>
                 <Avatar className='h-[35px] w-[35px] cursor-pointer'>
                   <AvatarImage src={avatarUrl || 'https://github.com/shadcn.png'} />
                   <AvatarFallback className='text-sm'>
@@ -364,6 +382,79 @@ export const Navbar = () => {
                   </DropdownMenuItem>
                 </>
               )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Mobile Menu Button - Only visible on mobile */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className='lg:hidden flex items-center gap-2 focus:outline-none p-2'>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  className='text-white'
+                >
+                  <line x1='4' x2='20' y1='12' y2='12' />
+                  <line x1='4' x2='20' y1='6' y2='6' />
+                  <line x1='4' x2='20' y1='18' y2='18' />
+                </svg>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className='w-56 lg:hidden'
+              align='end'
+              style={{
+                backgroundColor: '#323031',
+                color: 'white',
+                border: '1px solid #444',
+                fontFamily: 'InterTight'
+              }}
+            >
+              <DropdownMenuItem asChild>
+                <Link
+                  href='/'
+                  className='group flex items-center gap-2 px-4 py-3 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                >
+                  Home
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href='/product'
+                  className='group flex items-center gap-2 px-4 py-3 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                >
+                  Products
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href='/worldmap'
+                  className='group flex items-center gap-2 px-4 py-3 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                >
+                  World Vinyl
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href='/preorder'
+                  className='group flex items-center gap-2 px-4 py-3 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                >
+                  Pre Order
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator style={{ backgroundColor: '#444' }} />
+              <DropdownMenuItem asChild>
+                <div className='px-4 py-3'>
+                  <SearchBar />
+                </div>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
