@@ -1,6 +1,5 @@
 import Order from '../models/order/order.model.js';
 import Cart from '../models/order/cart.model.js';
-import Disc from '../models/product/disc.model.js';
 import mongoose from 'mongoose';
 
 export const getOrderById = async (req, res) => {
@@ -20,12 +19,24 @@ export const getOrderById = async (req, res) => {
 
 export const createOrder = async (req, res) => {
   try {
-    const { userId, customerInfo, paymentMethod, paymentStatus, sessionId } = req.body;
+    const { userId } = req.params; // Lấy userId từ params
+    const { 
+      address, 
+      paymentMethod, 
+      paymentStatus
+    } = req.body; // Body chỉ cần 3 trường này
 
-    if (!userId || !customerInfo) {
+    if (!userId) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Missing required fields: userId and customerInfo' 
+        message: 'User ID is required' 
+      });
+    }
+
+    if (!address) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Address is required' 
       });
     }
 
@@ -55,7 +66,7 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Transform cart items to order items with proper product data
+    // Transform cart items to order items
     const orderItems = await Promise.all(
       cart.items.map(async (item) => {
         // Fetch product details from Disc model
@@ -75,21 +86,19 @@ export const createOrder = async (req, res) => {
       userId: new mongoose.Types.ObjectId(userId),
       items: orderItems,
       totalPrice: typeof cart.total === 'string' ? parseInt(cart.total.replace(/[^\d]/g, ''), 10) || 0 : cart.total || 0,
-      shippingAddress: {
-        addressLine: customerInfo.address,
-        city: customerInfo.city || 'Ho Chi Minh',
-        country: customerInfo.country || 'Vietnam',
-        postalCode: customerInfo.postalCode || 700000
-      },
-      status: 'Confirmed',
+      address: address,
       paymentMethod: paymentMethod,
       paymentStatus: paymentStatus || 'Pending',
-      createdDate: new Date()
+      deliveryFee: 0,
+      createdAt: new Date()
     };
 
     // Create and save the order
     const order = new Order(orderData);
     await order.save();
+
+    // Xóa giỏ hàng sau khi tạo order thành công
+    await Cart.findOneAndDelete({ userId: new mongoose.Types.ObjectId(userId) });
 
     res.status(201).json({
       success: true,
@@ -120,7 +129,7 @@ export const getUserOrders = async (req, res) => {
 
     const orders = await Order.find({ 
       userId: new mongoose.Types.ObjectId(userId) 
-    }).sort({ createdDate: -1 });
+    }).sort({ createdAt: -1 });
 
     res.json({
       success: true,
@@ -149,7 +158,7 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const validStatuses = ['Confirmed', 'Processing', 'Shipped', 'Delivered'];
+    const validStatuses = ['Confirmed', 'PickingUp', 'Preparing', 'Delivering', 'Delivered'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ 
         success: false, 
