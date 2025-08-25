@@ -9,6 +9,7 @@ import Account from '../models/auth/account.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import axios from 'axios'
+import config from '../config/config.js'
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email.js'
 import {
   createResetToken,
@@ -76,11 +77,13 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid username or password' })
     }
 
+    console.log('🔑 Creating JWT token with secret:', config.jwt.secret.substring(0, 10) + '...')
     const token = jwt.sign(
       { accountID: account._id, username: account.Username, role: account.Role },
-      process.env.JWT_SECRET || 'your_jwt_secret',
-      { expiresIn: '1h' }
+      config.jwt.secret,
+      { expiresIn: config.jwt.expiresIn }
     )
+    console.log('✅ JWT token created:', token.substring(0, 20) + '...')
 
     res.status(200).json({
       message: 'Login successful',
@@ -109,11 +112,19 @@ export const facebookLogin = async (req, res) => {
   }
 
   try {
-    // Xác minh access token với Facebook
+    // Xác minh access token với Facebook - lấy thêm thông tin chi tiết
+    console.log('🔍 Verifying Facebook access token and fetching user data...')
     const response = await axios.get(
-      `https://graph.facebook.com/me?fields=id,email,name,picture&access_token=${accessToken}`
+      `https://graph.facebook.com/me?fields=id,email,name,picture.type(large).width(400).height(400)&access_token=${accessToken}`
     )
     const { id: facebookId, email, name, picture } = response.data
+
+    console.log('👤 Facebook user data received:', {
+      facebookId,
+      email,
+      name,
+      pictureUrl: picture?.data?.url
+    })
 
     if (!email || !name) {
       return res.status(400).json({ message: 'Email and display name are required from Facebook' })
@@ -126,22 +137,23 @@ export const facebookLogin = async (req, res) => {
     const account = await findAccountByEmail(email)
 
     // Tạo JWT token
-    const token = jwt.sign(
-      { accountID, username: `fb_${facebookId}`, role },
-      process.env.JWT_SECRET || 'your_jwt_secret',
-      { expiresIn: '1h' }
-    )
+    const token = jwt.sign({ accountID, username: `fb_${facebookId}`, role }, config.jwt.secret, {
+      expiresIn: config.jwt.expiresIn
+    })
 
+    console.log('✅ Facebook login successful for user:', account.DisplayName)
     res.status(200).json({
       message: 'Facebook login successful',
       token,
       user: {
-        accountID,
-        username: `fb_${facebookId}`,
-        email,
-        displayName: name,
-        avatarURL: picture?.data?.url,
-        role
+        accountID: account._id,
+        username: account.Username,
+        email: account.Email,
+        displayName: account.DisplayName,
+        avatarURL: account.AvatarURL,
+        role: account.Role,
+        phone: account.Phone,
+        address: account.Address
       }
     })
   } catch (error) {
@@ -239,18 +251,40 @@ export const updateUserInfo = async (req, res) => {
   const updatedData = req.body
 
   try {
-    const account = await Account.findOneAndUpdate(
-      { Username: username },
-      { ...updatedData, UpdatedAt: new Date() },
-      { new: true, runValidators: true }
-    ).select('-Password')
+    console.log('🔄 Updating user info for:', username)
+    console.log('📝 Update data:', updatedData)
+    console.log('👤 Authenticated user:', req.user)
+
+    // Đối với session auth (Google users), ưu tiên sử dụng accountID từ authenticated user
+    let account = null
+
+    if (req.user && req.user.accountID) {
+      // Sử dụng accountID từ middleware authentication
+      account = await Account.findByIdAndUpdate(
+        req.user.accountID,
+        { ...updatedData, UpdatedAt: new Date() },
+        { new: true, runValidators: true }
+      ).select('-Password')
+      console.log('✅ Updated using accountID:', req.user.accountID)
+    } else {
+      // Fallback: tìm theo username (traditional auth)
+      account = await Account.findOneAndUpdate(
+        { Username: username },
+        { ...updatedData, UpdatedAt: new Date() },
+        { new: true, runValidators: true }
+      ).select('-Password')
+      console.log('✅ Updated using username:', username)
+    }
 
     if (!account) {
+      console.log('❌ User not found')
       return res.status(404).json({ message: 'User not found' })
     }
 
+    console.log('🎉 Update successful:', account.DisplayName)
     res.status(200).json({ message: 'User updated successfully', user: account })
   } catch (error) {
+    console.error('💥 Update failed:', error)
     res.status(500).json({ message: 'Update failed', error: error.message })
   }
 }

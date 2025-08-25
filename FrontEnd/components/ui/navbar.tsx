@@ -74,19 +74,35 @@ export const Navbar = () => {
   // Handle avatar updates
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      const storedUsername = localStorage.getItem('username')
-      if (storedUsername) {
-        fetchUserData(storedUsername)
+      // Refresh avatar từ backend hoặc update từ user object
+      if (user?.username) {
+        fetchUserData(user.username)
+      } else {
+        const storedUsername = localStorage.getItem('username')
+        if (storedUsername) {
+          fetchUserData(storedUsername)
+        }
       }
     }
 
     window.addEventListener('avatar-update', handleAvatarUpdate)
     return () => window.removeEventListener('avatar-update', handleAvatarUpdate)
-  }, [])
+  }, [user])
 
-  // Handle login state and initial data fetch
+  // Handle login state and user data updates
   useEffect(() => {
-    const updateLoginState = () => {
+    // Ưu tiên sử dụng thông tin từ useAuth hook (bao gồm Google Auth)
+    if (isAuthenticated && user) {
+      console.log('🧭 Navbar: Using user from hook:', user)
+      console.log('🖼️ Navbar: Avatar URL from user:', user.avatarURL)
+      const newUsername = user.username || user.email?.split('@')[0] || ''
+      const newAvatarUrl = user.avatarURL || ''
+
+      // Chỉ update state nếu có thay đổi để tránh re-render không cần thiết
+      if (username !== newUsername) setUsername(newUsername)
+      if (avatarUrl !== newAvatarUrl) setAvatarUrl(newAvatarUrl)
+    } else {
+      // Fallback: sử dụng localStorage nếu không có user từ hook
       const storedUsername = localStorage.getItem('username')
       setUsername(storedUsername || '')
 
@@ -96,21 +112,27 @@ export const Navbar = () => {
         setAvatarUrl('')
       }
     }
+  }, [isAuthenticated, user, avatarUrl, username])
 
-    // Initial state
-    updateLoginState()
-
-    // Handle storage changes
+  // Handle storage changes for traditional auth
+  useEffect(() => {
     const handleStorageChange = () => {
-      updateLoginState()
+      // Chỉ xử lý storage changes khi không có user từ hook
+      if (!user) {
+        const storedUsername = localStorage.getItem('username')
+        setUsername(storedUsername || '')
+
+        if (isAuthenticated && storedUsername) {
+          fetchUserData(storedUsername)
+        } else {
+          setAvatarUrl('')
+        }
+      }
     }
 
     window.addEventListener('storage', handleStorageChange)
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-    }
-  }, [isAuthenticated])
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [user, isAuthenticated])
 
   return (
     <nav className='bg-[#323031] text-[20px] sticky top-0 z-50 text-white shadow-md font-[Inter_Tight]'>
