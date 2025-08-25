@@ -3,17 +3,23 @@
 import Link from 'next/link'
 import './components.css'
 import { useState, useEffect } from 'react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import SearchBar from '../SearchBar'
 import axios from 'axios'
 import { cartService } from '@/lib/services/cart'
 import { useAuth } from '@/hooks/use-auth'
-import { UserRound } from 'lucide-react';
+import { UserRound } from 'lucide-react'
 
 export const Navbar = () => {
   const { user, isAdmin, isAuthenticated, logout } = useAuth()
-  
+
   console.log('🧭 Navbar state:', { user, isAdmin, isAuthenticated })
   const [cartCount, setCartCount] = useState(0)
   const [avatarUrl, setAvatarUrl] = useState('')
@@ -109,14 +115,15 @@ export const Navbar = () => {
   return (
     <nav className='bg-[#323031] text-[20px] sticky top-0 z-50 text-white shadow-md font-[Inter_Tight]'>
       <div className='container mx-auto flex items-center justify-between p-4'>
-        <Link className='text-white text-4xl font-black font-[Inter_Tight]' href='/'>er.</Link>
+        <Link className='text-white text-4xl font-black font-[Inter_Tight] mb-1' href='/'>
+          er.
+        </Link>
         <div className='flex gap-10 text-center font-bold'>
           <Link href='/'>Home</Link>
           <Link href='/product'>Products</Link>
           <Link href='/worldmap'>World Vinyl</Link>
           <Link href='/preorder'> Pre Order</Link>
         </div>
-        
 
         <div className='flex gap-8 text-center'>
           <SearchBar />
@@ -277,7 +284,7 @@ export const Navbar = () => {
                       Tài khoản
                     </Link>
                   </DropdownMenuItem>
-                  
+
                   {isAdmin && (
                     <>
                       <DropdownMenuSeparator />
@@ -331,9 +338,9 @@ export const Navbar = () => {
                       </DropdownMenuItem>
                     </>
                   )}
-                  
+
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={handleLogout}
                     className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200 cursor-pointer'
                   >

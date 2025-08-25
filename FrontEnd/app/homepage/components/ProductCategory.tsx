@@ -7,27 +7,27 @@ import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 
 const categories = [
-  { label: 'ALL', value: '', image: 'http://localhost:3000/images/all.png' },
+  { label: 'ALL', value: '', image: '/images/all.png' },
   {
     label: 'CD / DVD',
     value: '687a5c8eaea60fd849fc0847',
     subcategories: [
-      { label: 'CD Nhạc Việt', value: 'cd-viet', filterKey: 'subcategory' },
-      { label: 'CD Nhạc Âu Mỹ', value: 'cd-aumy', filterKey: 'subcategory' }
-    ], 
-    image: 'http://localhost:3000/images/all.png'
+      { label: 'Vietnam CD', value: 'cd-viet', filterKey: 'subcategory' },
+      { label: 'US-UK CD', value: 'cd-aumy', filterKey: 'subcategory' }
+    ],
+    image: '/images/cd.jpg'
   },
   {
     label: 'VINYL',
     value: '687a5c8eaea60fd849fc0848',
     subcategories: [
-      { label: 'Vinyl Việt', value: 'vinyl-viet', filterKey: 'subcategory' },
-      { label: 'Vinyl Âu Mỹ', value: 'vinyl-aumy', filterKey: 'subcategory' }
-    ], 
-    image: 'http://localhost:3000/images/vinyl.png'
+      { label: 'Vietnam Vinyl', value: 'vinyl-viet', filterKey: 'subcategory' },
+      { label: 'US-UK Vinyl', value: 'vinyl-aumy', filterKey: 'subcategory' }
+    ],
+    image: '/images/vinyl.png'
   },
-  { label: 'CASSETTE', value: '687a5c8eaea60fd849fc0849', image: 'http://localhost:3000/images/all.png' },
-  { label: 'MERCH', value: '687a5c8eaea60fd849fc084a', image: 'http://localhost:3000/images/all.png' }
+  { label: 'CASSETTE', value: '687a5c8eaea60fd849fc0849', image: '/images/cassette.jpg' },
+  { label: 'MERCH', value: '687a5c8eaea60fd849fc084a', image: '/images/merch.jpg' }
 ]
 
 function ProductCategoryContent() {
@@ -48,7 +48,7 @@ function ProductCategoryContent() {
     }
     router.push(`/product?${params.toString()}`)
   }
-  const currentCategory = categories.find(cat => cat.value === selected) || categories[0]
+  const currentCategory = categories.find((cat) => cat.value === selected) || categories[0]
 
   const handleSubcategoryClick = (categoryValue: string, subcategoryValue: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -70,65 +70,71 @@ function ProductCategoryContent() {
   }
 
   return (
-    <div className="w-full mb-8">
-      <div className="flex justify-center items-center gap-20 h-14 border-b border-gray-300 font-[DrukWideBold]">
+    <div className='w-full mb-8'>
+      {/* Category Navigation */}
+      <div className='flex justify-center items-center gap-10 h-14 border-b border-gray-300 font-[DrukWideBold]'>
         {categories.map((cat) => (
-          <div key={cat.value}>
-            <div>
-              <Button
-                variant='ghost'
-                className={cn(
-                  'justify-between w-full hover:bg-muted rounded-none border-b text-2xl sm:text-3xl font-bold uppercase transition-colors',
-                  selected === cat.value 
-                  ? "text-[#BB3C36]"
-                  : "text-neutral-800 hover:text-red-500"
-                )}
-                onClick={() => {
-                  handleClick(cat.value)
-                  if (cat.subcategories) {
-                    toggleExpanded(cat.value)
-                  }
-                }}
-              >
-                <span>{cat.label}</span>
-                {cat.subcategories &&
-                  (expandedCategories.includes(cat.value) || selected === cat.value ? (
-                    <ChevronDown className='h-4 w-4' />
-                  ) : (
-                    <ChevronRight className='h-4 w-4' />
-                  ))}
-              </Button>
+          <div key={cat.value} className='relative'>
+            <Button
+              variant='ghost'
+              className={cn(
+                'justify-between hover:bg-muted rounded-none text-2xl sm:text-3xl font-bold uppercase transition-colors px-4 py-2',
+                selected === cat.value ? 'text-[#BB3C36]' : 'text-neutral-800 hover:text-red-500'
+              )}
+              onClick={() => {
+                handleClick(cat.value)
+                if (cat.subcategories) {
+                  toggleExpanded(cat.value)
+                }
+              }}
+            >
+              <span>{cat.label}</span>
+              {cat.subcategories &&
+                (expandedCategories.includes(cat.value) || selected === cat.value ? (
+                  <ChevronDown className='h-4 w-4 ml-2' />
+                ) : (
+                  <ChevronRight className='h-4 w-4 ml-2' />
+                ))}
+            </Button>
+          </div>
+        ))}
+      </div>
 
-              {/* Subcategories */}
-              {cat.subcategories && (expandedCategories.includes(cat.value) || selected === cat.value) && (
-                <ul className='ml-4 mt-2 space-y-1 list-none'>
-                  {cat.subcategories.map((subcat) => (
-                    <div key={subcat.value}>
+      {/* Subcategories Section - Appears below main nav */}
+      {categories.some(
+        (cat) => cat.subcategories && (expandedCategories.includes(cat.value) || selected === cat.value)
+      ) && (
+        <div className='bg-gray-50 border-b border-gray-300 py-4'>
+          <div className='flex justify-center items-center gap-8 flex-wrap'>
+            {categories.map(
+              (cat) =>
+                cat.subcategories &&
+                (expandedCategories.includes(cat.value) || selected === cat.value) && (
+                  <div key={cat.value} className='flex gap-4'>
+                    {cat.subcategories.map((subcat) => (
                       <Button
+                        key={subcat.value}
                         variant='ghost'
                         className={cn(
-                          'justify-start w-full hover:bg-muted rounded-none text-lg border-b border-gray-300',
+                          'px-4 py-2 rounded-md text-base font-medium transition-colors',
                           selectedSubcategory === subcat.value && selected === cat.value
-                            ? 'text-primary font-semibold bg-muted/50'
-                            : 'text-gray-600'
+                            ? 'bg-[#BB3C36] text-white hover:bg-[#A0342E]'
+                            : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                         )}
                         onClick={() => handleSubcategoryClick(cat.value, subcat.value)}
                       >
                         {subcat.label}
                       </Button>
-                    </div>
-                  ))}
-                </ul>
-              )}
-            </div>
+                    ))}
+                  </div>
+                )
+            )}
           </div>
-        ))}
-      </div>
-      <img
-        src={currentCategory.image}
-        alt={currentCategory.label}
-        className="w-full h-64 object-cover mt-6"
-      />
+        </div>
+      )}
+
+      {/* Category Image */}
+      <img src={currentCategory.image} alt={currentCategory.label} className='w-full h-64 object-cover mt-6' />
     </div>
   )
 }
