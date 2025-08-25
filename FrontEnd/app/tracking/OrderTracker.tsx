@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import OrderStatusSteps from './OrderStatusSteps';
 
 interface Order {
@@ -28,13 +29,12 @@ export default function OrderTracker({ orderId }: Props) {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/orders/${orderId}`);
-        if (!res.ok) throw new Error('Order not found');
-        const data: Order = await res.json();
+        const res = await axios.get(`http://localhost:5000/api/orders/${orderId}`);
+        const data: Order = res.data;
         setOrder(data);
         setError(null);
       } catch (err: any) {
-        setError(err.message);
+        setError(err.response?.data?.message || err.message || 'Order not found');
         setOrder(null);
       }
     };

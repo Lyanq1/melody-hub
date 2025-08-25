@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import Image from 'next/image'
-import { Search } from 'lucide-react';
+import { Search } from 'lucide-react'
 
 type Product = {
   _id: string
@@ -73,53 +73,44 @@ export default function SearchBar() {
   }
 
   return (
-    <div ref={wrapperRef} className="w-[512px] h-12 relative">
-      <form
-        onSubmit={handleSearch}
-        className="relative flex w-full h-12 rounded-[30px] bg-white overflow-hidden"
-      >
+    <div ref={wrapperRef} className='w-full sm:w-[400px] lg:w-[512px] h-12 relative max-w-lg'>
+      <form onSubmit={handleSearch} className='relative flex w-full h-12 rounded-[30px] bg-white overflow-hidden'>
         {/* Input */}
         <input
           ref={inputRef}
-          type="text"
+          type='text'
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => {
             if (suggestions.length > 0) setShowSuggestions(true)
           }}
-          placeholder="Search on the website"
-          className="flex-1 px-4 text-black text-lg font-['Inter_Tight'] placeholder-stone-400 focus:outline-none"
+          placeholder='Search...'
+          className="flex-1 px-3 sm:px-4 text-black text-sm sm:text-lg font-['Inter_Tight'] placeholder-stone-400 focus:outline-none"
         />
 
         {/* Search button */}
         <button
-          type="submit"
-          className="flex items-center gap-2 w-30 h-full bg-[#DDB351] rounded-tr-[30px] rounded-br-[30px] px-4 text-white text-lg font-semibold font-['Inter_Tight']"
+          type='submit'
+          className="flex items-center justify-center gap-1 sm:gap-2 min-w-[60px] sm:w-auto h-full bg-[#DDB351] rounded-tr-[30px] rounded-br-[30px] px-3 sm:px-4 text-white text-sm sm:text-lg font-semibold font-['Inter_Tight']"
         >
-          <Search />
-          Search
+          <Search className='w-4 h-4 sm:w-5 sm:h-5' />
+          <span className='hidden sm:inline'>Search</span>
         </button>
       </form>
 
       {/* Suggestions dropdown */}
       {showSuggestions && suggestions.length > 0 && (
-        <ul className="absolute z-50 w-full mt-2 bg-[#1f1e1d] rounded-md shadow-lg max-h-72 overflow-y-auto">
+        <ul className='absolute w-full mt-2 bg-[#1f1e1d] rounded-md shadow-lg max-h-72 overflow-y-auto'>
           {suggestions.map((item) => (
             <li
               key={item._id}
               onClick={() => handleSuggestionClick(item)}
-              className="flex items-center gap-3 px-4 py-2 text-sm text-white hover:bg-[#3d3b3a] cursor-pointer transition duration-150"
+              className='flex items-center gap-3 px-4 py-2 text-sm text-white hover:bg-[#3d3b3a] cursor-pointer transition duration-150'
             >
-              <Image
-                src={item.image}
-                alt={item.name}
-                width={48}
-                height={48}
-                className="rounded-lg"
-              />
-              <div>
-                <p className="font-medium">{item.name}</p>
-                <p className="text-xs text-gray-400">{item.price}₫</p>
+              <Image src={item.image} alt={item.name} width={48} height={48} className='rounded-lg' />
+              <div className='flex flex-col text-left'>
+                <p className='font-medium text-left'>{item.name}</p>
+                <p className='font-light text-gray-300 text-left'>{item.price}₫</p>
               </div>
             </li>
           ))}

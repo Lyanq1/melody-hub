@@ -12,13 +12,13 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') })
 // Kiểm tra cấu hình email (chỉ khi cần thiết)
 const checkEmailConfig = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.error('❌ Email configuration missing! Please set EMAIL_USER and EMAIL_PASS in .env file');
-    console.error('❌ EMAIL_USER:', process.env.EMAIL_USER ? '✅ Set' : '❌ Missing');
-    console.error('❌ EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ Set' : '❌ Missing');
-    return false;
+    console.error('❌ Email configuration missing! Please set EMAIL_USER and EMAIL_PASS in .env file')
+    console.error('❌ EMAIL_USER:', process.env.EMAIL_USER ? '✅ Set' : '❌ Missing')
+    console.error('❌ EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ Set' : '❌ Missing')
+    return false
   }
-  return true;
-};
+  return true
+}
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -29,7 +29,7 @@ const transporter = nodemailer.createTransport({
 
 const sendVerificationEmail = async (email, displayName) => {
   if (!checkEmailConfig()) {
-    throw new Error('Email configuration missing');
+    throw new Error('Email configuration missing')
   }
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -38,8 +38,7 @@ const sendVerificationEmail = async (email, displayName) => {
     html: `
       <h2>Chào mừng bạn đến với MelodyHub, ${displayName}!</h2>
       <p>Tài khoản của bạn đã được kích hoạt thành công.</p>
-      <p>Hãy vào https://melodyhub1.vercel.app/login để thực hiện thanh toán.</p>
-      <p>Dev vào https://680f-14-169-250-93.ngrok-free.app để thực hiện thanh toán.</p>
+      <p>Hãy thực hiện đăng nhập tại https://melodyhub1.vercel.app/login và bắt đầu trải nghiệm mua hàng.</p>
 
     `
   }
@@ -53,10 +52,9 @@ const sendVerificationEmail = async (email, displayName) => {
   }
 }
 
-
 const sendPasswordResetEmail = async (email, displayName, resetToken) => {
   if (!checkEmailConfig()) {
-    throw new Error('Email configuration missing');
+    throw new Error('Email configuration missing')
   }
 
   const mailOptions = {
@@ -96,17 +94,17 @@ const sendPasswordResetEmail = async (email, displayName, resetToken) => {
 const testEmailConfig = async () => {
   try {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      throw new Error('Email configuration missing');
+      throw new Error('Email configuration missing')
     }
-    
-    await transporter.verify();
-    console.log('✅ Email configuration is valid');
-    return true;
+
+    await transporter.verify()
+    console.log('✅ Email configuration is valid')
+    return true
   } catch (error) {
-    console.error('❌ Email configuration error:', error.message);
-    return false;
+    console.error('❌ Email configuration error:', error.message)
+    return false
   }
-};
+}
 
 export { sendVerificationEmail, sendPasswordResetEmail, testEmailConfig }
 export default sendVerificationEmail // Export mặc định

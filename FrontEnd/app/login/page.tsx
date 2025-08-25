@@ -13,8 +13,10 @@ declare global {
   }
 }
 import { signIn } from 'next-auth/react'
+import { useAuth } from '@/hooks/use-auth'
 
 const LoginPage = () => {
+  const { login } = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [role] = useState('Customer')
@@ -56,13 +58,14 @@ const LoginPage = () => {
     try {
       const response = await axios.post(AUTH_ENDPOINTS.LOGIN, { username, password })
       const { token, user } = response.data
-      
-      // Lưu token và thông tin user vào localStorage
-      localStorage.setItem('token', token)
-      localStorage.setItem('username', username)
-      
+
+      console.log('✅ Traditional login successful:', user)
+
+      // Sử dụng useAuth login function
+      login(token, user)
+
       toast.success(`Login successful! Welcome, ${user.displayName}`)
-      
+
       // Redirect dựa trên role
       if (user.role === 'Admin' || user.role === 'Artist') {
         window.location.href = '/dashboard'
@@ -93,32 +96,32 @@ const LoginPage = () => {
             const accessToken = response.authResponse.accessToken
             console.log('Access token received:', accessToken)
 
-            console.log('// testing')
+            // Lấy thông tin user từ Facebook Graph API với picture
+            console.log('🔍 Fetching Facebook user data...')
             axios
               .get(
-                `https://graph.facebook.com/me?fields=id,email,name,gender,birthday,age_range,location,hometown &access_token=${accessToken}`
+                `https://graph.facebook.com/me?fields=id,email,name,picture.type(large),gender,birthday,age_range,location,hometown&access_token=${accessToken}`
               )
               .then((response) => {
-                if (response.data) {
-                  localStorage.setItem('facebookUser', JSON.stringify(response.data))
-                }
-                console.log(response.data)
-              })
-              .catch((err) => {
-                console.error('Error fetching Facebook user data:', err)
-              })
+                const fbUserData = response.data
+                console.log('👤 Facebook user data:', fbUserData)
 
-            axios
-              .post(AUTH_ENDPOINTS.FACEBOOK_LOGIN, { accessToken, role })
+                if (fbUserData) {
+                  localStorage.setItem('facebookUser', JSON.stringify(fbUserData))
+                }
+
+                // Gọi backend login với thông tin đầy đủ
+                return axios.post(AUTH_ENDPOINTS.FACEBOOK_LOGIN, { accessToken, role })
+              })
               .then((res) => {
                 const { token, user } = res.data
-                
-                // Lưu token vào localStorage
-                localStorage.setItem('token', token)
-                localStorage.setItem('username', user.username)
-                
+                console.log('✅ Facebook login successful:', user)
+
+                // Sử dụng useAuth login function
+                login(token, user)
+
                 toast.success(`Facebook login successful! Welcome, ${user.displayName}`)
-                
+
                 // Redirect dựa trên role
                 if (user.role === 'Admin' || user.role === 'Artist') {
                   window.location.href = '/dashboard'
@@ -128,7 +131,9 @@ const LoginPage = () => {
               })
               .catch((err) => {
                 console.error('Facebook login error:', err.response?.data || err.message)
-                setError(err.response?.data?.message || 'Facebook login failed')
+                const errorMessage = err.response?.data?.message || err.message || 'Facebook login failed'
+                setError(errorMessage)
+                toast.error(errorMessage)
               })
               .finally(() => setIsLoading(false))
           } else {
@@ -146,9 +151,36 @@ const LoginPage = () => {
 
   const handleGoogle = async () => {
     try {
-      await signIn('google', { callbackUrl: '/' })
+      setIsLoading(true)
+      setError('')
+
+      const result = await signIn('google', {
+        callbackUrl: '/',
+        redirect: false
+      })
+
+      if (result?.error) {
+        setError('Google login failed')
+        toast.error('Google login failed')
+      } else if (result?.ok) {
+        toast.success('Google login successful!')
+
+        // 🔑 Wait a bit for NextAuth callback to complete and store token
+        setTimeout(() => {
+          const token = localStorage.getItem('token')
+          if (token) {
+            console.log('✅ Google login: JWT token found in localStorage')
+          } else {
+            console.log('⚠️ Google login: No JWT token found, may need to refresh')
+          }
+          window.location.href = '/'
+        }, 1000)
+      }
     } catch (e) {
+      setError('Google sign-in failed')
       toast.error('Google sign-in failed')
+    } finally {
+      setIsLoading(false)
     }
   }
 

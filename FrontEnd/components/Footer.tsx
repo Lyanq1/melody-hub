@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-[#323031] text-[#FFFFFF] py-8 border-t border-[var(--border)]">
+    <footer className="bg-black text-[#FFFFFF] py-8 border-t border-[var(--border)]">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-start text-left gap-8 text-sm md:text-base">
           {/* Logo và mô tả - Sử dụng font MicaValo cho logo */}

@@ -3,17 +3,23 @@
 import Link from 'next/link'
 import './components.css'
 import { useState, useEffect } from 'react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import SearchBar from '../SearchBar'
 import axios from 'axios'
 import { cartService } from '@/lib/services/cart'
 import { useAuth } from '@/hooks/use-auth'
-import { UserRound } from 'lucide-react';
+import { UserRound } from 'lucide-react'
 
 export const Navbar = () => {
   const { user, isAdmin, isAuthenticated, logout } = useAuth()
-  
+
   console.log('🧭 Navbar state:', { user, isAdmin, isAuthenticated })
   const [cartCount, setCartCount] = useState(0)
   const [avatarUrl, setAvatarUrl] = useState('')
@@ -55,72 +61,92 @@ export const Navbar = () => {
     }
   }, [isAuthenticated, user?.accountID])
 
-  // Fetch user data function
-  const fetchUserData = async (username: string) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/auth/user/${username}`)
-      setAvatarUrl(res.data.AvatarURL || '')
-    } catch (err) {
-      console.error('Error fetching user data:', err)
-    }
-  }
+  // Note: We no longer fetch user data directly from navbar
+  // All user data is managed through useAuth hook
 
-  // Handle avatar updates
+  // Handle avatar updates - use user data from useAuth instead of fetching
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      const storedUsername = localStorage.getItem('username')
-      if (storedUsername) {
-        fetchUserData(storedUsername)
+      // Use avatar from useAuth user object directly instead of fetching
+      if (user?.avatarURL) {
+        console.log('🔄 Updating avatar from user object:', user.avatarURL)
+        setAvatarUrl(user.avatarURL)
       }
     }
 
     window.addEventListener('avatar-update', handleAvatarUpdate)
     return () => window.removeEventListener('avatar-update', handleAvatarUpdate)
-  }, [])
+  }, [user?.avatarURL])
 
-  // Handle login state and initial data fetch
+  // Handle login state and user data updates
   useEffect(() => {
-    const updateLoginState = () => {
-      const storedUsername = localStorage.getItem('username')
-      setUsername(storedUsername || '')
+    // Ưu tiên sử dụng thông tin từ useAuth hook (bao gồm Google Auth)
+    if (isAuthenticated && user) {
+      console.log('🧭 Navbar: Using user from hook:', user)
+      console.log('🖼️ Navbar: Avatar URL from user:', user.avatarURL)
+      const newUsername = user.username || user.email?.split('@')[0] || ''
+      const newAvatarUrl = user.avatarURL || ''
 
-      if (isAuthenticated && storedUsername) {
-        fetchUserData(storedUsername)
-      } else {
+      // Chỉ update state nếu có thay đổi để tránh re-render không cần thiết
+      if (username !== newUsername) setUsername(newUsername)
+      if (avatarUrl !== newAvatarUrl) setAvatarUrl(newAvatarUrl)
+    } else if (!isAuthenticated) {
+      // User đã logout, clear state
+      console.log('🧹 Navbar: Clearing user state (not authenticated)')
+      setUsername('')
+      setAvatarUrl('')
+    }
+  }, [isAuthenticated, user, avatarUrl, username])
+
+  // Handle storage changes for traditional auth
+  useEffect(() => {
+    const handleStorageChange = () => {
+      // Chỉ xử lý storage changes khi không có user từ hook
+      if (!user) {
+        const storedUsername = localStorage.getItem('username')
+        setUsername(storedUsername || '')
+        // Clear avatar when no user data available
         setAvatarUrl('')
       }
     }
 
-    // Initial state
-    updateLoginState()
-
-    // Handle storage changes
-    const handleStorageChange = () => {
-      updateLoginState()
-    }
-
     window.addEventListener('storage', handleStorageChange)
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-    }
-  }, [isAuthenticated])
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [user, isAuthenticated])
 
   return (
-    <nav className='bg-[#323031] text-[20px] sticky top-0 z-50 text-white shadow-md font-[Inter_Tight]'>
+    <nav className='bg-black text-[20px] sticky top-0 z-50 text-white shadow-md font-[Inter_Tight]'>
       <div className='container mx-auto flex items-center justify-between p-4'>
-        <Link className='text-white text-4xl font-black font-[Inter_Tight]' href='/'>er.</Link>
-        <div className='flex gap-10 text-center font-bold'>
-          <Link href='/'>Home</Link>
-          <Link href='/product'>Products</Link>
-          <Link href='/worldmap'>World Vinyl</Link>
-          <Link href='/preorder'> Pre Order</Link>
-        </div>
-        
+        {/* Logo */}
+        <Link className='text-white text-3xl lg:text-4xl font-black font-[Inter_Tight] mb-1 flex-shrink-0' href='/'>
+          er.
+        </Link>
 
-        <div className='flex gap-8 text-center'>
-          <SearchBar />
-          <Link href='/cart' className='relative flex items-center gap-2'>
+        {/* Desktop Navigation - Hidden on mobile */}
+        <div className='hidden lg:flex gap-6 xl:gap-10 text-center font-bold'>
+          <Link href='/' className='hover:text-gray-300 transition-colors'>
+            Home
+          </Link>
+          <Link href='/product' className='hover:text-gray-300 transition-colors'>
+            Products
+          </Link>
+          <Link href='/worldmap' className='hover:text-gray-300 transition-colors whitespace-nowrap'>
+            World Vinyl
+          </Link>
+          <Link href='/preorder' className='hover:text-gray-300 transition-colors whitespace-nowrap'>
+            Pre Order
+          </Link>
+        </div>
+
+        {/* Right Side Actions */}
+        <div className='flex items-center gap-3 lg:gap-6 xl:gap-8'>
+          {/* Search Bar - Responsive sizing */}
+          <div className='hidden sm:block'>
+            <SearchBar />
+          </div>
+
+          {/* Cart Icon */}
+          <Link href='/cart' className='relative flex items-center gap-2 flex-shrink-0'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
               width='28'
@@ -144,9 +170,10 @@ export const Navbar = () => {
             )}
           </Link>
 
+          {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className='flex items-center gap-2 focus:outline-none'>
+              <button className='flex items-center gap-2 focus:outline-none flex-shrink-0'>
                 <Avatar className='h-[35px] w-[35px] cursor-pointer'>
                   <AvatarImage src={avatarUrl || 'https://github.com/shadcn.png'} />
                   <AvatarFallback className='text-sm'>
@@ -189,7 +216,7 @@ export const Navbar = () => {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
-                  href='/order-tracking'
+                  href='/tracking'
                   className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
                 >
                   <svg
@@ -277,7 +304,7 @@ export const Navbar = () => {
                       Tài khoản
                     </Link>
                   </DropdownMenuItem>
-                  
+
                   {isAdmin && (
                     <>
                       <DropdownMenuSeparator />
@@ -331,9 +358,9 @@ export const Navbar = () => {
                       </DropdownMenuItem>
                     </>
                   )}
-                  
+
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={handleLogout}
                     className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200 cursor-pointer'
                   >
@@ -357,6 +384,79 @@ export const Navbar = () => {
                   </DropdownMenuItem>
                 </>
               )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Mobile Menu Button - Only visible on mobile */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className='lg:hidden flex items-center gap-2 focus:outline-none p-2'>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  className='text-white'
+                >
+                  <line x1='4' x2='20' y1='12' y2='12' />
+                  <line x1='4' x2='20' y1='6' y2='6' />
+                  <line x1='4' x2='20' y1='18' y2='18' />
+                </svg>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className='w-56 lg:hidden'
+              align='end'
+              style={{
+                backgroundColor: '#323031',
+                color: 'white',
+                border: '1px solid #444',
+                fontFamily: 'InterTight'
+              }}
+            >
+              <DropdownMenuItem asChild>
+                <Link
+                  href='/'
+                  className='group flex items-center gap-2 px-4 py-3 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                >
+                  Home
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href='/product'
+                  className='group flex items-center gap-2 px-4 py-3 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                >
+                  Products
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href='/worldmap'
+                  className='group flex items-center gap-2 px-4 py-3 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                >
+                  World Vinyl
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href='/preorder'
+                  className='group flex items-center gap-2 px-4 py-3 hover:bg-gray-700 rounded-md transition-colors duration-200'
+                >
+                  Pre Order
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator style={{ backgroundColor: '#444' }} />
+              <DropdownMenuItem asChild>
+                <div className='px-4 py-3'>
+                  <SearchBar />
+                </div>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
