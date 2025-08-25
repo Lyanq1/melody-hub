@@ -61,12 +61,16 @@ export interface GetUserOrdersResponse {
  */
 export const createOrder = async (orderData: CreateOrderRequest): Promise<CreateOrderResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/orders/create`, {
+    const response = await fetch(`${API_BASE_URL}/orders/create/${orderData.userId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(orderData),
+      body: JSON.stringify({
+        address: orderData.customerInfo.address,
+        paymentMethod: orderData.paymentMethod,
+        paymentStatus: orderData.paymentStatus
+      }),
     });
 
     const data = await response.json();

@@ -3,9 +3,9 @@ import { getOrderById, createOrder, getUserOrders, updateOrderStatus } from '../
 
 const router = express.Router();
 
-router.get('/:id', getOrderById); // /api/orders/:id
-router.post('/create', createOrder); // /api/orders/create
-router.get('/user/:userId', getUserOrders); // /api/orders/user/:userId
-router.put('/:orderId/status', updateOrderStatus); // /api/orders/:orderId/status
+router.get('/:id', getOrderById);
+router.post('/create/:userId', createOrder); 
+router.get('/user/:userId', getUserOrders);
+router.put('/:orderId/status', updateOrderStatus);
 
 export default router;

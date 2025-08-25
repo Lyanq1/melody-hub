@@ -216,7 +216,7 @@ export const Navbar = () => {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
-                  href='/order-tracking'
+                  href='/tracking'
                   className='group flex items-center gap-2 px-4 py-2 hover:bg-gray-700 rounded-md transition-colors duration-200'
                 >
                   <svg

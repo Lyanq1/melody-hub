@@ -7,7 +7,7 @@ const deliveryFeeSchema = new mongoose.Schema({
   },
   fromDistrict: {
     type: String,
-    default: 'Quận 5'
+    default: 'Phường Chợ Quán'
   },
   deliveryFee: {
     type: Number,
