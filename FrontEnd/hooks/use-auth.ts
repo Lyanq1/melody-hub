@@ -76,6 +76,16 @@ export const useAuth = (): AuthState & {
         console.log('🔍 NextAuth session found:', session.user)
         const sessionUser = session.user as any
 
+        // 🔑 If session has JWT token, store it in localStorage for compatibility
+        if (sessionUser.jwtToken && typeof window !== 'undefined') {
+          const currentToken = localStorage.getItem('token')
+          if (currentToken !== sessionUser.jwtToken) {
+            localStorage.setItem('token', sessionUser.jwtToken)
+            localStorage.setItem('username', sessionUser.username || sessionUser.email?.split('@')[0] || '')
+            console.log('🔑 JWT token from session stored in localStorage')
+          }
+        }
+
         // Nếu có thông tin backend user từ session
         if (sessionUser.backendUser) {
           const user = sessionUser.backendUser
@@ -131,7 +141,7 @@ export const useAuth = (): AuthState & {
         return
       }
 
-      // Kiểm tra token với backend
+      // Kiểm tra token với backend và fetch full user data
       console.log('🔐 Validating token with backend...')
       console.log('🔑 Token being sent:', token ? token.substring(0, 20) + '...' : 'none')
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -143,14 +153,30 @@ export const useAuth = (): AuthState & {
       if (response.ok) {
         const data = await response.json()
         const user = data.user
-        console.log('✅ Token valid, user data:', user)
+        console.log('✅ Token valid, user data from backend:', user)
         console.log('👑 User role:', user.role)
+        console.log('📱 User phone:', user.phone)
+        console.log('🏠 User address:', user.address)
+
+        // Ensure all user fields are properly mapped
+        const mappedUser: User = {
+          accountID: user.accountID || user._id,
+          username: user.username || user.Username,
+          email: user.email || user.Email,
+          displayName: user.displayName || user.DisplayName,
+          avatarURL: user.avatarURL || user.AvatarURL,
+          role: user.role || user.Role,
+          phone: user.phone || user.Phone,
+          address: user.address || user.Address
+        }
+
+        console.log('🔄 Mapped user data:', mappedUser)
 
         setAuthState({
-          user,
-          isAdmin: user.role === 'Admin',
-          isArtist: user.role === 'Artist',
-          isCustomer: user.role === 'Customer',
+          user: mappedUser,
+          isAdmin: mappedUser.role === 'Admin',
+          isArtist: mappedUser.role === 'Artist',
+          isCustomer: mappedUser.role === 'Customer',
           isLoading: false,
           isAuthenticated: true
         })
@@ -245,23 +271,39 @@ export const useAuth = (): AuthState & {
       const token = localStorage.getItem('token')
 
       if (!token) {
+        console.log('No token for refreshUserInfo')
         return
       }
 
+      console.log('🔄 Refreshing user info in useAuth...')
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        headers: { Authorization: `Bearer ${token}` }
       })
 
       if (response.ok) {
         const data = await response.json()
         const user = data.user
 
+        // Ensure all user fields are properly mapped
+        const mappedUser: User = {
+          accountID: user.accountID || user._id,
+          username: user.username || user.Username,
+          email: user.email || user.Email,
+          displayName: user.displayName || user.DisplayName,
+          avatarURL: user.avatarURL || user.AvatarURL,
+          role: user.role || user.Role,
+          phone: user.phone || user.Phone,
+          address: user.address || user.Address
+        }
+
+        console.log('✅ useAuth: User info refreshed:', mappedUser)
+
         setAuthState((prev) => ({
           ...prev,
-          user,
-          isAdmin: user.role === 'Admin',
-          isArtist: user.role === 'Artist',
-          isCustomer: user.role === 'Customer'
+          user: mappedUser,
+          isAdmin: mappedUser.role === 'Admin',
+          isArtist: mappedUser.role === 'Artist',
+          isCustomer: mappedUser.role === 'Customer'
         }))
       }
     } catch (error) {

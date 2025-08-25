@@ -26,11 +26,18 @@ const handler = NextAuth({
 
           if (response.data.success) {
             const backendUser = response.data.user
+            const jwtToken = response.data.token // 🔑 Get JWT token from backend
+
             token.backendUser = backendUser
             token.accountID = backendUser.accountID
             token.username = backendUser.username
             token.role = backendUser.role
+            token.jwtToken = jwtToken // 🔑 Store JWT token in NextAuth token
+
             console.log('[NextAuth] Backend sync successful:', backendUser)
+            console.log('[NextAuth] JWT token received:', jwtToken ? jwtToken.substring(0, 20) + '...' : 'none')
+
+            // Note: localStorage will be handled on client-side in useAuth hook
           }
         } catch (error) {
           console.error('[NextAuth] Backend sync failed:', error)
@@ -54,7 +61,8 @@ const handler = NextAuth({
           accountID: (token as any).accountID,
           username: (token as any).username,
           role: (token as any).role,
-          backendUser: (token as any).backendUser
+          backendUser: (token as any).backendUser,
+          jwtToken: (token as any).jwtToken // 🔑 Include JWT token in session
         }
       }
       return session

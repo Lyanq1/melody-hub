@@ -22,6 +22,7 @@ export default function Profile() {
   const { data: session } = useSession()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [imageProcessing, setImageProcessing] = useState(false)
   const [username, setUsername] = useState('')
 
@@ -44,112 +45,182 @@ export default function Profile() {
       console.log('🔗 Account ID:', user.accountID)
       console.log('👤 Username:', user.username)
       console.log('📧 Email:', user.email)
+      console.log('📱 Phone from user:', user.phone)
+      console.log('🏠 Address from user:', user.address)
 
       const finalUsername = user.username || user.email?.split('@')[0] || ''
       setUsername(finalUsername)
+
+      // Only set form fields if they're not empty, preserve existing values
       setFullName(user.displayName || '')
       setDisplayedName(user.displayName || 'Chưa có tên')
       setEmail(user.email || '')
       setPhone(user.phone || '')
       setAddress(user.address || '')
-      // Ưu tiên avatar từ Google Auth hoặc backend
       setAvatarUrl(user.avatarURL || '')
+
       setLoading(false)
 
       console.log('✅ Profile data loaded for user:', finalUsername)
+      console.log('📋 Form initialized with:', {
+        fullName: user.displayName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        avatarUrl: user.avatarURL || ''
+      })
     }
   }, [isAuthenticated, user, router])
+
+  // 🔄 Auto refresh user data khi authenticated và có user
+  useEffect(() => {
+    if (isAuthenticated && user?.accountID && !loading) {
+      console.log('🔄 Auto-refreshing user data on mount...')
+      refreshUserData()
+    }
+  }, [isAuthenticated, user?.accountID, loading])
 
   const handleLogout = async () => {
     await logout()
     router.push('/')
   }
 
-  // Lấy authorization header tùy thuộc vào loại authentication
+  // Function để refresh user data từ backend sau khi update
+  const refreshUserData = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) return
+
+      console.log('🔄 Refreshing user data from backend...')
+      const response = await axios.get(`${API_BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data?.user) {
+        const freshUser = response.data.user
+        console.log('✅ Fresh user data from backend:', freshUser)
+
+        // Map backend response to consistent format
+        const mappedUser = {
+          accountID: freshUser.accountID || freshUser._id,
+          username: freshUser.username || freshUser.Username,
+          email: freshUser.email || freshUser.Email,
+          displayName: freshUser.displayName || freshUser.DisplayName,
+          avatarURL: freshUser.avatarURL || freshUser.AvatarURL,
+          role: freshUser.role || freshUser.Role,
+          phone: freshUser.phone || freshUser.Phone,
+          address: freshUser.address || freshUser.Address
+        }
+
+        // Update local state với fresh data
+        setFullName(mappedUser.displayName || '')
+        setDisplayedName(mappedUser.displayName || 'Chưa có tên')
+        setEmail(mappedUser.email || '')
+        setPhone(mappedUser.phone || '')
+        setAddress(mappedUser.address || '')
+        setAvatarUrl(mappedUser.avatarURL || '')
+
+        // Dispatch event để update useAuth state
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('user-profile-updated', {
+              detail: mappedUser
+            })
+          )
+        }
+
+        console.log('🎉 Local state updated with fresh data')
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing user data:', error)
+    }
+  }
+
+  // Lấy authorization header - now all auth methods should have JWT token
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token')
 
     if (token) {
-      // Traditional JWT authentication
+      console.log('🔑 Using JWT token from localStorage:', token.substring(0, 20) + '...')
       return {
         Authorization: `Bearer ${token}`
       }
-    } else if (session?.user) {
-      // Google Auth - sử dụng accountID hoặc email làm identifier
-      const sessionUser = session.user as any
-      return {
-        'X-Session-User': JSON.stringify({
-          accountID: sessionUser.accountID,
-          email: sessionUser.email,
-          username: sessionUser.username
-        })
-      }
     }
 
+    console.log('❌ No JWT token found in localStorage')
     return {}
   }
 
   const handleSave = async () => {
+    if (saving) return // Prevent multiple saves
+
     try {
+      setSaving(true)
       console.log('💾 Starting profile save...')
       console.log('👤 Current user object:', user)
       console.log('🔗 User accountID:', user?.accountID)
       console.log('👤 Username state:', username)
+      console.log('📝 Form data being saved:', { fullName, email, address, phone, avatarUrl })
+
+      // Validate form data trước khi save
+      if (!fullName.trim()) {
+        toast.error('Tên hiển thị không được để trống')
+        setSaving(false)
+        return
+      }
+
+      if (!email.trim()) {
+        toast.error('Email không được để trống')
+        setSaving(false)
+        return
+      }
+
+      // Kiểm tra token trước khi thực hiện update
+      const headers = getAuthHeaders()
+      if (!headers.Authorization) {
+        toast.error('Không tìm thấy token xác thực. Vui lòng đăng nhập lại.')
+        setSaving(false)
+        return
+      }
 
       // Kiểm tra nếu user có accountID (từ backend) thì dùng endpoint cập nhật
       if (user?.accountID) {
-        const headers = getAuthHeaders()
         console.log('🔑 Sending request with headers:', headers)
 
         // Sử dụng username hoặc email làm identifier
         const userIdentifier = username || user.email?.split('@')[0] || user.email
         console.log('🆔 Using identifier:', userIdentifier)
 
-        const updateData = {
-          DisplayName: fullName,
-          Email: email,
-          Address: address,
-          Phone: phone,
-          AvatarURL: avatarUrl
-        }
-        console.log('📝 Update data:', updateData)
+        // Only include fields that are not empty to avoid overwriting existing data
+        const updateData: any = {}
+
+        if (fullName.trim()) updateData.DisplayName = fullName.trim()
+        if (email.trim()) updateData.Email = email.trim()
+        if (address.trim()) updateData.Address = address.trim()
+        if (phone.trim()) updateData.Phone = phone.trim()
+        if (avatarUrl) updateData.AvatarURL = avatarUrl
+
+        console.log('📝 Clean update data (only non-empty fields):', updateData)
 
         await axios.put(`${API_BASE_URL}/auth/user/${userIdentifier}`, updateData, { headers })
         console.log('✅ Profile update request sent successfully')
+
+        // 🔄 Refresh user data từ backend để có dữ liệu mới nhất
+        await refreshUserData()
+
+        // Dispatch event for navbar avatar update
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('avatar-update'))
+        }
+
+        toast.success('Cập nhật thông tin thành công!')
+        setDisplayedName(fullName.trim() || fullName)
       } else {
         console.log('❌ No accountID found in user object')
         toast.warning('Thông tin user chưa được đồng bộ hoàn toàn. Vui lòng thử lại sau khi đăng nhập lại.')
+        setSaving(false)
         return
       }
-
-      // Cập nhật useAuth state để refresh navbar
-      if (user) {
-        // Cập nhật user object trong useAuth
-        const updatedUser = {
-          ...user,
-          displayName: fullName,
-          email: email,
-          phone: phone,
-          address: address,
-          avatarURL: avatarUrl
-        }
-
-        // Trigger refresh user info in useAuth hook
-        if (typeof window !== 'undefined') {
-          // Dispatch custom event với updated user data
-          window.dispatchEvent(
-            new CustomEvent('user-profile-updated', {
-              detail: updatedUser
-            })
-          )
-
-          // Dispatch event for navbar avatar update
-          window.dispatchEvent(new Event('avatar-update'))
-        }
-      }
-
-      toast.success('Cập nhật thông tin thành công!')
-      setDisplayedName(fullName)
     } catch (err) {
       console.error('💥 Lỗi khi cập nhật thông tin:', err)
 
@@ -166,6 +237,8 @@ export default function Profile() {
         console.error('❌ Unknown error:', err)
         toast.error('Đã xảy ra lỗi không xác định khi cập nhật.')
       }
+    } finally {
+      setSaving(false)
     }
   }
   const getCookie = (name: string): string | null => {
@@ -374,8 +447,19 @@ export default function Profile() {
 
         {/* Buttons */}
         <div className='pt-4 flex justify-end'>
-          <Button onClick={handleSave} className='bg-black text-white hover:bg-gray-800 font-semibold'>
-            Lưu thay đổi
+          <Button
+            onClick={handleSave}
+            disabled={saving || loading}
+            className='bg-black text-white hover:bg-gray-800 font-semibold disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            {saving ? (
+              <>
+                <div className='animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2' />
+                Đang lưu...
+              </>
+            ) : (
+              'Lưu thay đổi'
+            )}
           </Button>
         </div>
       </div>

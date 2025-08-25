@@ -61,33 +61,22 @@ export const Navbar = () => {
     }
   }, [isAuthenticated, user?.accountID])
 
-  // Fetch user data function
-  const fetchUserData = async (username: string) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/auth/user/${username}`)
-      setAvatarUrl(res.data.AvatarURL || '')
-    } catch (err) {
-      console.error('Error fetching user data:', err)
-    }
-  }
+  // Note: We no longer fetch user data directly from navbar
+  // All user data is managed through useAuth hook
 
-  // Handle avatar updates
+  // Handle avatar updates - use user data from useAuth instead of fetching
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      // Refresh avatar từ backend hoặc update từ user object
-      if (user?.username) {
-        fetchUserData(user.username)
-      } else {
-        const storedUsername = localStorage.getItem('username')
-        if (storedUsername) {
-          fetchUserData(storedUsername)
-        }
+      // Use avatar from useAuth user object directly instead of fetching
+      if (user?.avatarURL) {
+        console.log('🔄 Updating avatar from user object:', user.avatarURL)
+        setAvatarUrl(user.avatarURL)
       }
     }
 
     window.addEventListener('avatar-update', handleAvatarUpdate)
     return () => window.removeEventListener('avatar-update', handleAvatarUpdate)
-  }, [user])
+  }, [user?.avatarURL])
 
   // Handle login state and user data updates
   useEffect(() => {
@@ -101,16 +90,11 @@ export const Navbar = () => {
       // Chỉ update state nếu có thay đổi để tránh re-render không cần thiết
       if (username !== newUsername) setUsername(newUsername)
       if (avatarUrl !== newAvatarUrl) setAvatarUrl(newAvatarUrl)
-    } else {
-      // Fallback: sử dụng localStorage nếu không có user từ hook
-      const storedUsername = localStorage.getItem('username')
-      setUsername(storedUsername || '')
-
-      if (isAuthenticated && storedUsername) {
-        fetchUserData(storedUsername)
-      } else {
-        setAvatarUrl('')
-      }
+    } else if (!isAuthenticated) {
+      // User đã logout, clear state
+      console.log('🧹 Navbar: Clearing user state (not authenticated)')
+      setUsername('')
+      setAvatarUrl('')
     }
   }, [isAuthenticated, user, avatarUrl, username])
 
@@ -121,12 +105,8 @@ export const Navbar = () => {
       if (!user) {
         const storedUsername = localStorage.getItem('username')
         setUsername(storedUsername || '')
-
-        if (isAuthenticated && storedUsername) {
-          fetchUserData(storedUsername)
-        } else {
-          setAvatarUrl('')
-        }
+        // Clear avatar when no user data available
+        setAvatarUrl('')
       }
     }
 

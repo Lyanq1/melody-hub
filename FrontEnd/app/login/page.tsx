@@ -164,7 +164,17 @@ const LoginPage = () => {
         toast.error('Google login failed')
       } else if (result?.ok) {
         toast.success('Google login successful!')
-        window.location.href = '/'
+
+        // 🔑 Wait a bit for NextAuth callback to complete and store token
+        setTimeout(() => {
+          const token = localStorage.getItem('token')
+          if (token) {
+            console.log('✅ Google login: JWT token found in localStorage')
+          } else {
+            console.log('⚠️ Google login: No JWT token found, may need to refresh')
+          }
+          window.location.href = '/'
+        }, 1000)
       }
     } catch (e) {
       setError('Google sign-in failed')

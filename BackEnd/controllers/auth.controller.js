@@ -252,8 +252,27 @@ export const updateUserInfo = async (req, res) => {
 
   try {
     console.log('🔄 Updating user info for:', username)
-    console.log('📝 Update data:', updatedData)
+    console.log('📝 Raw update data:', updatedData)
     console.log('👤 Authenticated user:', req.user)
+
+    // Filter out empty strings and undefined values to avoid overwriting existing data
+    const cleanedData = {}
+    Object.keys(updatedData).forEach((key) => {
+      const value = updatedData[key]
+      if (value !== undefined && value !== null && value !== '') {
+        cleanedData[key] = value
+      }
+    })
+
+    console.log('🧹 Cleaned update data (non-empty only):', cleanedData)
+
+    // Only proceed if there's actually data to update
+    if (Object.keys(cleanedData).length === 0) {
+      return res.status(400).json({ message: 'No valid data to update' })
+    }
+
+    // Add UpdatedAt timestamp
+    cleanedData.UpdatedAt = new Date()
 
     // Đối với session auth (Google users), ưu tiên sử dụng accountID từ authenticated user
     let account = null
@@ -262,7 +281,7 @@ export const updateUserInfo = async (req, res) => {
       // Sử dụng accountID từ middleware authentication
       account = await Account.findByIdAndUpdate(
         req.user.accountID,
-        { ...updatedData, UpdatedAt: new Date() },
+        { $set: cleanedData }, // Use $set to only update specified fields
         { new: true, runValidators: true }
       ).select('-Password')
       console.log('✅ Updated using accountID:', req.user.accountID)
@@ -270,7 +289,7 @@ export const updateUserInfo = async (req, res) => {
       // Fallback: tìm theo username (traditional auth)
       account = await Account.findOneAndUpdate(
         { Username: username },
-        { ...updatedData, UpdatedAt: new Date() },
+        { $set: cleanedData }, // Use $set to only update specified fields
         { new: true, runValidators: true }
       ).select('-Password')
       console.log('✅ Updated using username:', username)
@@ -282,6 +301,7 @@ export const updateUserInfo = async (req, res) => {
     }
 
     console.log('🎉 Update successful:', account.DisplayName)
+    console.log('📊 Updated fields:', Object.keys(cleanedData))
     res.status(200).json({ message: 'User updated successfully', user: account })
   } catch (error) {
     console.error('💥 Update failed:', error)
@@ -462,15 +482,30 @@ export const googleSync = async (req, res) => {
       console.log('[googleSync] updated account', account._id.toString())
     }
 
+    // 🔑 Generate JWT token for Google user (same as traditional login)
+    const token = jwt.sign(
+      {
+        accountID: account._id,
+        username: account.Username,
+        role: account.Role
+      },
+      config.jwt.secret,
+      { expiresIn: config.jwt.expiresIn }
+    )
+    console.log('✅ JWT token created for Google user:', token.substring(0, 20) + '...')
+
     return res.status(200).json({
       success: true,
+      token, // 🔑 Include token in response
       user: {
         accountID: account._id,
         username: account.Username,
         email: account.Email,
         displayName: account.DisplayName,
         avatarURL: account.AvatarURL,
-        role: account.Role
+        role: account.Role,
+        phone: account.Phone,
+        address: account.Address
       }
     })
   } catch (error) {
