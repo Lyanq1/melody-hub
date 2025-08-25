@@ -49,10 +49,7 @@ export const register = async (req, res) => {
     const accountID = await createAccount(username, password, email, displayName, null, role, phone, address)
     console.log('Account created with ID:', accountID)
 
-    // With MongoDB, we don't need separate tables for different roles
-    // The role and additional fields are already stored in the Account document
-
-    // await sendVerificationEmail(email, displayName) // Gửi email xác nhận
+    await sendVerificationEmail(email, displayName) // Gửi email xác nhận
 
     console.log('Registration successful, returning response')
     res.status(201).json({ message: 'Registration successful', accountID })
