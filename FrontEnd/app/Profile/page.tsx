@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Camera } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useSession } from 'next-auth/react'
+import { API_BASE_URL } from '@/lib/config'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -40,8 +41,12 @@ export default function Profile() {
     if (user) {
       console.log('👤 Profile page user data:', user)
       console.log('🖼️ Avatar URL from user:', user.avatarURL)
+      console.log('🔗 Account ID:', user.accountID)
+      console.log('👤 Username:', user.username)
+      console.log('📧 Email:', user.email)
 
-      setUsername(user.username || user.email?.split('@')[0] || '')
+      const finalUsername = user.username || user.email?.split('@')[0] || ''
+      setUsername(finalUsername)
       setFullName(user.displayName || '')
       setDisplayedName(user.displayName || 'Chưa có tên')
       setEmail(user.email || '')
@@ -50,6 +55,8 @@ export default function Profile() {
       // Ưu tiên avatar từ Google Auth hoặc backend
       setAvatarUrl(user.avatarURL || '')
       setLoading(false)
+
+      console.log('✅ Profile data loaded for user:', finalUsername)
     }
   }, [isAuthenticated, user, router])
 
@@ -84,6 +91,11 @@ export default function Profile() {
 
   const handleSave = async () => {
     try {
+      console.log('💾 Starting profile save...')
+      console.log('👤 Current user object:', user)
+      console.log('🔗 User accountID:', user?.accountID)
+      console.log('👤 Username state:', username)
+
       // Kiểm tra nếu user có accountID (từ backend) thì dùng endpoint cập nhật
       if (user?.accountID) {
         const headers = getAuthHeaders()
@@ -91,20 +103,21 @@ export default function Profile() {
 
         // Sử dụng username hoặc email làm identifier
         const userIdentifier = username || user.email?.split('@')[0] || user.email
+        console.log('🆔 Using identifier:', userIdentifier)
 
-        await axios.put(
-          `http://localhost:5000/api/auth/user/${userIdentifier}`,
-          {
-            DisplayName: fullName,
-            Email: email,
-            Address: address,
-            Phone: phone,
-            AvatarURL: avatarUrl
-          },
-          { headers }
-        )
+        const updateData = {
+          DisplayName: fullName,
+          Email: email,
+          Address: address,
+          Phone: phone,
+          AvatarURL: avatarUrl
+        }
+        console.log('📝 Update data:', updateData)
+
+        await axios.put(`${API_BASE_URL}/auth/user/${userIdentifier}`, updateData, { headers })
+        console.log('✅ Profile update request sent successfully')
       } else {
-        // Nếu không có accountID, có thể là Google user chưa được sync
+        console.log('❌ No accountID found in user object')
         toast.warning('Thông tin user chưa được đồng bộ hoàn toàn. Vui lòng thử lại sau khi đăng nhập lại.')
         return
       }
@@ -138,8 +151,21 @@ export default function Profile() {
       toast.success('Cập nhật thông tin thành công!')
       setDisplayedName(fullName)
     } catch (err) {
-      console.error('Lỗi khi cập nhật thông tin:', err)
-      toast.error('Đã xảy ra lỗi khi cập nhật.')
+      console.error('💥 Lỗi khi cập nhật thông tin:', err)
+
+      if (axios.isAxiosError(err)) {
+        const errorMessage = err.response?.data?.message || err.message
+        console.error('📡 API Error:', {
+          status: err.response?.status,
+          statusText: err.response?.statusText,
+          data: err.response?.data,
+          config: err.config
+        })
+        toast.error(`Lỗi cập nhật: ${errorMessage}`)
+      } else {
+        console.error('❌ Unknown error:', err)
+        toast.error('Đã xảy ra lỗi không xác định khi cập nhật.')
+      }
     }
   }
   const getCookie = (name: string): string | null => {
