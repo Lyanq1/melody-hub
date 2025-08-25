@@ -207,7 +207,7 @@ export default function Cart() {
             <div className='flex-1 flex flex-col sm:flex-row sm:items-center justify-between w-full'>
               <div className='mb-4 sm:mb-0'>
                 <h3 className='text-lg font-semibold'>{item.product?.name}</h3>
-                <p className='text-gray-600'>{item.product?.price}</p>
+                <p className='text-gray-600'>{item.product?.price}đ</p>
               </div>
 
               <div className='flex items-center gap-4'>

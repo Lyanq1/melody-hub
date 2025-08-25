@@ -1,6 +1,7 @@
 import Account from '../models/auth/account.model.js';
 import Disc from '../models/product/disc.model.js';
 import Category from '../models/product/category.model.js';
+import Order from '../models/order/order.model.js';
 import { verifyToken, canManageSystem } from '../middleware/auth.middleware.js';
 
 // Lấy danh sách tất cả người dùng (chỉ admin)
@@ -262,15 +263,26 @@ export const getAllProducts = async (req, res) => {
     sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
     
     const products = await Disc.find(searchCriteria)
-      .populate('categoryId', 'name')
       .sort(sortOptions)
       .skip(skip)
       .limit(parseInt(limit));
     
+    // Fetch all categories to map category names
+    const categories = await Category.find({}, '_id name');
+    
+    // Map category names to products
+    const productsWithCategories = products.map(product => {
+      const category = categories.find(cat => cat._id.toString() === product.categoryId?.toString());
+      return {
+        ...product.toObject(),
+        categoryId: category ? { _id: category._id, name: category.name } : null
+      };
+    });
+    
     const total = await Disc.countDocuments(searchCriteria);
     
     res.status(200).json({
-      products,
+      products: productsWithCategories,
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / parseInt(limit)),
@@ -292,10 +304,18 @@ export const getProductById = async (req, res) => {
     }
 
     const { productId } = req.params;
-    const product = await Disc.findById(productId).populate('categoryId', 'name');
+    const product = await Disc.findById(productId);
     
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
+    }
+    
+    // Fetch category name for this product
+    if (product.categoryId) {
+      const category = await Category.findById(product.categoryId, '_id name');
+      if (category) {
+        product.categoryId = { _id: category._id, name: category.name };
+      }
     }
     
     res.status(200).json(product);
@@ -640,5 +660,599 @@ export const getProductStats = async (req, res) => {
   } catch (error) {
     console.error('Error getting product stats:', error);
     res.status(500).json({ message: 'Error retrieving product statistics', error: error.message });
+  }
+};
+
+// ==================== ORDER MANAGEMENT ====================
+
+// Lấy danh sách tất cả đơn hàng (chỉ admin)
+export const getAllOrders = async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+    }
+
+    const { page = 1, limit = 10, status, paymentStatus, startDate, endDate } = req.query;
+    
+    let searchCriteria = {};
+    
+    // Lọc theo trạng thái đơn hàng
+    if (status && status !== 'all') {
+      searchCriteria.status = status;
+    }
+    
+    // Lọc theo trạng thái thanh toán
+    if (paymentStatus && paymentStatus !== 'all') {
+      searchCriteria.paymentStatus = paymentStatus;
+    }
+    
+    // Lọc theo khoảng thời gian
+    if (startDate || endDate) {
+      searchCriteria.createdAt = {};
+      if (startDate) searchCriteria.createdAt.$gte = new Date(startDate);
+      if (endDate) searchCriteria.createdAt.$lte = new Date(endDate);
+    }
+    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Get all orders with filters (no search)
+    const orders = await Order.find(searchCriteria)
+      .populate('userId', 'DisplayName Email Username')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Order.countDocuments(searchCriteria);
+    
+    res.status(200).json({
+      orders,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        totalOrders: total,
+        ordersPerPage: parseInt(limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error getting all orders:', error);
+    res.status(500).json({ message: 'Error retrieving orders', error: error.message });
+  }
+};
+
+// Lấy thông tin một đơn hàng cụ thể (chỉ admin)
+export const getOrderById = async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+    }
+
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId)
+      .populate('userId', 'DisplayName Email Username Phone')
+      .populate('shipperId', 'name phone vehicle');
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    res.status(200).json(order);
+  } catch (error) {
+    console.error('Error getting order by ID:', error);
+    res.status(500).json({ message: 'Error retrieving order', error: error.message });
+  }
+};
+
+// Cập nhật trạng thái đơn hàng (chỉ admin)
+export const updateOrderStatus = async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+    }
+
+    const { orderId } = req.params;
+    const { status, note } = req.body;
+    
+    const validStatuses = ['Confirmed', 'PickingUp', 'Preparing', 'Delivering', 'Delivered', 'Cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
+    
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { 
+        status: status,
+        $push: {
+          statusHistory: {
+            status: status,
+            timestamp: new Date(),
+            description: note || `Status updated to ${status}`
+          }
+        }
+      },
+      { new: true }
+    );
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    res.status(200).json({ 
+      message: 'Order status updated successfully', 
+      order 
+    });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ message: 'Error updating order status', error: error.message });
+  }
+};
+
+// Cập nhật trạng thái thanh toán (chỉ admin)
+export const updatePaymentStatus = async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+    }
+
+    const { orderId } = req.params;
+    const { paymentStatus } = req.body;
+    
+    const validPaymentStatuses = ['Pending', 'Completed', 'Failed'];
+    if (!validPaymentStatuses.includes(paymentStatus)) {
+      return res.status(400).json({ message: 'Invalid payment status value' });
+    }
+    
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { paymentStatus: paymentStatus },
+      { new: true }
+    );
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    res.status(200).json({ 
+      message: 'Payment status updated successfully', 
+      order 
+    });
+  } catch (error) {
+    console.error('Error updating payment status:', error);
+    res.status(500).json({ message: 'Error updating payment status', error: error.message });
+  }
+};
+
+// Xóa đơn hàng (chỉ admin)
+export const deleteOrder = async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+    }
+
+    const { orderId } = req.params;
+    
+    const order = await Order.findByIdAndDelete(orderId);
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    res.status(200).json({ message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    res.status(500).json({ message: 'Error deleting order', error: error.message });
+  }
+};
+
+// ==================== COMPREHENSIVE STATISTICS ====================
+
+// Lấy thống kê tổng quan hệ thống (chỉ admin)
+export const getComprehensiveStats = async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+    }
+
+    const { period = 'month' } = req.query;
+    
+    // Tính toán khoảng thời gian
+    const now = new Date();
+    let startDate, endDate;
+    
+    switch (period) {
+      case 'day':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        break;
+      case 'week':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() + 7);
+        break;
+      case 'month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        break;
+      case 'quarter':
+        const quarter = Math.floor(now.getMonth() / 3);
+        startDate = new Date(now.getFullYear(), quarter * 3, 1);
+        endDate = new Date(now.getFullYear(), (quarter + 1) * 3, 1);
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        endDate = new Date(now.getFullYear() + 1, 0, 1);
+        break;
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    }
+
+    // Thống kê đơn hàng
+    const totalOrders = await Order.countDocuments();
+    const periodOrders = await Order.countDocuments({
+      createdAt: { $gte: startDate, $lt: endDate }
+    });
+    const pendingOrders = await Order.countDocuments({ status: 'Confirmed' });
+    const deliveringOrders = await Order.countDocuments({ status: 'Delivering' });
+    const completedOrders = await Order.countDocuments({ status: 'Delivered' });
+    const cancelledOrders = await Order.countDocuments({ status: 'Cancelled' });
+
+    // Thống kê thanh toán
+    const totalRevenue = await Order.aggregate([
+      { $match: { paymentStatus: 'Completed' } },
+      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+    ]);
+    
+    const periodRevenue = await Order.aggregate([
+      { 
+        $match: { 
+          paymentStatus: 'Completed',
+          createdAt: { $gte: startDate, $lt: endDate }
+        } 
+      },
+      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+    ]);
+
+    // Thống kê sản phẩm
+    const totalProducts = await Disc.countDocuments();
+    const lowStockProducts = await Disc.countDocuments({ stock: { $lt: 10 } });
+    const outOfStockProducts = await Disc.countDocuments({ stock: 0 });
+
+    // Thống kê danh mục
+    const totalCategories = await Category.countDocuments();
+
+    // Thống kê khách hàng
+    const totalCustomers = await Account.countDocuments({ Role: 'Customer' });
+    const newCustomers = await Account.countDocuments({
+      Role: 'Customer',
+      CreatedAt: { $gte: startDate, $lt: endDate }
+    });
+
+    // Thống kê đơn hàng theo trạng thái
+    const ordersByStatus = await Order.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    // Thống kê doanh thu theo ngày trong tháng
+    const dailyRevenue = await Order.aggregate([
+      {
+        $match: {
+          paymentStatus: 'Completed',
+          createdAt: { $gte: startDate, $lt: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          revenue: { $sum: '$totalPrice' },
+          orders: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    // Thống kê sản phẩm bán chạy
+    const topProducts = await Order.aggregate([
+      {
+        $unwind: '$items'
+      },
+      {
+        $group: {
+          _id: '$items.discId',
+          totalSold: { $sum: '$items.quantity' },
+          totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
+        }
+      },
+      {
+        $lookup: {
+          from: 'discs',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'product'
+        }
+      },
+      {
+        $unwind: '$product'
+      },
+      {
+        $project: {
+          productName: '$product.name',
+          totalSold: 1,
+          totalRevenue: 1
+        }
+      },
+      {
+        $sort: { totalSold: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+
+    const stats = {
+      period: {
+        start: startDate,
+        end: endDate,
+        type: period
+      },
+      orders: {
+        total: totalOrders,
+        period: periodOrders,
+        pending: pendingOrders,
+        delivering: deliveringOrders,
+        completed: completedOrders,
+        cancelled: cancelledOrders,
+        byStatus: ordersByStatus
+      },
+      revenue: {
+        total: totalRevenue[0]?.total || 0,
+        period: periodRevenue[0]?.total || 0,
+        daily: dailyRevenue
+      },
+      products: {
+        total: totalProducts,
+        lowStock: lowStockProducts,
+        outOfStock: outOfStockProducts,
+        topSelling: topProducts
+      },
+      categories: {
+        total: totalCategories
+      },
+      customers: {
+        total: totalCustomers,
+        new: newCustomers
+      },
+      timestamp: new Date()
+    };
+    
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error('Error getting comprehensive stats:', error);
+    res.status(500).json({ message: 'Error retrieving statistics', error: error.message });
+  }
+};
+
+// Lấy thống kê doanh thu theo thời gian (chỉ admin)
+export const getRevenueStats = async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+    }
+
+    const { type = 'monthly', year = new Date().getFullYear() } = req.query;
+    
+    let groupFormat, matchCriteria;
+    
+    switch (type) {
+      case 'daily':
+        groupFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
+        matchCriteria = {
+          paymentStatus: 'Completed',
+          createdAt: {
+            $gte: new Date(year, 0, 1),
+            $lt: new Date(year + 1, 0, 1)
+          }
+        };
+        break;
+      case 'monthly':
+        groupFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
+        matchCriteria = {
+          paymentStatus: 'Completed',
+          createdAt: {
+            $gte: new Date(year, 0, 1),
+            $lt: new Date(year + 1, 0, 1)
+          }
+        };
+        break;
+      case 'quarterly':
+        groupFormat = {
+          $concat: [
+            { $toString: { $year: '$createdAt' } },
+            '-Q',
+            { $toString: { $ceil: { $divide: [{ $month: '$createdAt' }, 3] } } }
+          ]
+        };
+        matchCriteria = {
+          paymentStatus: 'Completed',
+          createdAt: {
+            $gte: new Date(year, 0, 1),
+            $lt: new Date(year + 1, 0, 1)
+          }
+        };
+        break;
+      case 'yearly':
+        groupFormat = { $dateToString: { format: '%Y', date: '$createdAt' } };
+        matchCriteria = { paymentStatus: 'Completed' };
+        break;
+      default:
+        groupFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
+        matchCriteria = {
+          paymentStatus: 'Completed',
+          createdAt: {
+            $gte: new Date(year, 0, 1),
+            $lt: new Date(year + 1, 0, 1)
+          }
+        };
+    }
+
+    const revenueStats = await Order.aggregate([
+      { $match: matchCriteria },
+      {
+        $group: {
+          _id: groupFormat,
+          revenue: { $sum: '$totalPrice' },
+          orders: { $sum: 1 },
+          averageOrderValue: { $avg: '$totalPrice' }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    res.status(200).json({
+      type,
+      year: parseInt(year),
+      data: revenueStats
+    });
+  } catch (error) {
+    console.error('Error getting revenue stats:', error);
+    res.status(500).json({ message: 'Error retrieving revenue statistics', error: error.message });
+  }
+};
+
+// Lấy thống kê khách hàng (chỉ admin)
+export const getCustomerStats = async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+    }
+
+    const { period = 'month' } = req.query;
+    
+    const now = new Date();
+    let startDate;
+    
+    switch (period) {
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'quarter':
+        const quarter = Math.floor(now.getMonth() / 3);
+        startDate = new Date(now.getFullYear(), quarter * 3, 1);
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    // Thống kê khách hàng mới
+    const newCustomers = await Account.countDocuments({
+      Role: 'Customer',
+      CreatedAt: { $gte: startDate }
+    });
+
+    // Thống kê khách hàng theo hoạt động
+    const activeCustomers = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$userId',
+          orderCount: { $sum: 1 },
+          totalSpent: { $sum: '$totalPrice' }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          uniqueCustomers: { $sum: 1 },
+          totalOrders: { $sum: '$orderCount' },
+          totalRevenue: { $sum: '$totalSpent' },
+          averageOrdersPerCustomer: { $avg: '$orderCount' },
+          averageSpentPerCustomer: { $avg: '$totalSpent' }
+        }
+      }
+    ]);
+
+    // Top khách hàng chi tiêu cao nhất
+    const topCustomers = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$userId',
+          totalSpent: { $sum: '$totalPrice' },
+          orderCount: { $sum: 1 }
+        }
+      },
+      {
+        $lookup: {
+          from: 'accounts',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'customer'
+        }
+      },
+      {
+        $unwind: '$customer'
+      },
+      {
+        $project: {
+          customerName: '$customer.DisplayName',
+          email: '$customer.Email',
+          totalSpent: 1,
+          orderCount: 1
+        }
+      },
+      {
+        $sort: { totalSpent: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+
+    const stats = {
+      period: {
+        start: startDate,
+        end: now,
+        type: period
+      },
+      newCustomers,
+      activeCustomers: activeCustomers[0] || {
+        uniqueCustomers: 0,
+        totalOrders: 0,
+        totalRevenue: 0,
+        averageOrdersPerCustomer: 0,
+        averageSpentPerCustomer: 0
+      },
+      topCustomers,
+      timestamp: new Date()
+    };
+
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error('Error getting customer stats:', error);
+    res.status(500).json({ message: 'Error retrieving customer statistics', error: error.message });
   }
 };
