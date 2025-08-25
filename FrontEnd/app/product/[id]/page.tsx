@@ -222,132 +222,131 @@ export default function ProductDetail({ params }: { params: Promise< { id: strin
   const numericPrice = Number(product.price.replace(/[^\d]/g, "")) || 0;
 
   return (
-<div className="container mx-auto py-12 px-6 lg:px-20">
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-    {/* Left: Product Image */}
-    <div className="flex justify-center">
-      <div className="relative w-[700px] aspect-square">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-contain"
-        />
-      </div>
-    </div>
-
-    {/* Right: Product Info */}
-    <div className="flex flex-col justify-between">
-      {/* Header */}
-      <div className="space-y-6">
-        <div className="w-56 h-2 bg-red-700" />
-        <h1 className="text-4xl font-extrabold text-neutral-800 uppercase">
-          {product.name}
-        </h1>
-
-        <div className="flex items-center gap-3">
-          <svg
-            className="w-6 h-6 text-green-600"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4"
-            viewBox="0 0 48 48"
-          >
-            <path
-              d="M40 12L18 34L8 24"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+    <div className="container mx-auto py-12 px-6 lg:px-20">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Left: Product Image */}
+        <div className="flex justify-center">
+          <div className="relative w-[700px] aspect-square">
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-contain"
             />
-          </svg>
-          <span className="text-2xl font-light">Available In Store</span>
+          </div>
         </div>
 
-        {/* Price + Quantity */}
-        <div className="flex justify-between items-center w-[500px]">
-          <div>
-            <p className="text-2xl font-semibold">PRICE</p>
-            <p className="text-3xl font-bold">{product.price} đ</p>
-          </div>
-          <div>
-            <p className="text-2xl font-semibold">QUANTITY</p>
-            <div className="flex items-center bg-stone-200 rounded-full px-4 py-2 gap-6">
-              <button
-                onClick={decreaseQuantity}
-                className="text-2xl text-gray-400"
+        {/* Right: Product Info */}
+        <div className="flex flex-col justify-between">
+          {/* Header */}
+          <div className="space-y-6">
+            <h1 className="text-4xl font-extrabold text-neutral-800 uppercase">
+              {product.name}
+            </h1>
+            <div className="w-56 h-2 bg-red-700" />
+            
+            <div className="flex items-center gap-3">
+              <svg
+                className="w-6 h-6 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="4"
+                viewBox="0 0 48 48"
               >
-                −
-              </button>
-              <span className="text-2xl font-medium">{quantity}</span>
-              <button
-                onClick={increaseQuantity}
-                className="text-2xl text-gray-400"
-              >
-                +
-              </button>
+                <path
+                  d="M40 12L18 34L8 24"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="text-2xl font-light">Available In Store</span>
+            </div>
+
+            {/* Price + Quantity */}
+            <div className="flex justify-between items-center w-[500px]">
+              <div>
+                <p className="text-2xl font-semibold">PRICE</p>
+                <p className="text-3xl font-bold">{product.price} đ</p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold">QUANTITY</p>
+                <div className="flex items-center bg-stone-200 rounded-full px-4 py-2 gap-6">
+                  <button
+                    onClick={decreaseQuantity}
+                    className="text-2xl text-gray-400"
+                  >
+                    −
+                  </button>
+                  <span className="text-2xl font-medium">{quantity}</span>
+                  <button
+                    onClick={increaseQuantity}
+                    className="text-2xl text-gray-400"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Total + Add to Cart */}
+          <div className="mt-12 flex items-center gap-10">
+            <div>
+              <p className="text-2xl font-semibold">TOTAL PRICE</p>
+              <p className="text-4xl font-bold">
+                {(quantity * numericPrice).toLocaleString()} đ
+              </p>
+            </div>
+            <button
+              onClick={addToCart}
+              className="flex items-center gap-4 bg-amber-300 text-white px-10 py-4 rounded-full text-2xl font-medium"
+            >
+              <ShoppingBag className="w-8 h-8" />
+              Add to cart
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Total + Add to Cart */}
-      <div className="mt-12 flex items-center gap-10">
-        <div>
-          <p className="text-2xl font-semibold">TOTAL PRICE</p>
-          <p className="text-4xl font-bold">
-            {(quantity * numericPrice).toLocaleString()} đ
+      {/* Description */}
+      <div className="mt-16">
+        <div className="flex">
+          <div className="w-36 h-2 bg-red-700 rounded-l-2xl" />
+          <div className="flex-1 h-2 bg-stone-300 rounded-r-2xl" />
+        </div>
+        <div className="mt-6">
+          <p className="text-2xl font-semibold">DESCRIPTION</p>
+          <p className="mt-4 text-lg">{product.description}</p>
+          <p className="mt-2 text-lg">
+            <span className="font-bold">COUNTRY:</span> {product.country || "United States"}
           </p>
         </div>
-        <button
-          onClick={addToCart}
-          className="flex items-center gap-4 bg-amber-300 text-white px-10 py-4 rounded-full text-2xl font-medium"
-        >
-          <ShoppingBag className="w-8 h-8" />
-          Add to cart
-        </button>
+      </div>
+
+      {/* Related Products */}
+      <div className="mt-20">
+        <h2 className="text-5xl font-bold text-neutral-800 mb-4">
+          RELATED PRODUCT
+        </h2>
+        <div className="h-2 bg-red-700 mb-8" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          {similarProducts.map((item) => (
+            <Link key={item._id} href={`/product/${item._id}`} className="block">
+              <div className="relative aspect-square mb-2 overflow-hidden">
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <h3 className="text-lg font-semibold uppercase">{item.name}</h3>
+              <p>{item.artist}</p>
+              <p className="font-bold">{item.price} đ</p>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-
-  {/* Description */}
-  <div className="mt-16">
-    <div className="flex">
-      <div className="w-36 h-2 bg-red-700 rounded-l-2xl" />
-      <div className="flex-1 h-2 bg-stone-300 rounded-r-2xl" />
-    </div>
-    <div className="mt-6">
-      <p className="text-2xl font-semibold">DESCRIPTION</p>
-      <p className="mt-4 text-lg">{product.description}</p>
-      <p className="mt-2 text-lg">
-        <span className="font-bold">COUNTRY:</span> {product.country || "United States"}
-      </p>
-    </div>
-  </div>
-
-  {/* Related Products */}
-  <div className="mt-20">
-    <h2 className="text-5xl font-bold text-neutral-800 mb-4">
-      RELATED PRODUCT
-    </h2>
-    <div className="h-2 bg-red-700 mb-8" />
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-      {similarProducts.map((item) => (
-        <Link key={item._id} href={`/product/${item._id}`} className="block">
-          <div className="relative aspect-square mb-2 overflow-hidden">
-            <Image
-              src={item.image}
-              alt={item.name}
-              fill
-              className="object-cover"
-            />
-          </div>
-          <h3 className="text-lg font-semibold uppercase">{item.name}</h3>
-          <p>{item.artist}</p>
-          <p className="font-bold">{item.price} đ</p>
-        </Link>
-      ))}
-    </div>
-  </div>
-</div>
-
   )
 } 

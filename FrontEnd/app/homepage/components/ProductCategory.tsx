@@ -24,7 +24,7 @@ const categories = [
       { label: 'Vinyl Việt', value: 'vinyl-viet', filterKey: 'subcategory' },
       { label: 'Vinyl Âu Mỹ', value: 'vinyl-aumy', filterKey: 'subcategory' }
     ], 
-    image: 'http://localhost:3000/images/all.png'
+    image: 'http://localhost:3000/images/vinyl.png'
   },
   { label: 'CASSETTE', value: '687a5c8eaea60fd849fc0849', image: 'http://localhost:3000/images/all.png' },
   { label: 'MERCH', value: '687a5c8eaea60fd849fc084a', image: 'http://localhost:3000/images/all.png' }
@@ -73,7 +73,7 @@ function ProductCategoryContent() {
     <div className="w-full mb-8">
       <div className="flex justify-center items-center gap-20 h-14 border-b border-gray-300 font-[DrukWideBold]">
         {categories.map((cat) => (
-          <li key={cat.value}>
+          <div key={cat.value}>
             <div>
               <Button
                 variant='ghost'
@@ -101,9 +101,9 @@ function ProductCategoryContent() {
 
               {/* Subcategories */}
               {cat.subcategories && (expandedCategories.includes(cat.value) || selected === cat.value) && (
-                <ul className='ml-4 mt-2 space-y-1'>
+                <ul className='ml-4 mt-2 space-y-1 list-none'>
                   {cat.subcategories.map((subcat) => (
-                    <li key={subcat.value}>
+                    <div key={subcat.value}>
                       <Button
                         variant='ghost'
                         className={cn(
@@ -116,12 +116,12 @@ function ProductCategoryContent() {
                       >
                         {subcat.label}
                       </Button>
-                    </li>
+                    </div>
                   ))}
                 </ul>
               )}
             </div>
-          </li>
+          </div>
         ))}
       </div>
       <img

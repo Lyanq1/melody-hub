@@ -73,7 +73,7 @@ export default function SearchBar() {
   }
 
   return (
-    <div ref={wrapperRef} className="w-[612px] h-12 relative">
+    <div ref={wrapperRef} className="w-[512px] h-12 relative">
       <form
         onSubmit={handleSearch}
         className="relative flex w-full h-12 rounded-[30px] bg-white overflow-hidden"

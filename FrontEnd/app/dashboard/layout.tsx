@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Disc, ShoppingCart, Users, Database, Settings } from 'lucide-react';
+import { House, Disc3 , Package, UsersRound, Database, Cog } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -13,22 +13,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     {
       name: 'Dashboard',
       href: '/dashboard',
-      icon: LayoutDashboard,
+      icon: House,
     },
     {
       name: 'Products',
       href: '/dashboard/products',
-      icon: Disc,
+      icon: Disc3 ,
     },
     {
       name: 'Orders',
       href: '/dashboard/orders',
-      icon: ShoppingCart,
+      icon: Package,
     },
     {
       name: 'Customers',
       href: '/dashboard/customers',
-      icon: Users,
+      icon: UsersRound,
     },
     {
       name: 'Scraper',
@@ -38,17 +38,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     {
       name: 'Settings',
       href: '/dashboard/settings',
-      icon: Settings,
+      icon: Cog,
     },
   ];
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-[#faf5f4]">
         {/* Sidebar */}
-        <aside className="w-58 bg-gray-900 text-white">
+        <aside className="w-58 bg-[#232227] font-semibold font-['Inter_Tight'] text-white">
           <div className="p-4">
-            <h2 className="text-2xl font-bold mb-6 font-[Tangkiwood] tracking-wide text-center">MELODY HUB</h2>
             <nav>
               <ul className="space-y-2">
                 {navItems.map((item) => {
@@ -75,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 bg-gray-100">
+        <main className="flex-1">
           {children}
         </main>
       </div>
