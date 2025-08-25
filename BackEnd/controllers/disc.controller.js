@@ -16,7 +16,7 @@ export const getAllDiscs = async (req, res) => {
 
     // If not in cache, get from database
     console.log('Fetching discs from Database')
-    const discs = await Disc.find({})
+    const discs = await Disc.find({}).populate('categoryId', 'name')
 
     if (discs.length === 0) {
       return res.status(404).json({ message: 'No discs found' })
@@ -48,7 +48,7 @@ export const getDiscById = async (req, res) => {
 
     // If not in cache, get from database
     console.log(`Fetching disc ${id} from Database`)
-    const disc = await Disc.findById(id)
+    const disc = await Disc.findById(id).populate('categoryId', 'name')
 
     if (!disc) {
       return res.status(404).json({ message: 'Disc not found' })

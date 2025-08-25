@@ -115,7 +115,7 @@ export const Navbar = () => {
   }, [user, isAuthenticated])
 
   return (
-    <nav className='bg-[#323031] text-[20px] sticky top-0 z-50 text-white shadow-md font-[Inter_Tight]'>
+    <nav className='bg-black text-[20px] sticky top-0 z-50 text-white shadow-md font-[Inter_Tight]'>
       <div className='container mx-auto flex items-center justify-between p-4'>
         {/* Logo */}
         <Link className='text-white text-3xl lg:text-4xl font-black font-[Inter_Tight] mb-1 flex-shrink-0' href='/'>
