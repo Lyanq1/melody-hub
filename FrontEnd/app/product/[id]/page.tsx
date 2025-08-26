@@ -299,7 +299,7 @@ export default function ProductDetail({ params }: { params: Promise< { id: strin
             </div>
             <button
               onClick={addToCart}
-              className="flex items-center gap-4 bg-amber-300 text-white px-10 py-4 rounded-full text-2xl font-medium"
+              className="flex items-center gap-4 bg-[#DDB351] text-white px-10 py-4 rounded-full text-2xl font-medium"
             >
               <ShoppingBag className="w-8 h-8" />
               Add to cart

@@ -24,7 +24,7 @@ const categories = [
       { label: 'Vietnam Vinyl', value: 'vinyl-viet', filterKey: 'subcategory' },
       { label: 'US-UK Vinyl', value: 'vinyl-aumy', filterKey: 'subcategory' }
     ],
-    image: '/images/vinyl.png'
+    image: '/images/vinyl.jpg'
   },
   { label: 'CASSETTE', value: '687a5c8eaea60fd849fc0849', image: '/images/cassette.jpg' },
   { label: 'MERCH', value: '687a5c8eaea60fd849fc084a', image: '/images/merch.jpg' }
