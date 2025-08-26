@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { toast } from 'sonner'
 import { Camera, Eye, EyeOff } from 'lucide-react'
+import OrdersTable from '@/components/user/OrdersTable'
 import { useAuth } from '@/hooks/use-auth'
 import { useSession } from 'next-auth/react'
 import { API_BASE_URL } from '@/lib/config'
@@ -663,7 +664,7 @@ export default function Profile() {
         {activeTab === 'orders' && (
           <>
             <h2 className='text-2xl font-semibold mb-6'>Đơn hàng đã mua</h2>
-            <p className='text-gray-600'>Tính năng này sẽ được phát triển trong tương lai.</p>
+            <OrdersTable />
           </>
         )}
       </div>
