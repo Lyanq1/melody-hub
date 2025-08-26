@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { toast } from 'sonner'
-import { Camera } from 'lucide-react'
+import { Camera, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useSession } from 'next-auth/react'
 import { API_BASE_URL } from '@/lib/config'
@@ -32,6 +32,16 @@ export default function Profile() {
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
+  
+  // Navigation state
+  const [activeTab, setActiveTab] = useState('account')
+  
+  // Password change states
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
 
   useEffect(() => {
     // if (!isAuthenticated) {
@@ -83,6 +93,91 @@ export default function Profile() {
   const handleLogout = async () => {
     await logout()
     router.push('/')
+  }
+
+  // Handle password change
+  const handlePasswordChange = async () => {
+    if (changingPassword) return // Prevent multiple requests
+
+    // Validate inputs
+    if (!currentPassword.trim()) {
+      toast.error('Vui lòng nhập mật khẩu hiện tại')
+      return
+    }
+
+    if (!newPassword.trim()) {
+      toast.error('Vui lòng nhập mật khẩu mới')
+      return
+    }
+
+    if (newPassword.length < 6) {
+      toast.error('Mật khẩu mới phải có ít nhất 6 ký tự')
+      return
+    }
+
+    if (currentPassword === newPassword) {
+      toast.error('Mật khẩu mới phải khác mật khẩu hiện tại')
+      return
+    }
+
+    try {
+      setChangingPassword(true)
+      console.log('🔒 Starting password change process...')
+
+      // Get auth headers
+      const headers = getAuthHeaders()
+      if (!headers.Authorization) {
+        toast.error('Không tìm thấy token xác thực. Vui lòng đăng nhập lại.')
+        return
+      }
+
+      // Get user identifier
+      const userIdentifier = username || user?.email?.split('@')[0] || user?.email
+      if (!userIdentifier) {
+        toast.error('Không thể xác định thông tin người dùng')
+        return
+      }
+
+      console.log('🆔 Using identifier for password change:', userIdentifier)
+
+      // Call API to change password
+      await axios.put(
+        `${API_BASE_URL}/auth/change-password/${userIdentifier}`,
+        {
+          currentPassword,
+          newPassword
+        },
+        { headers }
+      )
+
+      console.log('✅ Password changed successfully')
+      toast.success('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.')
+
+      // Clear password fields
+      setCurrentPassword('')
+      setNewPassword('')
+
+      // Logout and redirect to login page
+      await logout()
+      router.push('/login')
+
+    } catch (err) {
+      console.error('❌ Error changing password:', err)
+      
+      if (axios.isAxiosError(err)) {
+        const errorMessage = err.response?.data?.message || 'Lỗi khi đổi mật khẩu'
+        
+        if (err.response?.status === 400 && errorMessage.includes('incorrect')) {
+          toast.error('Mật khẩu hiện tại không đúng')
+        } else {
+          toast.error(errorMessage)
+        }
+      } else {
+        toast.error('Đã xảy ra lỗi không xác định khi đổi mật khẩu')
+      }
+    } finally {
+      setChangingPassword(false)
+    }
   }
 
   // Function để refresh user data từ backend sau khi update
@@ -342,13 +437,34 @@ export default function Profile() {
       {/* Sidebar */}
       <aside className='space-y-4 text-sm font-medium w-64'>
         <div className='border-b pb-2'>
-          <p className='text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer'>
+          <p 
+            className={`font-semibold uppercase text-lg tracking-wide cursor-pointer transition-colors ${
+              activeTab === 'account' ? 'text-blue-600' : 'text-black hover:text-blue-600'
+            }`}
+            onClick={() => setActiveTab('account')}
+          >
             Thông tin tài khoản
           </p>
         </div>
 
+        <div className='border-b pb-2'>
+          <p 
+            className={`font-semibold uppercase text-lg tracking-wide cursor-pointer transition-colors ${
+              activeTab === 'password' ? 'text-blue-600' : 'text-black hover:text-blue-600'
+            }`}
+            onClick={() => setActiveTab('password')}
+          >
+            Thay đổi mật khẩu
+          </p>
+        </div>
+
         <div className='border-b pb-2 cursor-pointer hover:text-blue-600'>
-          <p className='text-black font-semibold uppercase text-lg tracking-wide hover:text-blue-600 cursor-pointer'>
+          <p 
+            className={`font-semibold uppercase text-lg tracking-wide cursor-pointer transition-colors ${
+              activeTab === 'orders' ? 'text-blue-600' : 'text-black hover:text-blue-600'
+            }`}
+            onClick={() => setActiveTab('orders')}
+          >
             Đơn hàng đã mua
           </p>
         </div>
@@ -365,103 +481,191 @@ export default function Profile() {
 
       {/* Main content */}
       <div className='w-full md:w-3/4 bg-white p-6 rounded-lg shadow space-y-7 relative'>
-        {/* Avatar */}
-        <input
-          ref={fileInputRef}
-          type='file'
-          accept='image/*'
-          id='avatar-upload'
-          className='hidden'
-          onChange={handleFileChange}
-        />
+        {/* Account Information Content */}
+        {activeTab === 'account' && (
+          <>
+            {/* Avatar */}
+            <input
+              ref={fileInputRef}
+              type='file'
+              accept='image/*'
+              id='avatar-upload'
+              className='hidden'
+              onChange={handleFileChange}
+            />
 
-        <div className='flex justify-center relative'>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className='relative'>
-                  <Avatar className='h-40 w-40 border-2 border-gray-300'>
-                    <AvatarImage src={avatarUrl || 'https://github.com/shadcn.png'} />
-                    <AvatarFallback>NA</AvatarFallback>
-                  </Avatar>
-                  <div
-                    onClick={() => !imageProcessing && fileInputRef.current?.click()}
-                    className={`absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md border border-gray-200 transition-colors ${
-                      imageProcessing ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-gray-50'
-                    }`}
-                  >
-                    {imageProcessing ? (
-                      <div className='animate-spin h-5 w-5 border-2 border-gray-600 border-t-transparent rounded-full' />
-                    ) : (
-                      <Camera className='h-5 w-5 text-gray-600' />
-                    )}
-                  </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Nhấp vào icon để thay đổi ảnh đại diện</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+            <div className='flex justify-center relative'>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className='relative'>
+                      <Avatar className='h-40 w-40 border-2 border-gray-300'>
+                        <AvatarImage src={avatarUrl || 'https://github.com/shadcn.png'} />
+                        <AvatarFallback>NA</AvatarFallback>
+                      </Avatar>
+                      <div
+                        onClick={() => !imageProcessing && fileInputRef.current?.click()}
+                        className={`absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md border border-gray-200 transition-colors ${
+                          imageProcessing ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-gray-50'
+                        }`}
+                      >
+                        {imageProcessing ? (
+                          <div className='animate-spin h-5 w-5 border-2 border-gray-600 border-t-transparent rounded-full' />
+                        ) : (
+                          <Camera className='h-5 w-5 text-gray-600' />
+                        )}
+                      </div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Nhấp vào icon để thay đổi ảnh đại diện</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
 
-        {/* Display Name */}
-        <div className='space-y-2'>
-          <Label className='text-lg font-semibold'>Tên hiển thị *</Label>
-          {loading ? (
-            <Skeleton className='h-12 w-full rounded-md' />
-          ) : (
-            <Input className='h-12 text-lg' value={fullName} onChange={(e) => setFullName(e.target.value)} />
-          )}
-        </div>
+            {/* Display Name */}
+            <div className='space-y-2'>
+              <Label className='text-lg font-semibold'>Tên hiển thị *</Label>
+              {loading ? (
+                <Skeleton className='h-12 w-full rounded-md' />
+              ) : (
+                <Input className='h-12 text-lg' value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              )}
+            </div>
 
-        {/* Email */}
-        <div className='space-y-2'>
-          <Label className='text-lg font-semibold'>Email *</Label>
-          {loading ? (
-            <Skeleton className='h-12 w-full rounded-md' />
-          ) : (
-            <Input className='h-12 text-lg' value={email} onChange={(e) => setEmail(e.target.value)} />
-          )}
-        </div>
+            {/* Email */}
+            <div className='space-y-2'>
+              <Label className='text-lg font-semibold'>Email *</Label>
+              {loading ? (
+                <Skeleton className='h-12 w-full rounded-md' />
+              ) : (
+                <Input className='h-12 text-lg' value={email} onChange={(e) => setEmail(e.target.value)} />
+              )}
+            </div>
 
-        {/* Address */}
-        <div className='space-y-2'>
-          <Label className='text-lg font-semibold'>Địa chỉ *</Label>
-          {loading ? (
-            <Skeleton className='h-12 w-full rounded-md' />
-          ) : (
-            <Input className='h-12 text-lg' value={address} onChange={(e) => setAddress(e.target.value)} />
-          )}
-        </div>
+            {/* Address */}
+            <div className='space-y-2'>
+              <Label className='text-lg font-semibold'>Địa chỉ *</Label>
+              {loading ? (
+                <Skeleton className='h-12 w-full rounded-md' />
+              ) : (
+                <Input className='h-12 text-lg' value={address} onChange={(e) => setAddress(e.target.value)} />
+              )}
+            </div>
 
-        {/* Phone */}
-        <div className='space-y-2'>
-          <Label className='text-lg font-semibold'>Số điện thoại *</Label>
-          {loading ? (
-            <Skeleton className='h-12 w-full rounded-md' />
-          ) : (
-            <Input className='h-12 text-lg' value={phone} onChange={(e) => setPhone(e.target.value)} />
-          )}
-        </div>
+            {/* Phone */}
+            <div className='space-y-2'>
+              <Label className='text-lg font-semibold'>Số điện thoại *</Label>
+              {loading ? (
+                <Skeleton className='h-12 w-full rounded-md' />
+              ) : (
+                <Input className='h-12 text-lg' value={phone} onChange={(e) => setPhone(e.target.value)} />
+              )}
+            </div>
 
-        {/* Buttons */}
-        <div className='pt-4 flex justify-end'>
-          <Button
-            onClick={handleSave}
-            disabled={saving || loading}
-            className='bg-black text-white hover:bg-gray-800 font-semibold disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            {saving ? (
-              <>
-                <div className='animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2' />
-                Đang lưu...
-              </>
-            ) : (
-              'Lưu thay đổi'
-            )}
-          </Button>
-        </div>
+            {/* Buttons */}
+            <div className='pt-4 flex justify-end'>
+              <Button
+                onClick={handleSave}
+                disabled={saving || loading}
+                className='bg-black text-white hover:bg-gray-800 font-semibold disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {saving ? (
+                  <>
+                    <div className='animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2' />
+                    Đang lưu...
+                  </>
+                ) : (
+                  'Lưu thay đổi'
+                )}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {/* Password Change Content */}
+        {activeTab === 'password' && (
+          <>
+            <h2 className='text-2xl font-semibold mb-6'>Thay đổi mật khẩu</h2>
+            
+            {/* Current Password */}
+            <div className='space-y-2'>
+              <Label className='text-lg font-semibold'>Mật khẩu hiện tại *</Label>
+              <div className='relative'>
+                <Input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  className='h-12 text-lg pr-12'
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder='Nhập mật khẩu hiện tại'
+                />
+                <button
+                  type='button'
+                  className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none'
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff className='h-5 w-5' />
+                  ) : (
+                    <Eye className='h-5 w-5' />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* New Password */}
+            <div className='space-y-2'>
+              <Label className='text-lg font-semibold'>Mật khẩu mới *</Label>
+              <div className='relative'>
+                <Input
+                  type={showNewPassword ? 'text' : 'password'}
+                  className='h-12 text-lg pr-12'
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder='Nhập mật khẩu mới (tối thiểu 6 ký tự)'
+                />
+                <button
+                  type='button'
+                  className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none'
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? (
+                    <EyeOff className='h-5 w-5' />
+                  ) : (
+                    <Eye className='h-5 w-5' />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Change Password Button */}
+            <div className='pt-4 flex justify-end'>
+              <Button
+                onClick={handlePasswordChange}
+                disabled={changingPassword}
+                className='bg-red-600 text-white hover:bg-red-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {changingPassword ? (
+                  <>
+                    <div className='animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2' />
+                    Đang đổi mật khẩu...
+                  </>
+                ) : (
+                  'Đổi mật khẩu'
+                )}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {/* Orders Content */}
+        {activeTab === 'orders' && (
+          <>
+            <h2 className='text-2xl font-semibold mb-6'>Đơn hàng đã mua</h2>
+            <p className='text-gray-600'>Tính năng này sẽ được phát triển trong tương lai.</p>
+          </>
+        )}
       </div>
     </div>
   )

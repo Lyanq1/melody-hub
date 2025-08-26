@@ -439,6 +439,54 @@ export const resetPassword = async (req, res) => {
   }
 }
 
+// Change password for authenticated user
+export const changePassword = async (req, res) => {
+  const { username } = req.params
+  const { currentPassword, newPassword } = req.body
+
+  try {
+    console.log('🔒 Change password request for username:', username)
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Vui lòng cung cấp mật khẩu hiện tại và mật khẩu mới' })
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ message: 'Mật khẩu mới phải khác mật khẩu hiện tại' })
+    }
+
+    // Find account
+    const account = await findAccountByUsername(username)
+    if (!account) {
+      return res.status(404).json({ message: 'Tài khoản không tồn tại' })
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await account.comparePassword(currentPassword)
+    if (!isCurrentPasswordValid) {
+      console.log('❌ Current password is incorrect for user:', username)
+      return res.status(400).json({ message: 'Mật khẩu hiện tại không đúng' })
+    }
+
+    console.log('✅ Current password verified for user:', username)
+
+    // Update password (will be hashed in pre-save middleware)
+    await updateAccount(account._id, { Password: newPassword })
+
+    console.log('✅ Password updated successfully for user:', username)
+    res.status(200).json({ message: 'Đổi mật khẩu thành công' })
+
+  } catch (error) {
+    console.error('❌ Error changing password:', error)
+    res.status(500).json({ message: 'Lỗi khi đổi mật khẩu', error: error.message })
+  }
+}
+
 // Upsert Google user sent from NextAuth callback
 export const googleSync = async (req, res) => {
   try {

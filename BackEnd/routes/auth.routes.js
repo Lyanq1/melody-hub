@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { register, login, facebookLogin, updateUserInfo, getUserInfo, checkDashboardAccess, getCurrentUser,
-    requestPasswordReset, verifyResetCode, resetPassword, googleSync
+    requestPasswordReset, verifyResetCode, resetPassword, changePassword, googleSync
  } from '../controllers/auth.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
@@ -20,6 +20,9 @@ router.get('/user/:username', verifyToken, getUserInfo);
 router.post('/forgot-password', requestPasswordReset);
 router.post('/verify-reset-code', verifyResetCode);
 router.post('/reset-password', resetPassword);
+
+// Change password route (protected)
+router.put('/change-password/:username', verifyToken, changePassword);
 
 // Dashboard access check (protected)
 router.get('/dashboard/access', verifyToken, checkDashboardAccess);
