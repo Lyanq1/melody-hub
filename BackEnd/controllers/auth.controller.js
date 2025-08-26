@@ -251,9 +251,9 @@ export const updateUserInfo = async (req, res) => {
   const updatedData = req.body
 
   try {
-    console.log('🔄 Updating user info for:', username)
-    console.log('📝 Raw update data:', updatedData)
-    console.log('👤 Authenticated user:', req.user)
+    // console.log('🔄 Updating user info for:', username)
+    // console.log('📝 Raw update data:', updatedData)
+    // console.log('👤 Authenticated user:', req.user)
 
     // Filter out empty strings and undefined values to avoid overwriting existing data
     const cleanedData = {}
@@ -264,7 +264,7 @@ export const updateUserInfo = async (req, res) => {
       }
     })
 
-    console.log('🧹 Cleaned update data (non-empty only):', cleanedData)
+    // console.log('🧹 Cleaned update data (non-empty only):', cleanedData)
 
     // Only proceed if there's actually data to update
     if (Object.keys(cleanedData).length === 0) {

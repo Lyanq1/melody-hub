@@ -27,9 +27,7 @@ export const AdminNavbar = () => {
           <Link href='/dashboard' className='hover:text-gray-300 transition-colors'>
             Dashboard
           </Link>
-          <Link href='/admin' className='hover:text-gray-300 transition-colors whitespace-nowrap'>
-            System
-          </Link>
+
         </div>
 
         <div className='flex items-center gap-3 lg:gap-6 xl:gap-8'>
@@ -51,7 +49,7 @@ export const AdminNavbar = () => {
                 backgroundColor: '#323031',
                 color: 'white',
                 border: '1px solid #444',
-                fontFamily: 'InterTight'
+                fontFamily: 'Inter_Tight'
               }}
             >
               {isAuthenticated && isAdmin && (

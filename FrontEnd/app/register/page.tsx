@@ -12,7 +12,6 @@ export default function RegisterPage() {
     password: string
     email: string
     displayName: string
-    role: string
     phone: string
     address: string
   }
@@ -23,7 +22,6 @@ export default function RegisterPage() {
     password: '',
     email: '',
     displayName: '',
-    role: '',
     phone: '',
     address: ''
   })
@@ -55,11 +53,6 @@ export default function RegisterPage() {
       setLoading(false)
       return
     }
-    if (!formData.role) {
-      setError('Vui lòng chọn vai trò')
-      setLoading(false)
-      return
-    }
     // http://localhost:5000/api/auth/register
     try {
       const response = await axios.post(AUTH_ENDPOINTS.REGISTER, formData, {
@@ -74,7 +67,6 @@ export default function RegisterPage() {
         password: '',
         email: '',
         displayName: '',
-        role: '',
         phone: '',
         address: ''
       })
@@ -174,14 +166,7 @@ export default function RegisterPage() {
           </div>
 
           <div className='input-box font-["Inter_Tight"]'>
-            <select id='role' name='role' value={formData.role} onChange={handleChange} required>
-              <option value='' disabled>
-                role
-              </option>
-              <option value='Customer'>customer</option>
-              <option value='Artist'>artist</option>
-              <option value='Admin'>admin</option>
-            </select>
+          
             <i className='bx bxs-chevron-down'></i>
           </div>
 

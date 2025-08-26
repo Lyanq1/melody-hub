@@ -8,16 +8,16 @@ export const verifyToken = async (req, res, next) => {
     const authHeader = req.headers.authorization
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1]
-      console.log('🔑 JWT Token found:', token.substring(0, 20) + '...')
-      console.log('🔑 Using JWT secret:', config.jwt.secret.substring(0, 10) + '...')
+      // console.log('🔑 JWT Token found:', token.substring(0, 20) + '...')
+      // console.log('🔑 Using JWT secret:', config.jwt.secret.substring(0, 10) + '...')
 
       try {
         const decoded = jwt.verify(token, config.jwt.secret)
-        console.log('✅ JWT verification successful:', decoded)
+        // console.log('✅ JWT verification successful:', decoded)
         req.user = decoded
         return next()
       } catch (jwtError) {
-        console.log('❌ JWT verification failed:', jwtError.message)
+        // console.log('❌ JWT verification failed:', jwtError.message)
       }
     }
 

@@ -194,7 +194,7 @@ export default function Checkout() {
       if (res.success && res.url) {
         // Thêm paymentType vào URL Stripe success
         const successUrl = new URL(res.url);
-        successUrl.searchParams.append('paymentType', 'stripe');
+        successUrl.searchParams.append('paymentType', 'Stripe');
         window.location.href = successUrl.toString();
       } else {
         setError(res.message || 'Failed to start Stripe checkout');

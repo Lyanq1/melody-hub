@@ -242,10 +242,10 @@ export default function Cart() {
       <div className='mt-8 p-4 bg-gray-50 rounded-lg'>
         <div className='flex justify-between items-center mb-4'>
           <span className='text-lg font-semibold'>TOTAL:</span>
-          <span className='text-xl font-bold'>{calculateTotal()}₫</span>
+              <span className='text-xl font-bold'>{cart?.total.toLocaleString()}₫</span>
         </div>
         <Button className='w-full bg-[#DDB351] rounded-[30px] hover:bg-primary/90 font-bold text-2xl text-[#BB3C36]' onClick={handleCheckout}>
-          ABATE
+          CHECKOUT
         </Button>
       </div>
     </div>
