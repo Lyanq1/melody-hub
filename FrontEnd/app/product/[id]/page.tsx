@@ -243,7 +243,7 @@ export default function ProductDetail({ params }: { params: Promise< { id: strin
             <h1 className="text-4xl font-extrabold text-neutral-800 uppercase">
               {product.name}
             </h1>
-            <div className="w-56 h-2 bg-red-700" />
+            <div className="w-56 h-2 bg-[#BB3C36]" />
             
             <div className="flex items-center gap-3">
               <svg
@@ -309,9 +309,9 @@ export default function ProductDetail({ params }: { params: Promise< { id: strin
       </div>
 
       {/* Description */}
-      <div className="mt-16">
+      <div className="mt-16 font-['Inter_Tight']">
         <div className="flex">
-          <div className="w-36 h-2 bg-red-700 rounded-l-2xl" />
+          <div className="w-36 h-2 bg-[#BB3C36] rounded-l-2xl" />
           <div className="flex-1 h-2 bg-stone-300 rounded-r-2xl" />
         </div>
         <div className="mt-6">
@@ -325,11 +325,11 @@ export default function ProductDetail({ params }: { params: Promise< { id: strin
 
       {/* Related Products */}
       <div className="mt-20">
-        <h2 className="text-5xl font-bold text-neutral-800 mb-4">
+        <h2 className="text-3xl font-bold text-neutral-800 mb-4 font-[DrukWideBold]">
           RELATED PRODUCT
         </h2>
-        <div className="h-2 bg-red-700 mb-8" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <div className="h-2 w-111 bg-[#BB3C36] mb-8" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 font-['Inter_Tight']">
           {similarProducts.map((item) => (
             <Link key={item._id} href={`/product/${item._id}`} className="block">
               <div className="relative aspect-square mb-2 overflow-hidden">

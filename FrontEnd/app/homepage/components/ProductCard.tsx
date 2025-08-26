@@ -71,7 +71,7 @@ const addToWishlist = (id: string, name: string, price: string, imageUrl: string
 
 export function ProductCard({ id, name, price, imageUrl, isNew = false, onAddToCart }: ProductCardProps) {
   return (
-    <Card className='w-full overflow-hidden flex flex-col h-full group font-[Ceflinty]'>
+    <Card className='w-full overflow-hidden flex flex-col h-full group font-[Inter_Tight]'>
       <Link href={`/product/${id}`} className='relative h-[250px] w-full'>
         <Image src={imageUrl} alt={name} fill className='object-cover' sizes='(max-width: 300px) 100vw, 300px' />
         {isNew && (
