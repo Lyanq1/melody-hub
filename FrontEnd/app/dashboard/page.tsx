@@ -7,6 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import { LayoutDashboard, Disc, ShoppingCart, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/use-auth'
+import adminStats, { adminStatsService, StatsPeriod, RevenueType } from '@/lib/services/admin-stats'
 
 const salesData = [
   { month: 'Jan', sales: 1200 },
@@ -32,7 +33,15 @@ const recentOrders = [
 export default function Dashboard() {
   const { user, isAdmin, isAuthenticated } = useAuth()
   const [systemStats, setSystemStats] = useState<any>(null)
+  const [productStats, setProductStats] = useState<any>(null)
+  const [comprehensive, setComprehensive] = useState<any>(null)
+  const [customerStats, setCustomerStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+
+  const [period, setPeriod] = useState<StatsPeriod>('month')
+  const [revenueType, setRevenueType] = useState<RevenueType>('monthly')
+  const [year, setYear] = useState<number>(new Date().getFullYear())
+  const [revenueSeries, setRevenueSeries] = useState<any[]>([])
 
   console.log('🎯 Dashboard component state:', { user, isAdmin, isAuthenticated })
 
@@ -40,11 +49,11 @@ export default function Dashboard() {
     // Chỉ Admin mới có thể truy cập dashboard
     if (isAuthenticated && isAdmin) {
       console.log('✅ Admin authenticated, fetching stats...')
-      fetchSystemStats()
+      fetchAll()
     } else {
       console.log('❌ Not admin or not authenticated:', { isAuthenticated, isAdmin })
     }
-  }, [isAuthenticated, isAdmin])
+  }, [isAuthenticated, isAdmin, period, revenueType, year])
 
   // Kiểm tra quyền truy cập
   if (!isAuthenticated) {
@@ -69,19 +78,29 @@ export default function Dashboard() {
     )
   }
 
-  const fetchSystemStats = async () => {
+  const fetchAll = async () => {
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/admin/stats', {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
-      })
-      
-      if (response.ok) {
-        const stats = await response.json()
-        setSystemStats(stats)
-      }
+      const [sys, prod, comp, cust, rev] = await Promise.all([
+        adminStatsService.getSystemStats(),
+        adminStatsService.getProductStats(),
+        adminStatsService.getComprehensiveStats({ period }),
+        adminStatsService.getCustomerStats({ period }),
+        adminStatsService.getRevenueStats({ type: revenueType, year })
+      ])
+      setSystemStats(sys)
+      setProductStats(prod)
+      setComprehensive(comp)
+      setCustomerStats(cust)
+      // Normalize revenue data into chart-friendly series
+      const chart = (rev?.data || []).map((d: any) => ({
+        label: d._id,
+        revenue: d.revenue,
+        orders: d.orders,
+        aov: d.averageOrderValue
+      }))
+      setRevenueSeries(chart)
     } catch (error) {
-      console.error('Error fetching system stats:', error)
+      console.error('Error fetching stats:', error)
     } finally {
       setLoading(false)
     }
@@ -105,6 +124,43 @@ export default function Dashboard() {
               </Button>
             </Link>
           )}
+        </div>
+      </div>
+
+      {/* Bộ lọc kỳ thống kê */}
+      <div className='flex flex-wrap items-center gap-3'>
+        <div className='flex items-center gap-2'>
+          <span className='text-sm text-gray-600'>Kỳ:</span>
+          <select
+            className='border rounded px-2 py-1'
+            value={period}
+            onChange={(e) => setPeriod(e.target.value as StatsPeriod)}
+          >
+            <option value='day'>Ngày</option>
+            <option value='week'>Tuần</option>
+            <option value='month'>Tháng</option>
+            <option value='quarter'>Quý</option>
+            <option value='year'>Năm</option>
+          </select>
+        </div>
+        <div className='flex items-center gap-2'>
+          <span className='text-sm text-gray-600'>Doanh thu theo:</span>
+          <select
+            className='border rounded px-2 py-1'
+            value={revenueType}
+            onChange={(e) => setRevenueType(e.target.value as RevenueType)}
+          >
+            <option value='daily'>Ngày</option>
+            <option value='monthly'>Tháng</option>
+            <option value='quarterly'>Quý</option>
+            <option value='yearly'>Năm</option>
+          </select>
+          <input
+            type='number'
+            className='border rounded px-2 py-1 w-24'
+            value={year}
+            onChange={(e) => setYear(parseInt(e.target.value || `${new Date().getFullYear()}`))}
+          />
         </div>
       </div>
 
@@ -159,19 +215,64 @@ export default function Dashboard() {
       {/* Biểu đồ doanh thu */}
       <Card className='rounded-2xl shadow-lg'>
         <CardHeader>
-          <CardTitle className='text-xl font-semibold mb-2'>📊 Doanh thu theo tháng</CardTitle>
+          <CardTitle className='text-xl font-semibold mb-2'>📊 Doanh thu</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width='100%' height={300}>
-            <BarChart data={salesData}>
-              <XAxis dataKey='month' stroke='#8884d8' />
+            <BarChart data={revenueSeries?.length ? revenueSeries : salesData}>
+              <XAxis dataKey='label' stroke='#8884d8' />
               <YAxis />
               <Tooltip />
-              <Bar dataKey='sales' fill='#6366f1' radius={[4, 4, 0, 0]} />
+              <Bar dataKey='revenue' fill='#6366f1' radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
+
+      {/* Khối thống kê theo nhóm */}
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+        {/* Giao dịch mua & trạng thái */}
+        <Card className='shadow'>
+          <CardHeader>
+            <CardTitle className='text-lg font-semibold'>Giao dịch & Trạng thái</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-2 text-sm'>
+            <div className='flex justify-between'><span>Tổng đơn</span><b>{comprehensive?.orders?.total ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Đơn kỳ hiện tại</span><b>{comprehensive?.orders?.period ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Đang chờ</span><b>{comprehensive?.orders?.pending ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Đang giao</span><b>{comprehensive?.orders?.delivering ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Hoàn tất</span><b>{comprehensive?.orders?.completed ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Hủy</span><b>{comprehensive?.orders?.cancelled ?? '...'}</b></div>
+          </CardContent>
+        </Card>
+
+        {/* Sản phẩm & Danh mục */}
+        <Card className='shadow'>
+          <CardHeader>
+            <CardTitle className='text-lg font-semibold'>Sản phẩm & Danh mục</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-2 text-sm'>
+            <div className='flex justify-between'><span>Tổng sản phẩm</span><b>{comprehensive?.products?.total ?? productStats?.totalProducts ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Tổng danh mục</span><b>{comprehensive?.categories?.total ?? productStats?.totalCategories ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Sắp hết hàng (&lt;10)</span><b>{comprehensive?.products?.lowStock ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Hết hàng</span><b>{comprehensive?.products?.outOfStock ?? '...'}</b></div>
+          </CardContent>
+        </Card>
+
+        {/* Khách hàng */}
+        <Card className='shadow'>
+          <CardHeader>
+            <CardTitle className='text-lg font-semibold'>Khách hàng</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-2 text-sm'>
+            <div className='flex justify-between'><span>Tổng khách hàng</span><b>{comprehensive?.customers?.total ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Khách hàng mới</span><b>{comprehensive?.customers?.new ?? customerStats?.newCustomers ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Số KH hoạt động</span><b>{customerStats?.activeCustomers?.uniqueCustomers ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Đơn TB/KH</span><b>{customerStats?.activeCustomers?.averageOrdersPerCustomer?.toFixed?.(2) ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Chi tiêu TB/KH</span><b>{customerStats?.activeCustomers?.averageSpentPerCustomer?.toLocaleString?.() ?? '...'}</b></div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Đơn hàng gần đây */}
       <Card className='shadow-lg'>

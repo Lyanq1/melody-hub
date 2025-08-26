@@ -477,24 +477,24 @@ export default function OrderManager() {
         </div>
 
         {/* Table */}
-        <div className="w-full overflow-x-auto">
-          <Table className="w-full min-w-[900px]">
+        <div className="w-full max-w-full overflow-x-auto">
+          <Table className="w-full table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead>
+                <TableHead className="w-10">
                   <Checkbox 
                     checked={selected.length === orders.length && orders.length > 0}
                     onCheckedChange={toggleSelectAll}
                   />
                 </TableHead>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Payment Status</TableHead>
-                <TableHead>Order Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="w-24 whitespace-nowrap">Order ID</TableHead>
+                <TableHead className="w-56 whitespace-nowrap">Customer</TableHead>
+                <TableHead className="w-[420px] whitespace-nowrap">Items</TableHead>
+                <TableHead className="w-28 whitespace-nowrap">Total</TableHead>
+                <TableHead className="w-36 whitespace-nowrap">Payment Status</TableHead>
+                <TableHead className="w-36 whitespace-nowrap">Order Status</TableHead>
+                <TableHead className="w-40 whitespace-nowrap">Date</TableHead>
+                <TableHead className="w-28 whitespace-nowrap">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -506,23 +506,22 @@ export default function OrderManager() {
                       onCheckedChange={() => toggleSelect(order._id)}
                     />
                   </TableCell>
-                  <TableCell className="font-mono text-sm">{order._id.slice(-8)}</TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{order.userId?.DisplayName || 'Unknown'}</div>
-                      <div className="text-sm text-gray-500">{order.userId?.Email}</div>
+                  <TableCell className="font-mono text-sm whitespace-nowrap">{order._id.slice(-8)}</TableCell>
+                  <TableCell className="truncate">
+                    <div className="max-w-[220px]">
+                      <div className="font-medium truncate">{order.userId?.DisplayName || 'Unknown'}</div>
+                      <div className="text-sm text-gray-500 truncate">{order.userId?.Email}</div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {order.items.length} item{order.items.length !== 1 ? 's' : ''}
-                      <div className="text-gray-500">
-                        {order.items.slice(0, 2).map(item => item.name).join(', ')}
-                        {order.items.length > 2 && '...'}
+                  <TableCell className="truncate">
+                    <div className="text-sm max-w-[400px] truncate">
+                      <span className="whitespace-nowrap">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</span>
+                      <div className="text-gray-500 truncate">
+                        {order.items.slice(0, 2).map(item => item.name).join(', ')}{order.items.length > 2 && ', …'}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{order.totalPrice.toLocaleString()}đ</TableCell>
+                  <TableCell className="font-medium whitespace-nowrap">{order.totalPrice.toLocaleString()}đ</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentColor(order.paymentStatus)}`}>
                       {order.paymentStatus}
@@ -533,8 +532,8 @@ export default function OrderManager() {
                       {order.status}
                     </span>
                   </TableCell>
-                  <TableCell className="text-sm">{formatDate(order.createdAt)}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-sm whitespace-nowrap">{formatDate(order.createdAt)}</TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <div className="flex gap-2">
                       <Button 
                         variant="outline" 

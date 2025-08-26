@@ -169,7 +169,7 @@ const LoginPage = () => {
         setTimeout(() => {
           const token = localStorage.getItem('token')
           if (token) {
-            console.log('✅ Google login: JWT token found in localStorage')
+            // console.log('✅ Google login: JWT token found in localStorage')
           } else {
             console.log('⚠️ Google login: No JWT token found, may need to refresh')
           }

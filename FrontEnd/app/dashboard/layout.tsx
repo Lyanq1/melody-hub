@@ -35,11 +35,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       href: '/dashboard/scraper',
       icon: Database,
     },
-    {
-      name: 'Settings',
-      href: '/dashboard/settings',
-      icon: Cog,
-    },
   ];
 
   return (

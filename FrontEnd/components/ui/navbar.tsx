@@ -82,8 +82,8 @@ export const Navbar = () => {
   useEffect(() => {
     // Ưu tiên sử dụng thông tin từ useAuth hook (bao gồm Google Auth)
     if (isAuthenticated && user) {
-      console.log('🧭 Navbar: Using user from hook:', user)
-      console.log('🖼️ Navbar: Avatar URL from user:', user.avatarURL)
+      // console.log('🧭 Navbar: Using user from hook:', user)
+      // console.log('🖼️ Navbar: Avatar URL from user:', user.avatarURL)
       const newUsername = user.username || user.email?.split('@')[0] || ''
       const newAvatarUrl = user.avatarURL || ''
 
@@ -189,7 +189,7 @@ export const Navbar = () => {
                 backgroundColor: '#323031',
                 color: 'white',
                 border: '1px solid #444',
-                fontFamily: 'InterTight'
+                fontFamily: 'Inter_Tight'
               }}
             >
               <DropdownMenuItem asChild>
@@ -416,7 +416,7 @@ export const Navbar = () => {
                 backgroundColor: '#323031',
                 color: 'white',
                 border: '1px solid #444',
-                fontFamily: 'InterTight'
+                fontFamily: 'Inter_Tight'
               }}
             >
               <DropdownMenuItem asChild>

@@ -50,13 +50,13 @@ export default function Profile() {
     // }
 
     if (user) {
-      console.log('👤 Profile page user data:', user)
-      console.log('🖼️ Avatar URL from user:', user.avatarURL)
-      console.log('🔗 Account ID:', user.accountID)
-      console.log('👤 Username:', user.username)
-      console.log('📧 Email:', user.email)
-      console.log('📱 Phone from user:', user.phone)
-      console.log('🏠 Address from user:', user.address)
+      // console.log('👤 Profile page user data:', user)
+      // console.log('🖼️ Avatar URL from user:', user.avatarURL)
+      // console.log('🔗 Account ID:', user.accountID)
+      // console.log('👤 Username:', user.username)
+      // console.log('📧 Email:', user.email)
+      // console.log('📱 Phone from user:', user.phone)
+      // console.log('🏠 Address from user:', user.address)
 
       const finalUsername = user.username || user.email?.split('@')[0] || ''
       setUsername(finalUsername)
