@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import Disc from '../models/product/disc.model.js';
 import DeliveryFee from '../models/shipping/deliveryFee.model.js';
 import axios from 'axios';
+import { scheduleOrderStatusUpdates } from '../services/order.service.js';
 
 // Hàm tính khoảng cách giữa 2 điểm theo công thức Haversine
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -226,6 +227,9 @@ export const createOrder = async (req, res) => {
     const order = new Order(orderData);
     await order.save();
 
+    // Schedule status updates
+    await scheduleOrderStatusUpdates(order._id, estimatedDeliveryTime);
+
     // Xóa giỏ hàng sau khi tạo order thành công
     await Cart.findOneAndDelete({ userId: new mongoose.Types.ObjectId(userId) });
 
@@ -287,7 +291,7 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const validStatuses = ['Confirmed', 'PickingUp', 'Preparing', 'Delivering', 'Delivered'];
+    const validStatuses = ['Confirmed','Shipping', 'Delivered'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ 
         success: false, 
