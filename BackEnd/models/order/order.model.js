@@ -17,6 +17,11 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  status: {
+    type: String,
+    enum: ['Confirmed', 'Shipping', 'Delivered'],
+    default: 'Confirmed'
+  },
   paymentMethod: {
     type: String,
     enum: ['Stripe', 'MoMo', 'Cash on Delivery'],
@@ -34,6 +39,10 @@ const orderSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  estimatedDeliveryTime: {
+    type: String,
+    required: true
   }
 }, {
   collection: 'orders'

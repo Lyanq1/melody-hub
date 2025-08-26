@@ -17,5 +17,6 @@ const deliveryFeeSchema = new mongoose.Schema({
   collection: 'deliveryFees'  // Tên collection trong MongoDB
 });
 
-const DeliveryFee = mongoose.model('DeliveryFee', deliveryFeeSchema);
+// Đổi tên model thành 'deliveryFees' để khớp với tên collection
+const DeliveryFee = mongoose.model('deliveryFees', deliveryFeeSchema);
 export default DeliveryFee;

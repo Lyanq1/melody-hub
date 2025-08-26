@@ -45,8 +45,10 @@ export default function MoMoPaymentButton({
         const payUrl = response.payUrl || (response.data && response.data.payUrl);
         
         if (payUrl) {
-          // Redirect to MoMo payment page
-          window.location.href = payUrl;
+          // Thêm paymentType vào URL MoMo success
+          const momoUrl = new URL(payUrl);
+          momoUrl.searchParams.append('paymentType', 'momo');
+          window.location.href = momoUrl.toString();
         } else {
           throw new Error('No payment URL received from server');
         }

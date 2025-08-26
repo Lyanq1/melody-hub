@@ -1,7 +1,44 @@
 import Order from '../models/order/order.model.js';
 import Cart from '../models/order/cart.model.js';
 import mongoose from 'mongoose';
+import Disc from '../models/product/disc.model.js';
+import DeliveryFee from '../models/shipping/deliveryFee.model.js';
+import axios from 'axios';
 
+// Hàm tính khoảng cách giữa 2 điểm theo công thức Haversine
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Bán kính trái đất (km)
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Khoảng cách (km)
+};
+
+// Hàm lấy tọa độ từ địa chỉ
+const getCoordinates = async (address) => {
+  try {
+    const encodedAddress = encodeURIComponent(address);
+    const response = await axios.get(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&countrycodes=vn`
+    );
+    
+    if (response.data && response.data.length > 0) {
+      const location = response.data[0];
+      return {
+        lat: parseFloat(location.lat),
+        lng: parseFloat(location.lon)
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting coordinates:', error);
+    return null;
+  }
+};
 export const getOrderById = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -81,16 +118,108 @@ export const createOrder = async (req, res) => {
       })
     );
 
+    // Get delivery fee based on district from address
+    let deliveryFee = 0;
+    try {
+      // Tìm quận/huyện từ địa chỉ
+      const district = address.split(',')
+        .map(part => part.trim())
+        .find(part => 
+          part.startsWith('Phường') || 
+          part.startsWith('Xã') || 
+          part.startsWith('Quận') || 
+          part.startsWith('Huyện')
+        );
+
+      if (district) {
+        console.log('Found district:', district);
+        // Sử dụng model đã import
+        const deliveryFeeDoc = await DeliveryFee.findOne({ toDistrict: district });
+        console.log('Query:', { toDistrict: district });
+        console.log('DeliveryFeeDoc:', deliveryFeeDoc);
+        
+        if (deliveryFeeDoc && deliveryFeeDoc.deliveryFee) {
+          deliveryFee = deliveryFeeDoc.deliveryFee;
+          console.log('Set delivery fee:', deliveryFee);
+        } else {
+          // Thử tìm tất cả delivery fees để debug
+          const allFees = await DeliveryFee.find({});
+          console.log('All delivery fees:', allFees);
+          console.log('No delivery fee found for district:', district);
+        }
+      } else {
+        console.log('No district found in address:', address);
+      }
+    } catch (error) {
+      console.error('Error getting delivery fee:', error);
+    }
+
+    // Calculate total price
+    const subtotal = typeof cart.total === 'string' ? parseInt(cart.total.replace(/[^\d]/g, ''), 10) || 0 : cart.total || 0;
+
+    // Tính thời gian giao hàng dự kiến
+    const storeLocation = {
+      address: '227 đường Nguyễn Văn Cừ, Phường Chợ Quán, Thành phố Hồ Chí Minh',
+      lat: 10.762622,
+      lng: 106.682028
+    };
+
+    let estimatedDeliveryTime = null;
+    try {
+      // Lấy tọa độ địa chỉ giao hàng
+      const deliveryCoords = await getCoordinates(address);
+      if (deliveryCoords) {
+        // Tính khoảng cách
+        const distance = calculateDistance(
+          storeLocation.lat, 
+          storeLocation.lng,
+          deliveryCoords.lat,
+          deliveryCoords.lng
+        );
+        
+        // Tính thời gian giao hàng (giờ) với vận tốc 40km/h
+        const deliveryTimeHours = distance / 40;
+        
+        // Chuyển sang phút và làm tròn lên
+        const deliveryTimeMinutes = Math.ceil(deliveryTimeHours * 60);
+        
+        // Thêm 5 phút chuẩn bị
+        const totalMinutes = deliveryTimeMinutes + 5;
+        
+        // Tính thời điểm giao hàng dự kiến
+        const now = new Date();
+        const estimatedTime = new Date(now.getTime() + totalMinutes * 60000);
+        
+        // Format thời gian
+        estimatedDeliveryTime = estimatedTime.toLocaleTimeString('vi-VN', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+
+        console.log('Delivery calculation:', {
+          distance,
+          deliveryTimeMinutes,
+          totalMinutes,
+          estimatedDeliveryTime
+        });
+      }
+    } catch (error) {
+      console.error('Error calculating delivery time:', error);
+    }
+
     // Create order object
     const orderData = {
       userId: new mongoose.Types.ObjectId(userId),
       items: orderItems,
-      totalPrice: typeof cart.total === 'string' ? parseInt(cart.total.replace(/[^\d]/g, ''), 10) || 0 : cart.total || 0,
+      totalPrice: subtotal + deliveryFee,  // Tổng tiền đã bao gồm phí giao hàng
       address: address,
+      status: 'Confirmed',  // Set default status
       paymentMethod: paymentMethod,
       paymentStatus: paymentStatus || 'Pending',
-      deliveryFee: 0,
-      createdAt: new Date()
+      deliveryFee: deliveryFee,
+      createdAt: new Date().toISOString(),
+      estimatedDeliveryTime: estimatedDeliveryTime || '--:--' // Fallback nếu không tính được
     };
 
     // Create and save the order
