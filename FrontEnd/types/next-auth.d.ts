@@ -8,6 +8,7 @@ declare module 'next-auth' {
       username?: string
       role?: string
       backendUser?: any
+      jwtToken?: string
     } & DefaultSession['user']
   }
 
@@ -16,6 +17,7 @@ declare module 'next-auth' {
     username?: string
     role?: string
     backendUser?: any
+    jwtToken?: string
   }
 }
 
@@ -27,5 +29,6 @@ declare module 'next-auth/jwt' {
     backendUser?: any
     provider?: string
     picture?: string
+    jwtToken?: string
   }
 }
