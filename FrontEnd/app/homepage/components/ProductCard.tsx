@@ -103,7 +103,7 @@ export function ProductCard({ id, name, price, imageUrl, isNew = false, onAddToC
       </div>
 
       <div className='flex flex-col items-center'>
-        <CardDescription className='text-lg font-semibold text-primary pt-0'>{price}</CardDescription>
+        <CardDescription className='text-lg font-semibold text-primary pt-0'>{price}đ</CardDescription>
       </div>
 
       <CardFooter>

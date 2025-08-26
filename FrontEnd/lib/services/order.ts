@@ -40,7 +40,8 @@ export interface Order {
   status: 'Confirmed' | 'Processing' | 'Shipped' | 'Delivered';
   paymentMethod: string;
   paymentStatus: string;
-  createdDate: string;
+  deliveryFee: number;
+  createdAt: string;
 }
 
 export interface CreateOrderResponse {

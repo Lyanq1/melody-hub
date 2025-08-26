@@ -789,7 +789,7 @@ export default function ProductsAdmin() {
                     </div>
                   </TableCell>
                   <TableCell>{p.stock} in stock</TableCell>
-                  <TableCell>${p.price}</TableCell>
+                  <TableCell>{p.price}đ</TableCell>
                   <TableCell>{p.artist}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">

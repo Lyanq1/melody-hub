@@ -1,4 +1,5 @@
 import Disc from '../models/product/disc.model.js'
+import Category from '../models/product/category.model.js'
 import redisClient from '../config/redis.js'
 
 const CACHE_EXPIRATION = 500 // Cache for 1 hour
@@ -16,17 +17,25 @@ export const getAllDiscs = async (req, res) => {
 
     // If not in cache, get from database
     console.log('Fetching discs from Database')
-    const discs = await Disc.find({}).populate('categoryId', 'name')
+    const discs = await Disc.find({})
+    
+    // Return discs with original categoryId (don't transform to object)
+    const discsWithOriginalCategoryId = discs.map(disc => {
+      return {
+        ...disc.toObject(),
+        categoryId: disc.categoryId // Keep as original ObjectId string
+      };
+    });
 
-    if (discs.length === 0) {
+    if (discsWithOriginalCategoryId.length === 0) {
       return res.status(404).json({ message: 'No discs found' })
     }
 
     // Store in cache for next request
-    await redisClient.setEx(ALL_DISCS_CACHE_KEY, CACHE_EXPIRATION, JSON.stringify(discs))
+    await redisClient.setEx(ALL_DISCS_CACHE_KEY, CACHE_EXPIRATION, JSON.stringify(discsWithOriginalCategoryId))
 
     res.set('X-Cache-Status', 'MISS')
-    res.json(discs)
+    res.json(discsWithOriginalCategoryId)
   } catch (error) {
     console.error('Error fetching discs:', error)
     res.status(500).json({ message: 'Error fetching discs', error: error.message })
@@ -48,10 +57,18 @@ export const getDiscById = async (req, res) => {
 
     // If not in cache, get from database
     console.log(`Fetching disc ${id} from Database`)
-    const disc = await Disc.findById(id).populate('categoryId', 'name')
-
+    const disc = await Disc.findById(id)
+    
     if (!disc) {
       return res.status(404).json({ message: 'Disc not found' })
+    }
+    
+    // Fetch category name for this disc
+    if (disc.categoryId) {
+      const category = await Category.findById(disc.categoryId, '_id name');
+      if (category) {
+        disc.categoryId = { _id: category._id, name: category.name };
+      }
     }
 
     // Store in cache for next request

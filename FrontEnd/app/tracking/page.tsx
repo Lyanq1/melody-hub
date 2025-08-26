@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import axios from 'axios';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
 
 // Dynamic import Leaflet để tránh SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
@@ -10,11 +13,28 @@ const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLaye
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
+// Cấu hình icon cho marker
+let customIcon: L.Icon | null = null;
+if (typeof window !== 'undefined') {
+  customIcon = new L.Icon({
+    iconUrl: '/assets/marker-icon.svg',
+    iconSize: [32, 32], // SVG có kích thước 32x32
+    iconAnchor: [16, 32], // Điểm neo ở giữa đáy icon
+    popupAnchor: [0, -32], // Popup sẽ xuất hiện phía trên icon
+  });
+}
+
 interface OrderItem {
   discId: string;
   name: string;
   price: number;
   quantity: number;
+}
+
+interface StatusHistoryItem {
+  status: 'Confirmed' | 'Shipping' | 'Delivered';
+  timestamp: string;
+  message: string;
 }
 
 interface Order {
@@ -27,6 +47,9 @@ interface Order {
   paymentStatus: string;
   deliveryFee: number;
   createdAt: string;
+  estimatedDeliveryTime: string;
+  status: 'Confirmed' | 'Shipping' | 'Delivered';
+  statusHistory: StatusHistoryItem[];
 }
 
 export default function OrderTrackingPage() {
@@ -41,6 +64,43 @@ export default function OrderTrackingPage() {
     lat: 10.762622,
     lng: 106.682028
   };
+
+  // State để lưu tọa độ điểm giao hàng
+  const [deliveryLocation, setDeliveryLocation] = useState<{lat: number; lng: number} | null>(null);
+
+  // Hàm lấy tọa độ từ địa chỉ sử dụng OpenStreetMap Nominatim
+  const getCoordinates = async (address: string) => {
+    try {
+      const encodedAddress = encodeURIComponent(address);
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&countrycodes=vn`
+      );
+      
+      if (response.data && response.data.length > 0) {
+        const location = response.data[0];
+        return {
+          lat: parseFloat(location.lat),
+          lng: parseFloat(location.lon)
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting coordinates:', error);
+      return null;
+    }
+  };
+
+  // Effect để cập nhật tọa độ khi order được chọn
+  useEffect(() => {
+    const updateDeliveryLocation = async () => {
+      if (selectedOrder) {
+        const coordinates = await getCoordinates(selectedOrder.address);
+        setDeliveryLocation(coordinates);
+      }
+    };
+
+    updateDeliveryLocation();
+  }, [selectedOrder]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -130,7 +190,14 @@ export default function OrderTrackingPage() {
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-semibold">Order #{order._id.slice(-6)}</h3>
                     <span className="text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                      {new Date(order.createdAt).toLocaleString('vi-VN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                      })}
                     </span>
                   </div>
                   
@@ -175,7 +242,10 @@ export default function OrderTrackingPage() {
                   />
                   
                   {/* Marker điểm xuất phát */}
-                  <Marker position={[storeLocation.lat, storeLocation.lng]}>
+                  <Marker 
+                    position={[storeLocation.lat, storeLocation.lng]} 
+                    icon={customIcon || undefined}
+                  >
                     <Popup>
                       <div>
                         <strong>Điểm xuất phát</strong><br />
@@ -184,15 +254,20 @@ export default function OrderTrackingPage() {
                     </Popup>
                   </Marker>
 
-                  {/* Marker điểm giao hàng (giả lập tọa độ) */}
-                  <Marker position={[10.7769, 106.7009]}>
-                    <Popup>
-                      <div>
-                        <strong>Điểm giao hàng</strong><br />
-                        {selectedOrder.address}
-                      </div>
-                    </Popup>
-                  </Marker>
+                  {/* Marker điểm giao hàng */}
+                  {deliveryLocation && (
+                    <Marker 
+                      position={[deliveryLocation.lat, deliveryLocation.lng]} 
+                      icon={customIcon || undefined}
+                    >
+                      <Popup>
+                        <div>
+                          <strong>Điểm giao hàng</strong><br />
+                          {selectedOrder.address}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )}
                 </MapContainer>
               </div>
               
@@ -207,8 +282,13 @@ export default function OrderTrackingPage() {
                 <p className="text-sm text-gray-600">
                   <strong>Phí giao hàng:</strong> {(selectedOrder.deliveryFee || 0).toLocaleString('vi-VN')}₫
                 </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Thời gian giao hàng dự kiến:</strong> {selectedOrder.estimatedDeliveryTime}
+                </p>
               </div>
             </div>
+
+
           ) : (
             <div className="border rounded-lg p-8 text-center text-gray-500">
               Chọn một đơn hàng để xem bản đồ giao hàng

@@ -163,7 +163,12 @@ export default function Checkout() {
   };
 
   const handlePaymentInitiated = () => {
-    localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
+    // Kết hợp district vào address
+    const updatedCustomerInfo = {
+      ...customerInfo,
+      address: `${customerInfo.address}, ${customerInfo.district}, Thành phố Hồ Chí Minh`
+    };
+    localStorage.setItem('customerInfo', JSON.stringify(updatedCustomerInfo));
     console.log('Payment initiated for amount:', totalAmount);
   };
 
@@ -178,11 +183,19 @@ export default function Checkout() {
     }
     try {
       setError('');
-      localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
+      // Kết hợp district vào address
+      const updatedCustomerInfo = {
+        ...customerInfo,
+        address: `${customerInfo.address}, ${customerInfo.district}, Thành phố Hồ Chí Minh`
+      };
+      localStorage.setItem('customerInfo', JSON.stringify(updatedCustomerInfo));
       const amountNumber = parseInt(totalAmount, 10) || 0;
       const res = await createStripeCheckoutSession(amountNumber + deliveryFee, 'MelodyHub Order');
       if (res.success && res.url) {
-        window.location.href = res.url;
+        // Thêm paymentType vào URL Stripe success
+        const successUrl = new URL(res.url);
+        successUrl.searchParams.append('paymentType', 'stripe');
+        window.location.href = successUrl.toString();
       } else {
         setError(res.message || 'Failed to start Stripe checkout');
       }
@@ -197,8 +210,13 @@ export default function Checkout() {
       return;
     }
     
-    localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
-    router.push('/checkout/success?resultCode=0&orderId=COD-' + Date.now() + '&message=Cash on Delivery');
+    // Kết hợp district vào address
+    const updatedCustomerInfo = {
+      ...customerInfo,
+      address: `${customerInfo.address}, ${customerInfo.district}, Thành phố Hồ Chí Minh`
+    };
+    localStorage.setItem('customerInfo', JSON.stringify(updatedCustomerInfo));
+    router.push('/checkout/success?paymentType=cod&message=Cash on Delivery');
   };
 
   if (loading) {

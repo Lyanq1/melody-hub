@@ -200,7 +200,7 @@ export default function Homepage() {
                     Được chọn là sản phẩm xuất sắc nhất năm với chất lượng âm thanh tuyệt vời và giá trị sưu tập cao.
                   </p>
                 </div>
-                <div className='text-3xl font-bold text-primary font-[Ceflinty]'>{bestOf2025Product.price}</div>
+                <div className='text-3xl font-bold text-primary font-[Ceflinty]'>{bestOf2025Product.price}đ</div>
                 <div className='flex gap-4'>
                   <Button
                     size='lg'

@@ -22,47 +22,65 @@ function CheckoutSuccessContent() {
   const resultCode = searchParams.get('resultCode') || searchParams.get('resultcode')
   const message = searchParams.get('message') || searchParams.get('errorMessage')
   const stripeSessionId = searchParams.get('session_id')
+  const paymentType = searchParams.get('paymentType')
   // const extraData = searchParams.get('extraData');
 
   useEffect(() => {
     const verifyPayment = async () => {
-      if (orderId && resultCode) {
-        try {
-          setVerifying(true)
-          const response = await verifyMoMoPayment(orderId, resultCode)
+      try {
+        setVerifying(true)
+        
+        switch(paymentType) {
+          case 'momo':
+            if (orderId && resultCode) {
+              const response = await verifyMoMoPayment(orderId, resultCode)
+              if (response.success) {
+                setVerified(response.verified || false)
+              } else {
+                setError(response.message || 'Payment verification failed')
+                setVerified(false)
+              }
+            } else {
+              setError('Missing MoMo payment information')
+              setVerified(false)
+            }
+            break;
 
-          if (response.success) {
-            setVerified(response.verified || false)
-          } else {
-            setError(response.message || 'Payment verification failed')
+          case 'stripe':
+            if (stripeSessionId) {
+              // For Stripe, successful redirect includes session_id
+              setVerified(true)
+            } else {
+              setError('Missing Stripe session information')
+              setVerified(false)
+            }
+            break;
+
+          case 'cod':
+            // COD không cần verify, luôn thành công
+            setVerified(true)
+            break;
+
+          default:
+            setError('Invalid payment type')
             setVerified(false)
-          }
-        } catch (error) {
-          console.error('Error verifying payment:', error)
-          setError('Failed to verify payment status')
-          setVerified(false)
-        } finally {
-          setVerifying(false)
         }
-      } else if (stripeSessionId) {
-        // For Stripe, successful redirect includes session_id. We consider it success for UI purposes.
-        // The definitive record should be confirmed via webhook on backend.
-        setVerified(true)
-        setVerifying(false)
-      } else {
-        setVerifying(false)
-        setError('Missing payment information')
+      } catch (error) {
+        console.error('Error verifying payment:', error)
+        setError('Failed to verify payment status')
         setVerified(false)
+      } finally {
+        setVerifying(false)
       }
     }
 
     verifyPayment()
-  }, [orderId, resultCode, stripeSessionId])
+  }, [orderId, resultCode, stripeSessionId, paymentType])
 
   // Create order after successful payment
   useEffect(() => {
     const createOrderAfterPayment = async () => {
-      if ((resultCode === '0' || stripeSessionId) && verified && !order) {
+      if ((resultCode === '0' || stripeSessionId || paymentType === 'cod') && verified && !order) {
         try {
           setOrderCreating(true)
 
@@ -94,12 +112,18 @@ function CheckoutSuccessContent() {
           let paymentMethod: 'Stripe' | 'MoMo' | 'Cash on Delivery' = 'Cash on Delivery'
           const paymentStatus: 'Pending' | 'Completed' | 'Failed' = 'Completed'
 
-          if (stripeSessionId) {
-            paymentMethod = 'Stripe'
-          } else if (resultCode === '0') {
-            paymentMethod = 'MoMo'
-          } else if (orderId?.startsWith('COD-')) {
-            paymentMethod = 'Cash on Delivery'
+          switch(paymentType) {
+            case 'stripe':
+              paymentMethod = 'Stripe'
+              break;
+            case 'cod':
+              paymentMethod = 'Cash on Delivery'
+              break;
+            case 'momo':
+              paymentMethod = 'MoMo'
+              break;
+            default:
+              throw new Error('Invalid payment type')
           }
 
           // Create order
@@ -130,7 +154,7 @@ function CheckoutSuccessContent() {
   // Clear cart after successful payment
   useEffect(() => {
     const clearCart = async () => {
-      if ((resultCode === '0' || stripeSessionId) && verified) {
+      if ((resultCode === '0' || stripeSessionId || paymentType === 'cod') && verified) {
         try {
           const token = localStorage.getItem('token')
           if (token) {
@@ -174,7 +198,7 @@ function CheckoutSuccessContent() {
   return (
     <div className='container mx-auto px-4 py-8'>
       <div className='max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden md:max-w-2xl p-8'>
-        {(resultCode === '0' || stripeSessionId) && verified ? (
+        {((resultCode === '0' || stripeSessionId || paymentType === 'cod') && verified) ? (
           <div className='text-center'>
             <div className='mb-4 text-green-500'>
               <svg
@@ -199,7 +223,7 @@ function CheckoutSuccessContent() {
                 <p className='text-sm text-gray-600 mb-1'>Total: {order.totalPrice?.toLocaleString('vi-VN')}₫</p>
                 <p className='text-sm text-gray-600 mb-1'>Status: {order.status}</p>
                 <p className='text-sm text-gray-600 mb-1'>Payment Method: {order.paymentMethod}</p>
-                <p className='text-sm text-gray-600'>Date: {new Date(order.createdDate).toLocaleDateString('vi-VN')}</p>
+                <p className='text-sm text-gray-600'>Date: {new Date(order.createdAt).toLocaleDateString('vi-VN')}</p>
               </div>
             )}
 
