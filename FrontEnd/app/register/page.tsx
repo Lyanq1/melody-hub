@@ -101,9 +101,8 @@ export default function RegisterPage() {
         {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
         {success && <p className='text-green-500 text-sm mb-4 text-center'>{success}</p>}
         <form onSubmit={handleSubmit}>
-          <div className='input-box'>
+          <div className='input-box font-["Inter_Tight"]'>
             <input
-              style={{ fontFamily: 'MicaValo' }}
               type='text'
               id='username'
               name='username'
@@ -116,7 +115,6 @@ export default function RegisterPage() {
 
           <div className='input-box'>
             <input
-              style={{ fontFamily: 'MicaValo' }}
               type='email'
               id='email'
               name='email'
@@ -130,7 +128,6 @@ export default function RegisterPage() {
 
           <div className='input-box'>
             <input
-              style={{ fontFamily: 'MicaValo' }}
               type='password'
               id='password'
               name='password'
@@ -144,7 +141,6 @@ export default function RegisterPage() {
 
           <div className='input-box'>
             <input
-              style={{ fontFamily: 'MicaValo' }}
               type='text'
               id='displayName'
               name='displayName'
@@ -157,7 +153,6 @@ export default function RegisterPage() {
 
           <div className='input-box'>
             <input
-              style={{ fontFamily: 'MicaValo' }}
               type='text'
               id='phone'
               name='phone'
@@ -169,7 +164,6 @@ export default function RegisterPage() {
 
           <div className='input-box'>
             <input
-              style={{ fontFamily: 'MicaValo' }}
               type='text'
               id='address'
               name='address'
@@ -179,7 +173,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className='input-box' style={{ fontFamily: 'MicaValo' }}>
+          <div className='input-box font-["Inter_Tight"]'>
             <select id='role' name='role' value={formData.role} onChange={handleChange} required>
               <option value='' disabled>
                 role
@@ -191,21 +185,13 @@ export default function RegisterPage() {
             <i className='bx bxs-chevron-down'></i>
           </div>
 
-          <div className='remember-forgot' style={{ fontFamily: 'MicaValo' }}>
-            <label>
-              <input type='checkbox' />
-              Remember me{' '}
-            </label>
-            <a href='#'>Forgot password?</a>
-          </div>
-
           <div className='btn font-[Tangkiwood]'>
             <button className='btn' type='submit' disabled={loading}>
               <span className='btn font-[Tangkiwood]'>{loading ? 'Creating account...' : 'REGISTER'}</span>
             </button>
           </div>
 
-          <div style={{ fontFamily: 'MicaValo' }} className='register-link'>
+          <div className='register-link font-["Inter_Tight"]'>
             <p>
               Already have an account? <a href='/login'> Login here </a>
             </p>

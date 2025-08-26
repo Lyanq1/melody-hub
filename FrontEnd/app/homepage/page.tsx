@@ -119,7 +119,7 @@ export default function Homepage() {
       <div className='max-w-7xl mx-auto mt-16 px-4'>
         <div className='text-center mb-12'>
           <h2 className='text-3xl font-bold font-[Ceflinty] text-primary mb-4 tracking-wider'>NEW RELEASES</h2>
-          <p className='text-muted-foreground font-[Lora] text-lg'>Khám phá những phát hành mới nhất và hot nhất</p>
+          <p className='text-muted-foreground font-[Inter_Tight] text-lg'>Khám phá những phát hành mới nhất và hot nhất</p>
         </div>
 
         {/* Masonry-style grid */}
@@ -153,7 +153,7 @@ export default function Homepage() {
 
         {newReleasesProducts.length === 0 && (
           <div className='text-center py-12'>
-            <p className='text-muted-foreground font-[Lora]'>Đang cập nhật sản phẩm mới...</p>
+            <p className='text-muted-foreground font-[Inter_Tight]'>Đang cập nhật sản phẩm mới...</p>
           </div>
         )}
       </div>
@@ -162,7 +162,7 @@ export default function Homepage() {
       <div className='max-w-6xl mx-auto mt-16 px-4'>
         <div className='text-center mb-12'>
           <h2 className='text-3xl font-bold font-[Ceflinty] text-primary mb-4'>STORE CHOICE</h2>
-          <p className='text-muted-foreground font-[Lora] text-lg'>Những sản phẩm được lựa chọn đặc biệt từ cửa hàng</p>
+          <p className='text-muted-foreground font-[Inter_Tight] text-lg'>Những sản phẩm được lựa chọn đặc biệt từ cửa hàng</p>
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
           {storeChoiceProducts.map((product) => (
@@ -185,7 +185,7 @@ export default function Homepage() {
       <div className='max-w-6xl mx-auto mt-16 px-4'>
         <div className='text-center mb-12'>
           <h2 className='text-3xl font-bold font-[Ceflinty] text-primary mb-4'>BEST OF 2025</h2>
-          <p className='text-muted-foreground font-[Lora] text-lg'>Sản phẩm xuất sắc nhất năm 2025</p>
+          <p className='text-muted-foreground font-[Inter_Tight] text-lg'>Sản phẩm xuất sắc nhất năm 2025</p>
         </div>
         {bestOf2025Product && (
           <div className='bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg p-8 border border-border/50'>
@@ -196,7 +196,7 @@ export default function Homepage() {
               <div className='space-y-6'>
                 <div>
                   <h3 className='text-2xl font-bold font-[Ceflinty] text-primary mb-2'>{bestOf2025Product.name}</h3>
-                  <p className='text-lg text-muted-foreground font-[Lora]'>
+                  <p className='text-lg text-muted-foreground font-[Inter_Tight]'>
                     Được chọn là sản phẩm xuất sắc nhất năm với chất lượng âm thanh tuyệt vời và giá trị sưu tập cao.
                   </p>
                 </div>
@@ -204,7 +204,7 @@ export default function Homepage() {
                 <div className='flex gap-4'>
                   <Button
                     size='lg'
-                    className='font-[Ceflinty]'
+                    className='font-[Inter_Tight]'
                     onClick={() => console.log(`Added product ${bestOf2025Product._id} to cart`)}
                   >
                     ADD TO CART
@@ -212,9 +212,10 @@ export default function Homepage() {
                   <Button
                     variant='outline'
                     size='lg'
+                    className='font-[Inter_Tight]'
                     onClick={() => (window.location.href = `/product/${bestOf2025Product._id}`)}
                   >
-                    View Details
+                    VIEW DETAILS
                   </Button>
                 </div>
               </div>
@@ -227,7 +228,7 @@ export default function Homepage() {
       <div className='max-w-6xl mx-auto mt-16 px-4'>
         <div className='text-center mb-12'>
           <h2 className='text-3xl font-bold font-[Ceflinty] text-primary mb-4'>CHÀO MỪNG NGÀY 2/9</h2>
-          <p className='text-muted-foreground font-[Lora] text-lg'>
+          <p className='text-muted-foreground font-[Inter_Tight] text-lg'>
             Đặt hàng các sản phẩm chào mừng ngày trọng đại của đất nước
           </p>
         </div>
@@ -240,7 +241,7 @@ export default function Homepage() {
       <div className='max-w-6xl mx-auto mt-16 px-4'>
         <div className='text-center mb-12'>
           <h2 className='text-3xl font-bold font-[Ceflinty] text-primary mb-4'>VIETNAM RELEASES</h2>
-          <p className='text-muted-foreground font-[Lora] text-lg'>
+          <p className='text-muted-foreground font-[Inter_Tight] text-lg'>
             Khám phá những phát hành âm nhạc đặc sắc từ Việt Nam
           </p>
         </div>
@@ -261,7 +262,7 @@ export default function Homepage() {
         </div>
         {vietnameseProducts.length === 0 && (
           <div className='text-center py-12'>
-            <p className='text-muted-foreground font-[Lora]'>Không tìm thấy sản phẩm Việt Nam</p>
+            <p className='text-muted-foreground font-[Inter_Tight]'>Không tìm thấy sản phẩm Việt Nam</p>
           </div>
         )}
       </div>
@@ -270,7 +271,7 @@ export default function Homepage() {
       <div className='max-w-6xl mx-auto mt-16 px-4 mb-16'>
         <div className='text-center mb-12'>
           <h2 className='text-3xl font-bold font-[Ceflinty] text-primary mb-4'>ESSENTIAL VINYL RECORDS</h2>
-          <p className='text-muted-foreground font-[Lora] text-lg'>Bộ sưu tập đĩa than cho người yêu âm nhạc</p>
+          <p className='text-muted-foreground font-[Inter_Tight] text-lg'>Bộ sưu tập đĩa than cho người yêu âm nhạc</p>
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
           {vinylProducts.map((product) => (
@@ -289,7 +290,7 @@ export default function Homepage() {
         </div>
         {vinylProducts.length === 0 && (
           <div className='text-center py-12'>
-            <p className='text-muted-foreground font-[Lora]'>Không tìm thấy đĩa than</p>
+            <p className='text-muted-foreground font-[Inter_Tight]'>Không tìm thấy đĩa than</p>
           </div>
         )}
       </div>

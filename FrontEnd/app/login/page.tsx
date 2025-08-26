@@ -195,9 +195,8 @@ const LoginPage = () => {
         <h1 style={{ fontFamily: 'Tangkiwood' }}>ACCOUNT LOGIN</h1>
         {error && <p className='text-red-500 text-sm mb-4 text-center'>{error}</p>}
         <form onSubmit={handleLogin}>
-          <div className='input-box'>
+          <div className='input-box font-["Inter_Tight"]'>
             <input
-              style={{ fontFamily: 'MicaValo' }}
               type='text'
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -205,9 +204,8 @@ const LoginPage = () => {
               required
             />
           </div>
-          <div className='input-box'>
+          <div className='input-box font-["Inter_Tight"]'>
             <input
-              style={{ fontFamily: 'MicaValo' }}
               placeholder='password'
               type='password'
               value={password}
@@ -215,8 +213,8 @@ const LoginPage = () => {
               required
             />
           </div>
-          <div className='forgot-password-link'>
-            <a href='/forgot-password' style={{ fontFamily: 'MicaValo' }}>
+          <div className='forgot-password-link font-["Inter_Tight"]'>
+            <a href='/forgot-password'>
               Forgot Password?
             </a>
           </div>
@@ -224,7 +222,7 @@ const LoginPage = () => {
             <span>{isLoading ? 'Logging in...' : 'LOGIN'}</span>
           </button>
         </form>
-        <p className='text-sm text-center mt-4'>or</p>
+        <p className='text-sm text-center mt-4 font-[Inter_Tight]'>or</p>
         {/* <p className='text-2xl text-center mt-4'>Login with Facebook</p> */}
         <button onClick={handleFacebookLogin} disabled={isLoading} className='btn font-[Tangkiwood] text-white mt-5'>
           <span>{isLoading ? 'Logging in...' : 'FACEBOOK LOGIN'}</span>
@@ -244,7 +242,7 @@ const LoginPage = () => {
           <span>CONTINUE WITH GOOGLE</span>
         </button>
 
-        <div style={{ fontFamily: 'MicaValo' }} className='register-link'>
+        <div className='register-link font-["Inter_Tight"] mt-4'>
           <p>
             Don't have an account? <a href='/register'> Register here </a>
           </p>
