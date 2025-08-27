@@ -7,7 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import { LayoutDashboard, Disc, ShoppingCart, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/use-auth'
-import adminStats, { adminStatsService, StatsPeriod, RevenueType } from '@/lib/services/admin-stats'
+import adminStats, { adminStatsService, StatsPeriod, RevenueType, RecentOrder } from '@/lib/services/admin-stats'
 
 const salesData = [
   { month: 'Jan', sales: 1200 },
@@ -24,11 +24,35 @@ const salesData = [
   { month: 'Dec', sales: 1700 }
 ]
 
-const recentOrders = [
-  { id: '#1001', customer: 'Nguyễn Văn A', total: '1.200.000₫', status: 'Hoàn thành' },
-  { id: '#1002', customer: 'Trần Thị B', total: '850.000₫', status: 'Đang xử lý' },
-  { id: '#1003', customer: 'Lê Văn C', total: '2.000.000₫', status: 'Đã hủy' }
-]
+const getStatusBadgeStyle = (status: string) => {
+  switch (status) {
+    case 'Delivered':
+    case 'Completed':
+      return 'bg-green-100 text-green-800'
+    case 'Cancelled':
+      return 'bg-red-100 text-red-800'
+    case 'Delivering':
+    case 'Shipping':
+      return 'bg-purple-100 text-purple-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'Delivered':
+    case 'Completed':
+      return 'Completed'
+    case 'Cancelled':
+      return 'Cancelled'
+    case 'Delivering':
+    case 'Shipping':
+      return 'Shipping'
+    default:
+      return status
+  }
+}
 
 export default function Dashboard() {
   const { user, isAdmin, isAuthenticated } = useAuth()
@@ -36,6 +60,7 @@ export default function Dashboard() {
   const [productStats, setProductStats] = useState<any>(null)
   const [comprehensive, setComprehensive] = useState<any>(null)
   const [customerStats, setCustomerStats] = useState<any>(null)
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
   const [loading, setLoading] = useState(true)
 
   const [period, setPeriod] = useState<StatsPeriod>('month')
@@ -80,17 +105,19 @@ export default function Dashboard() {
 
   const fetchAll = async () => {
     try {
-      const [sys, prod, comp, cust, rev] = await Promise.all([
+      const [sys, prod, comp, cust, rev, recent] = await Promise.all([
         adminStatsService.getSystemStats(),
         adminStatsService.getProductStats(),
         adminStatsService.getComprehensiveStats({ period }),
         adminStatsService.getCustomerStats({ period }),
-        adminStatsService.getRevenueStats({ type: revenueType, year })
+        adminStatsService.getRevenueStats({ type: revenueType, year }),
+        adminStatsService.getRecentOrders(5)
       ])
       setSystemStats(sys)
       setProductStats(prod)
       setComprehensive(comp)
       setCustomerStats(cust)
+      setRecentOrders(recent)
       // Normalize revenue data into chart-friendly series
       const chart = (rev?.data || []).map((d: any) => ({
         label: d._id,
@@ -239,8 +266,7 @@ export default function Dashboard() {
           <CardContent className='space-y-2 text-sm'>
             <div className='flex justify-between'><span>Tổng đơn</span><b>{comprehensive?.orders?.total ?? '...'}</b></div>
             <div className='flex justify-between'><span>Đơn kỳ hiện tại</span><b>{comprehensive?.orders?.period ?? '...'}</b></div>
-            <div className='flex justify-between'><span>Đang chờ</span><b>{comprehensive?.orders?.pending ?? '...'}</b></div>
-            <div className='flex justify-between'><span>Đang giao</span><b>{comprehensive?.orders?.delivering ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Đang giao</span><b>{comprehensive?.orders?.shipping ?? '...'}</b></div>
             <div className='flex justify-between'><span>Hoàn tất</span><b>{comprehensive?.orders?.completed ?? '...'}</b></div>
             <div className='flex justify-between'><span>Hủy</span><b>{comprehensive?.orders?.cancelled ?? '...'}</b></div>
           </CardContent>
@@ -269,7 +295,7 @@ export default function Dashboard() {
             <div className='flex justify-between'><span>Khách hàng mới</span><b>{comprehensive?.customers?.new ?? customerStats?.newCustomers ?? '...'}</b></div>
             <div className='flex justify-between'><span>Số KH hoạt động</span><b>{customerStats?.activeCustomers?.uniqueCustomers ?? '...'}</b></div>
             <div className='flex justify-between'><span>Đơn TB/KH</span><b>{customerStats?.activeCustomers?.averageOrdersPerCustomer?.toFixed?.(2) ?? '...'}</b></div>
-            <div className='flex justify-between'><span>Chi tiêu TB/KH</span><b>{customerStats?.activeCustomers?.averageSpentPerCustomer?.toLocaleString?.() ?? '...'}</b></div>
+            <div className='flex justify-between'><span>Chi tiêu TB/KH</span><b>{customerStats?.activeCustomers?.averageSpentPerCustomer.toFixed?.(0).toLocaleString() ?? '...'}đ</b></div>
           </CardContent>
         </Card>
       </div>
@@ -291,20 +317,17 @@ export default function Dashboard() {
             </thead>
             <tbody>
               {recentOrders.map((order) => (
-                <tr key={order.id}>
-                  <td className='py-2 px-4 border-b'>{order.id}</td>
-                  <td className='py-2 px-4 border-b'>{order.customer}</td>
-                  <td className='py-2 px-4 border-b'>{order.total}</td>
-                  <td
-                    className={`py-2 px-4 border-b font-bold ${
-                      order.status === 'Hoàn thành'
-                        ? 'text-green-600'
-                        : order.status === 'Đang xử lý'
-                        ? 'text-yellow-600'
-                        : 'text-red-600'
-                    }`}
-                  >
-                    {order.status}
+                <tr key={order._id}>
+                  <td className='py-2 px-4 border-b'>#{order._id.slice(-6)}</td>
+                  <td className='py-2 px-4 border-b'>{order.userId.DisplayName}</td>
+                  <td className='py-2 px-4 border-b'>
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+                      .format(order.totalPrice)}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeStyle(order.status)}`}>
+                      {getStatusText(order.status)}
+                    </span>
                   </td>
                 </tr>
               ))}
