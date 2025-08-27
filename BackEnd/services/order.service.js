@@ -64,9 +64,16 @@ const updateOrderToDelivered = async (orderId) => {
 
     // Schedule update status
     setTimeout(async () => {
+      const updateData = { status: 'Delivered' };
+      
+      // Nếu là COD, update paymentStatus thành Completed khi delivered
+      if (order.paymentMethod === 'Cash on Delivery') {
+        updateData.paymentStatus = 'Completed';
+      }
+      
       await Order.findByIdAndUpdate(
         orderId,
-        { status: 'Delivered' },
+        updateData,
         { new: true }
       );
     }, timeUntilDelivery);

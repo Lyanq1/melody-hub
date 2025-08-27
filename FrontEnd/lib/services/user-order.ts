@@ -3,6 +3,7 @@ import { API_BASE_URL } from '../config';
 export type UserOrder = {
   _id: string;
   createdAt: string;
+  paymentMethod: 'Stripe' | 'MoMo' | 'Cash on Delivery';
   paymentStatus: 'Pending' | 'Completed' | 'Failed';
   status: 'Confirmed' | 'Shipping' | 'Delivered';
   totalPrice: number;
@@ -38,6 +39,7 @@ export const userOrderService = {
       return data.orders.map((order: any) => ({
         _id: order._id,
         createdAt: order.createdAt,
+        paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
         status: order.status,
         totalPrice: order.totalPrice,
