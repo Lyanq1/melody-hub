@@ -10,8 +10,19 @@ import { toast } from 'sonner'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { useAuth } from '@/hooks/use-auth'
 
+interface OrderSummary {
+  totalOrders: number
+  totalSpent: number
+  productTypes: {
+    CD: number
+    Vinyl: number
+    Cassette: number
+  }
+}
+
 interface User {
   _id: string
+  accountID?: string
   Username: string
   Email: string
   DisplayName: string
@@ -19,6 +30,7 @@ interface User {
   Phone: string
   Address: string
   CreatedAt: string
+  orderSummary?: OrderSummary
 }
 
 export default function AdminPage() {
@@ -29,6 +41,15 @@ export default function AdminPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
+  const [productTypeFilter, setProductTypeFilter] = useState('all')
+  const [minSpentFilter, setMinSpentFilter] = useState('')
+  const [maxSpentFilter, setMaxSpentFilter] = useState('')
+  
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalUsers, setTotalUsers] = useState(0)
+  const usersPerPage = 10
 
   const [editForm, setEditForm] = useState({
     DisplayName: '',
@@ -42,18 +63,28 @@ export default function AdminPage() {
     if (isAdmin) {
       fetchUsers()
     }
-  }, [isAdmin])
+  }, [isAdmin, currentPage, searchQuery, roleFilter])
+
+  // Xử lý chuyển trang
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
 
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/admin/users', {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
-      })
+      const response = await fetch(
+        `http://localhost:5000/api/admin/users?withOrders=true&page=${currentPage}&limit=${usersPerPage}&search=${searchQuery}&role=${roleFilter}`,
+        {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
+        }
+      )
       
       if (response.ok) {
         const data = await response.json()
-        setUsers(data)
+        setUsers(data.users)
+        setTotalPages(data.pagination.totalPages)
+        setTotalUsers(data.pagination.totalUsers)
       } else {
         toast.error('Không thể tải danh sách người dùng')
       }
@@ -107,7 +138,23 @@ export default function AdminPage() {
   }
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa người dùng này?')) return
+    // Kiểm tra xem có phải đang xóa chính mình không
+    if (userId === user?.accountID) {
+      toast.error('Không thể xóa tài khoản của chính mình')
+      return
+    }
+
+    // Tìm thông tin người dùng cần xóa
+    const userToDelete = users.find(u => u._id === userId)
+    if (!userToDelete) return
+
+    // Hiển thị xác nhận với thông tin chi tiết
+    if (!confirm(
+      `Bạn có chắc chắn muốn xóa người dùng này?\n\n` +
+      `Tên: ${userToDelete.DisplayName}\n` +
+      `Email: ${userToDelete.Email}\n` +
+      `Vai trò: ${userToDelete.Role}`
+    )) return
 
     try {
       const token = localStorage.getItem('token')
@@ -118,6 +165,7 @@ export default function AdminPage() {
 
       if (response.ok) {
         toast.success('Xóa người dùng thành công')
+        // Tải lại danh sách người dùng ở trang hiện tại
         fetchUsers()
       } else {
         const errorData = await response.json()
@@ -154,15 +202,22 @@ export default function AdminPage() {
     }
   }
 
-  // Lọc users theo search và role
+  // Lọc users theo search, role và thông tin đơn hàng
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.DisplayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          user.Username.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          user.Email.toLowerCase().includes(searchQuery.toLowerCase())
     
     const matchesRole = roleFilter === 'all' || user.Role === roleFilter
+
+    const matchesProductType = productTypeFilter === 'all' || 
+                             (user.orderSummary?.productTypes[productTypeFilter as keyof typeof user.orderSummary.productTypes] ?? 0) > 0
+
+    const totalSpent = user.orderSummary?.totalSpent ?? 0
+    const matchesSpentRange = (!minSpentFilter || totalSpent >= parseFloat(minSpentFilter)) &&
+                            (!maxSpentFilter || totalSpent <= parseFloat(maxSpentFilter))
     
-    return matchesSearch && matchesRole
+    return matchesSearch && matchesRole && matchesProductType && matchesSpentRange
   })
 
   // Kiểm tra quyền truy cập
@@ -206,7 +261,7 @@ export default function AdminPage() {
                 <CardTitle>Tổng số người dùng</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold text-blue-600">{users.length}</p>
+                <p className="text-3xl font-bold text-blue-600">{totalUsers}</p>
               </CardContent>
             </Card>
 
@@ -254,29 +309,58 @@ export default function AdminPage() {
               <CardTitle>Tìm kiếm và lọc</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <Label htmlFor="search">Tìm kiếm</Label>
-                  <Input
-                    id="search"
-                    placeholder="Tìm theo tên, username hoặc email..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <Label htmlFor="search">Tìm kiếm</Label>
+                    <Input
+                      id="search"
+                      placeholder="Tìm theo tên, username hoặc email..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <div className="w-48">
+                    <Label htmlFor="role-filter">Lọc theo role</Label>
+                    <Select value={roleFilter} onValueChange={setRoleFilter}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tất cả</SelectItem>
+                        <SelectItem value="Customer">Customer</SelectItem>
+                        <SelectItem value="Artist">Artist</SelectItem>
+                        <SelectItem value="Admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div className="w-48">
-                  <Label htmlFor="role-filter">Lọc theo role</Label>
-                  <Select value={roleFilter} onValueChange={setRoleFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tất cả</SelectItem>
-                      <SelectItem value="Customer">Customer</SelectItem>
-                      <SelectItem value="Artist">Artist</SelectItem>
-                      <SelectItem value="Admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
+
+                <div className="flex gap-4">
+                 
+
+                  <div className="flex-1 flex gap-4">
+                    <div className="flex-1">
+                      <Label htmlFor="min-spent">Tổng chi tiêu từ (VNĐ)</Label>
+                      <Input
+                        id="min-spent"
+                        type="number"
+                        placeholder="0"
+                        value={minSpentFilter}
+                        onChange={(e) => setMinSpentFilter(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Label htmlFor="max-spent">Đến (VNĐ)</Label>
+                      <Input
+                        id="max-spent"
+                        type="number"
+                        placeholder="1,000,000"
+                        value={maxSpentFilter}
+                        onChange={(e) => setMaxSpentFilter(e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -307,6 +391,13 @@ export default function AdminPage() {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Ngày tạo
                         </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Số đơn hàng
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Tổng chi tiêu
+                        </th>
+
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Thao tác
                         </th>
@@ -343,7 +434,16 @@ export default function AdminPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {new Date(user.CreatedAt).toLocaleDateString('vi-VN')}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {/* THêm phần đĩa này dô  */}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.orderSummary?.totalOrders ?? 0}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+                              .format(user.orderSummary?.totalSpent ?? 0)}
+                          </td>
+
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">
                             <Button
                               variant="outline"
                               size="sm"
@@ -356,7 +456,7 @@ export default function AdminPage() {
                               variant="destructive"
                               size="sm"
                               onClick={() => handleDeleteUser(user._id)}
-                              disabled={user._id === user._id} // Không cho phép xóa chính mình
+                              disabled={user._id === user?.accountID} // Không cho phép xóa chính mình
                             >
                               Xóa
                             </Button>
@@ -365,6 +465,41 @@ export default function AdminPage() {
                       ))}
                     </tbody>
                   </table>
+
+                  {/* Phân trang */}
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Hiển thị {((currentPage - 1) * usersPerPage) + 1} - {Math.min(currentPage * usersPerPage, totalUsers)} trên tổng số {totalUsers} người dùng
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        Trước
+                      </Button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        Sau
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -373,7 +508,7 @@ export default function AdminPage() {
 
         {/* Modal chỉnh sửa người dùng */}
         {isEditing && selectedUser && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md">
               <h3 className="text-lg font-semibold mb-4">Chỉnh sửa người dùng</h3>
 

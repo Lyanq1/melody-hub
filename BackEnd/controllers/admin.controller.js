@@ -3,6 +3,7 @@ import Disc from '../models/product/disc.model.js';
 import Category from '../models/product/category.model.js';
 import Order from '../models/order/order.model.js';
 import { verifyToken, canManageSystem } from '../middleware/auth.middleware.js';
+import AdminService from '../services/admin.service.js';
 
 // Lấy danh sách tất cả người dùng (chỉ admin)
 export const getAllUsers = async (req, res) => {
@@ -12,8 +13,19 @@ export const getAllUsers = async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
     }
 
+    const { withOrders, page = 1, limit = 10, search = '', role = 'all' } = req.query;
+
+    if (withOrders === 'true') {
+      const result = await AdminService.getUsersWithOrders(
+        parseInt(page),
+        parseInt(limit),
+        search,
+        role
+      );
+      return res.status(200).json(result);
+    }
+
     const users = await Account.find().select('-Password').sort({ CreatedAt: -1 });
-    
     res.status(200).json(users);
   } catch (error) {
     console.error('Error getting all users:', error);
@@ -30,10 +42,22 @@ export const getUserById = async (req, res) => {
     }
 
     const { userId } = req.params;
+    const { withOrders } = req.query;
+
     const user = await Account.findById(userId).select('-Password');
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (withOrders === 'true') {
+      const orderSummary = await AdminService.calculateOrderSummary(userId);
+      const orderDetails = await AdminService.getUserOrderDetails(userId);
+      return res.status(200).json({
+        ...user.toObject(),
+        orderSummary,
+        orderDetails
+      });
     }
     
     res.status(200).json(user);

@@ -13,6 +13,18 @@ const getAuthHeaders = () => {
 export type StatsPeriod = 'day' | 'week' | 'month' | 'quarter' | 'year'
 export type RevenueType = 'daily' | 'monthly' | 'quarterly' | 'yearly'
 
+export interface RecentOrder {
+  _id: string
+  userId: {
+    DisplayName: string
+    Email: string
+  }
+  totalPrice: number
+  status: string
+  createdAt: string
+  paymentStatus: string
+}
+
 export const adminStatsService = {
   async getSystemStats() {
     const res = await axios.get(`${API_BASE_URL}/admin/system-stats`, {
@@ -50,6 +62,18 @@ export const adminStatsService = {
       params
     })
     return res.data
+  },
+
+  async getRecentOrders(limit: number = 5) {
+    const res = await axios.get(`${API_BASE_URL}/admin/orders`, {
+      headers: getAuthHeaders(),
+      params: {
+        limit,
+        page: 1,
+        sort: '-createdAt'
+      }
+    })
+    return res.data.orders as RecentOrder[]
   }
 }
 
