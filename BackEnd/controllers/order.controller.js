@@ -60,7 +60,8 @@ export const createOrder = async (req, res) => {
     const { userId } = req.params; // Lấy userId từ params
     const { 
       address, 
-      paymentMethod
+      paymentMethod, 
+      paymentStatus
     } = req.body; // Body chỉ cần 3 trường này
 
     if (!userId) {
@@ -208,7 +209,6 @@ export const createOrder = async (req, res) => {
       console.error('Error calculating delivery time:', error);
     }
 
-    const paymentStatus = paymentMethod === 'Cash on Delivery' ? 'Pending' : 'Completed';
     // Create order object
     const orderData = {
       userId: new mongoose.Types.ObjectId(userId),
@@ -217,7 +217,7 @@ export const createOrder = async (req, res) => {
       address: address,
       status: 'Confirmed',  // Set default status
       paymentMethod: paymentMethod,
-      paymentStatus: paymentStatus,
+      paymentStatus: paymentStatus || 'Pending',
       deliveryFee: deliveryFee,
       createdAt: new Date().toISOString(),
       estimatedDeliveryTime: estimatedDeliveryTime || '--:--' // Fallback nếu không tính được
