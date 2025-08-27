@@ -74,6 +74,7 @@ export default function OrdersTable() {
           <TableRow>
             <TableHead>Order ID</TableHead>
             <TableHead>Time</TableHead>
+            <TableHead>Payment Method</TableHead>
             <TableHead>Payment Status</TableHead>
             <TableHead>Order Status</TableHead>
             <TableHead>Total</TableHead>
@@ -87,6 +88,9 @@ export default function OrdersTable() {
               </TableCell>
               <TableCell>
                 {new Date(order.createdAt).toLocaleString('vi-VN')}
+              </TableCell>
+              <TableCell>
+                {order.paymentMethod === 'Cash on Delivery' ? 'COD' : order.paymentMethod}
               </TableCell>
               <TableCell>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(order.paymentStatus)}`}>
