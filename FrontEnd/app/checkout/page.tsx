@@ -6,6 +6,7 @@ import MoMoPaymentButton from '@/components/ui/momo-payment-button';
 import { createStripeCheckoutSession } from '@/lib/services/payment';
 import axios from 'axios';
 import { productService } from '@/lib/services/product';
+import { useAuth } from '@/hooks/use-auth';
 
 interface CartItem {
   id: string;
@@ -23,6 +24,7 @@ interface DeliveryFee {
 
 export default function Checkout() {
   const router = useRouter();
+  const { user } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalAmount, setTotalAmount] = useState('0');
   const [loading, setLoading] = useState(true);
@@ -105,6 +107,20 @@ export default function Checkout() {
 
     fetchCart();
   }, [router]);
+
+  // Initialize customer info from user data
+  useEffect(() => {
+    if (user) {
+      setCustomerInfo(prev => ({
+        ...prev,
+        name: user.displayName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address?.split(',')[0] || '', // Get the address without district and city
+        district: user.address?.split(',')[1]?.trim() || '' // Try to extract district from address
+      }));
+    }
+  }, [user]);
 
   // Fetch districts from API
   useEffect(() => {

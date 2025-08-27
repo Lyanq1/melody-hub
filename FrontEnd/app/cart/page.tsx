@@ -129,7 +129,6 @@ export default function Cart() {
       if (updatedCart) {
         setCart(updatedCart)
         await fetchCart() // Refresh cart with product details and emit event
-        toast.success('Cart updated')
       } else {
         toast.error('Failed to update quantity')
       }
@@ -138,6 +137,22 @@ export default function Cart() {
       toast.error('Failed to update quantity')
     }
   }
+
+  // Recalculate total whenever cart items change
+  useEffect(() => {
+    if (cartItemsWithProducts.length > 0) {
+      const newTotal = cartItemsWithProducts.reduce((sum, item) => {
+        const price = item.product?.price || '0';
+        // Remove non-numeric characters and convert to number
+        const priceNumber = parseInt(price.replace(/[^\d]/g, ''), 10) || 0;
+        return sum + (priceNumber * item.quantity);
+      }, 0);
+      
+      if (cart && newTotal !== cart.total) {
+        setCart(prev => prev ? { ...prev, total: newTotal } : null);
+      }
+    }
+  }, [cartItemsWithProducts]);
 
   const calculateTotal = () => {
     if (!cart) return '0'
