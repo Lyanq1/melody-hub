@@ -1,6 +1,7 @@
 # Melody Hub – Full-stack E‑commerce
 
 Monorepo for Melody Hub, including Backend (Node/Express + MongoDB) and Frontend (Next.js).
+<img width="1412" height="923" alt="image" src="https://github.com/user-attachments/assets/0d958d91-06ba-4bef-a304-c46f4d93a4ed" />
 
 ## Directory Structure
 ```
