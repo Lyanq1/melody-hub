@@ -22,6 +22,9 @@ melody-hub/
 ## Deployment
 https://melodyhub1.vercel.app/
 
+## Demo video
+https://youtu.be/ek5Jcc2GEdU?si=5Q2p7FWoYM8_rnEd
+
 ## Quick Start
 1) Backend
 ```bash
